@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faculty Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo-dot">A</span>AcadHub</div>
+    <div class="header-right"><span class="role-tag">Faculty</span><button onclick="logout()">Logout</button></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2 id="welcome">Welcome</h2>
+      <p><span id="today"></span> &middot; Manage your courses, students, marks and attendance</p>
+    </section>
+
+    <div id="error"></div>
+
+    <div class="grid-2">
+      <div class="card"><h2>My profile</h2><div id="profile" class="muted">Loading...</div></div>
+      <div class="card"><h2>Class performance <small id="perfCourse"></small></h2><div id="perfChart" class="muted">Choose a course.</div></div>
+    </div>
+
+    <div class="card"><h2>My courses</h2><div id="courses" class="muted">Loading...</div></div>
+
+    <!-- ===== Add data ===== -->
+    <div class="card">
+      <h2>Add students &amp; assessments</h2>
+      <div class="tabs">
+        <button class="active" data-tab="tNew">New student</button>
+        <button data-tab="tExisting">Enroll existing student</button>
+        <button data-tab="tAssess">New assessment</button>
+      </div>
+
+      <div id="tNew" class="tab-panel active">
+        <div class="form-grid">
+          <select id="sCourse"></select>
+          <input type="text" id="sName" placeholder="Full name">
+          <input type="text" id="sUsername" placeholder="Username">
+          <input type="password" id="sPassword" placeholder="Password">
+          <input type="text" id="sPhone" placeholder="Phone (optional)">
+          <input type="number" id="sRoll" placeholder="Roll number">
+          <input type="text" id="sDept" placeholder="Department (e.g. CSE)">
+          <input type="text" id="sBranch" placeholder="Branch (e.g. COE)">
+          <input type="number" id="sSem" min="1" max="8" placeholder="Semester (1-8)">
+          <input type="number" id="sCgpa" step="0.01" min="0" max="10" placeholder="CGPA (optional)">
+        </div>
+        <button class="action" onclick="addStudent()">Add and enroll student</button>
+        <div id="sMsg" class="msg"></div>
+      </div>
+
+      <div id="tExisting" class="tab-panel">
+        <div class="form-grid">
+          <select id="enCourse"></select>
+          <input type="number" id="enRoll" placeholder="Roll number of existing student">
+        </div>
+        <button class="action" onclick="enrollExisting()">Enroll</button>
+        <div id="enMsg" class="msg"></div>
+      </div>
+
+      <div id="tAssess" class="tab-panel">
+        <div class="form-grid">
+          <select id="asCourse"></select>
+          <input type="text" id="asType" placeholder="Type (e.g. Mid Term, Quiz 1)">
+          <input type="number" id="asTotal" min="1" placeholder="Total marks">
+          <input type="number" id="asPass" min="0" placeholder="Passing marks (default 40%)">
+        </div>
+        <button class="action" onclick="addAssessment()">Save assessment</button>
+        <div id="asMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Enter marks</h2>
+      <div class="form-row">
+        <select id="mCourse"></select>
+        <select id="mAssess"></select>
+      </div>
+      <div id="mTable" class="muted">Choose a course.</div>
+      <button class="action" onclick="saveMarks()">Save marks</button>
+      <div id="mMsg" class="msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Mark attendance</h2>
+      <div class="form-row">
+        <select id="aCourse"></select>
+        <input type="date" id="aDate">
+      </div>
+      <div id="aTable" class="muted">Choose a course.</div>
+      <button class="action" onclick="saveAttendance()">Save attendance</button>
+      <div id="aMsg" class="msg"></div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const cache = {};
+    const $ = id => document.getElementById(id);
+    const val = id => $(id).value.trim();
+    const num = id => $(id).value === '' ? null : Number($(id).value);
+
+    async function getCourse(code) {
+      if (!cache[code]) cache[code] = await load('/api/faculty/course-data?course=' + encodeURIComponent(code));
+      return cache[code];
+    }
+
+    async function post(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401) { location.href = 'index.html'; return { ok: false, data: {} }; }
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      return { ok: res.ok, data };
+    }
+
+    function show(id, text, good) {
+      const el = $(id);
+      el.textContent = text;
+      el.className = 'msg ' + (good ? 'ok' : 'low');
+    }
+
+    // ---------- tabs ----------
+    document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+      document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === b.dataset.tab));
+    });
+
+    // after any change to a course: reload its data and redraw the marks + attendance tables
+    async function refreshCourse(course) {
+      cache[course] = null;
+      if ($('mCourse').value === course) await loadMarksCourse();
+      if ($('aCourse').value === course) await loadAttCourse();
+      loadCourses();
+    }
+
+    // ---------- Add student / enroll / assessment ----------
+    async function addStudent() {
+      const course = $('sCourse').value;
+      const r = await post('/api/faculty/student', {
+        course, name: val('sName'), username: val('sUsername'), password: val('sPassword'),
+        phone: val('sPhone'), rollNo: num('sRoll'), department: val('sDept'),
+        branch: val('sBranch'), semester: num('sSem'), cgpa: num('sCgpa')
+      });
+      if (r.ok) {
+        show('sMsg', 'Student added and enrolled in ' + course + '.', true);
+        ['sName','sUsername','sPassword','sPhone','sRoll','sDept','sBranch','sSem','sCgpa'].forEach(i => $(i).value = '');
+        refreshCourse(course);
+      } else show('sMsg', r.data.error || 'Failed', false);
+    }
+
+    async function enrollExisting() {
+      const course = $('enCourse').value;
+      const r = await post('/api/faculty/enroll', { course, rollNo: num('enRoll') });
+      if (r.ok) {
+        show('enMsg', 'Student enrolled in ' + course + '.', true);
+        $('enRoll').value = '';
+        refreshCourse(course);
+      } else show('enMsg', r.data.error || 'Failed', false);
+    }
+
+    async function addAssessment() {
+      const course = $('asCourse').value;
+      const r = await post('/api/faculty/assessment', {
+        course, assessmentType: val('asType'), totalMarks: num('asTotal'), passingMarks: num('asPass')
+      });
+      if (r.ok) {
+        show('asMsg', 'Assessment added to ' + course + '.', true);
+        ['asType','asTotal','asPass'].forEach(i => $(i).value = '');
+        refreshCourse(course);
+      } else show('asMsg', r.data.error || 'Failed', false);
+    }
+
+    // ---------- Chart: average % per assessment ----------
+    function drawPerf(d) {
+      $('perfCourse').textContent = $('mCourse').value;
+      const items = d.assessments.map(a => {
+        const ms = d.marks.filter(m => m.assessment_id === a.assessment_id);
+        if (!ms.length || !a.total_marks) return null;
+        const avg = ms.reduce((s, m) => s + (m.marks_obtained / a.total_marks) * 100, 0) / ms.length;
+        return { label: a.assessment_type, value: Math.round(avg) };
+      }).filter(Boolean);
+      $('perfChart').innerHTML = items.length
+        ? barChart(items, 100, '%') + '<p class="muted" style="margin:14px 0 0;font-size:13px">Average score per assessment</p>'
+        : '<p class="empty">No marks entered for this course yet.</p>';
+    }
+
+    // ---------- Marks ----------
+    async function loadMarksCourse() {
+      const d = await getCourse($('mCourse').value);
+      if (!d) return;
+      $('mAssess').innerHTML = d.assessments.map(a =>
+        '<option value="' + a.assessment_id + '">' + esc(a.assessment_type) + ' (out of ' + a.total_marks + ')</option>').join('');
+      drawMarks();
+    }
+
+    function drawMarks() {
+      const d = cache[$('mCourse').value];
+      if (!d) return;
+      drawPerf(d);
+      if (d.assessments.length === 0) { $('mTable').textContent = 'No assessments for this course yet. Add one above.'; return; }
+      if (d.students.length === 0) { $('mTable').textContent = 'No students enrolled in this course yet. Add one above.'; return; }
+
+      const aid = Number($('mAssess').value);
+      const a = d.assessments.find(x => x.assessment_id === aid);
+
+      $('mTable').innerHTML = '<table><tr><th>Roll No</th><th>Name</th><th>Marks (max ' + a.total_marks + ')</th></tr>'
+        + d.students.map(s => {
+            const m = d.marks.find(x => x.roll_no === s.roll_no && x.assessment_id === aid);
+            return '<tr><td>' + esc(s.roll_no) + '</td><td>' + esc(s.name) + '</td>'
+                 + '<td><input type="number" min="0" max="' + a.total_marks + '" data-roll="' + s.roll_no + '" '
+                 + 'value="' + (m ? m.marks_obtained : '') + '"></td></tr>';
+          }).join('') + '</table>';
+    }
+
+    async function saveMarks() {
+      const aid = Number($('mAssess').value);
+      const inputs = [...document.querySelectorAll('#mTable input')];
+      let saved = 0;
+      const errors = [];
+
+      for (const i of inputs) {
+        if (i.value === '') continue;
+        const r = await post('/api/faculty/marks', { rollNo: Number(i.dataset.roll), assessmentId: aid, marks: Number(i.value) });
+        if (r.ok) saved++; else errors.push(i.dataset.roll + ': ' + (r.data.error || 'failed'));
+      }
+
+      cache[$('mCourse').value] = null;      // reload fresh data
+      await getCourse($('mCourse').value);
+      drawMarks();
+
+      if (errors.length) show('mMsg', 'Saved ' + saved + '. Problems: ' + errors.join(' | '), false);
+      else show('mMsg', 'Saved ' + saved + ' mark(s).', true);
+      loadCourses();                          // refresh class stats
+    }
+
+    // ---------- Attendance ----------
+    async function loadAttCourse() {
+      const d = await getCourse($('aCourse').value);
+      if (!d) return;
+      if (d.students.length === 0) { $('aTable').textContent = 'No students enrolled in this course yet. Add one above.'; return; }
+      $('aTable').innerHTML = '<table><tr><th>Roll No</th><th>Name</th><th>Status</th></tr>'
+        + d.students.map(s =>
+            '<tr><td>' + esc(s.roll_no) + '</td><td>' + esc(s.name) + '</td>'
+          + '<td><select data-roll="' + s.roll_no + '"><option>Present</option><option>Absent</option></select></td></tr>'
+        ).join('') + '</table>';
+    }
+
+    async function saveAttendance() {
+      const records = [...document.querySelectorAll('#aTable select')].map(s =>
+        ({ rollNo: Number(s.dataset.roll), status: s.value }));
+      const r = await post('/api/faculty/attendance', { course: $('aCourse').value, date: $('aDate').value, records });
+      if (r.ok) show('aMsg', 'Attendance saved for ' + r.data.count + ' student(s).', true);
+      else show('aMsg', r.data.error || 'Failed', false);
+    }
+
+    // ---------- Page load ----------
+    async function loadCourses() {
+      const d = await load('/api/faculty/dashboard');
+      if (!d) return null;
+      $('profile').innerHTML = render(d.profile);
+      $('courses').innerHTML = render(d.courses);
+      return d;
+    }
+
+    (async () => {
+      await whoami();
+      const d = await loadCourses();
+      if (!d) return;
+
+      const opts = d.courses.map(c =>
+        '<option value="' + esc(c.course_code) + '">' + esc(c.course_code) + ' - ' + esc(c.course_name) + '</option>').join('');
+      ['mCourse', 'aCourse', 'sCourse', 'enCourse', 'asCourse'].forEach(id => $(id).innerHTML = opts);
+      $('aDate').value = new Date().toISOString().slice(0, 10);
+
+      $('mCourse').onchange = loadMarksCourse;
+      $('mAssess').onchange = drawMarks;
+      $('aCourse').onchange = loadAttCourse;
+
+      if (d.courses.length) { loadMarksCourse(); loadAttCourse(); }
+    })();
+  </script>
+</body>
+</html>

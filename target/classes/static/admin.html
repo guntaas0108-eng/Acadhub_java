@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo-dot">A</span>AcadHub</div>
+    <div class="header-right"><span class="role-tag">Admin</span><button onclick="logout()">Logout</button></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2 id="welcome">Welcome</h2>
+      <p><span id="today"></span> &middot; Overview of users and student risk</p>
+    </section>
+
+    <div id="error"></div>
+
+    <div class="card">
+      <h2>Add data</h2>
+      <div class="tabs">
+        <button class="active" data-tab="tUser">Add user</button>
+        <button data-tab="tCourse">Add course</button>
+        <button data-tab="tEnroll">Enroll student</button>
+        <button data-tab="tAssign">Assign faculty</button>
+        <button data-tab="tAssess">Add assessment</button>
+      </div>
+
+      <div id="tUser" class="tab-panel active">
+        <div class="form-grid">
+          <select id="uRole"><option>Student</option><option>Faculty</option><option>Admin</option></select>
+          <input type="text" id="uName" placeholder="Full name">
+          <input type="text" id="uUsername" placeholder="Username">
+          <input type="password" id="uPassword" placeholder="Password">
+          <input type="text" id="uPhone" placeholder="Phone">
+        </div>
+        <div class="form-grid" id="studentFields" style="margin-top:12px">
+          <input type="number" id="uRoll" placeholder="Roll number">
+          <input type="text" id="uDept" placeholder="Department (e.g. CSE)">
+          <input type="text" id="uBranch" placeholder="Branch (e.g. COE)">
+          <input type="number" id="uSem" min="1" max="8" placeholder="Semester (1-8)">
+          <input type="number" id="uCgpa" step="0.01" min="0" max="10" placeholder="CGPA (optional)">
+        </div>
+        <div class="form-grid hidden" id="facultyFields" style="margin-top:12px">
+          <input type="text" id="uDesig" placeholder="Designation (e.g. Professor)">
+          <input type="text" id="uFDept" placeholder="Department (e.g. CSE)">
+        </div>
+        <button class="action" onclick="addUser()">Save user</button>
+        <div id="uMsg" class="msg"></div>
+      </div>
+
+      <div id="tCourse" class="tab-panel">
+        <div class="form-grid">
+          <input type="text" id="cCode" placeholder="Course code (e.g. UCS410)" maxlength="10">
+          <input type="text" id="cName" placeholder="Course name">
+          <input type="number" id="cCredits" min="1" placeholder="Credits (default 4)">
+          <input type="number" id="cSem" min="1" max="8" placeholder="Semester (1-8)">
+          <input type="text" id="cDesc" placeholder="Description (optional)">
+        </div>
+        <button class="action" onclick="addCourse()">Save course</button>
+        <div id="cMsg" class="msg"></div>
+      </div>
+
+      <div id="tEnroll" class="tab-panel">
+        <div class="form-grid">
+          <select id="eStudent"></select>
+          <select id="eCourse"></select>
+        </div>
+        <button class="action" onclick="enroll()">Enroll</button>
+        <div id="eMsg" class="msg"></div>
+      </div>
+
+      <div id="tAssign" class="tab-panel">
+        <div class="form-grid">
+          <select id="gFaculty"></select>
+          <select id="gCourse"></select>
+        </div>
+        <button class="action" onclick="assign()">Assign</button>
+        <div id="gMsg" class="msg"></div>
+      </div>
+
+      <div id="tAssess" class="tab-panel">
+        <div class="form-grid">
+          <select id="aCourse"></select>
+          <input type="text" id="aType" placeholder="Type (e.g. Mid Term)">
+          <input type="number" id="aTotal" min="1" placeholder="Total marks">
+          <input type="number" id="aPass" min="0" placeholder="Passing marks (default 40%)">
+        </div>
+        <button class="action" onclick="addAssessment()">Save assessment</button>
+        <div id="aMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <div class="card"><h2>Summary</h2><div id="summary" class="muted">Loading...</div></div>
+
+    <div class="grid-2">
+      <div class="card"><h2>Users by role</h2><div id="roleChart" class="muted">Loading...</div></div>
+      <div class="card"><h2>At-risk students</h2><div id="riskChart" class="muted">Loading...</div></div>
+    </div>
+
+    <div class="card"><h2>All users</h2><div id="users" class="muted">Loading...</div></div>
+    <div class="card"><h2>At-risk students</h2><div id="atRisk" class="muted">Loading...</div></div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    async function send(method, url, body) {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (res.status === 401) { location.href = 'index.html'; return { ok: false, data: {} }; }
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      return { ok: res.ok, data };
+    }
+
+    function show(id, text, good) {
+      const el = $(id);
+      el.textContent = text;
+      el.className = 'msg ' + (good ? 'ok' : 'low');
+    }
+
+    const val = id => $(id).value.trim();
+    const num = id => $(id).value === '' ? null : Number($(id).value);
+    const clear = ids => ids.forEach(i => $(i).value = '');
+
+    // ---------- tabs ----------
+    document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+      document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === b.dataset.tab));
+    });
+
+    $('uRole').onchange = () => {
+      $('studentFields').classList.toggle('hidden', $('uRole').value !== 'Student');
+      $('facultyFields').classList.toggle('hidden', $('uRole').value !== 'Faculty');
+    };
+
+    // ---------- form actions ----------
+    async function addUser() {
+      const role = $('uRole').value;
+      const body = { role, name: val('uName'), username: val('uUsername'), password: $('uPassword').value.trim(), phone: val('uPhone') };
+      if (role === 'Student') Object.assign(body, { rollNo: num('uRoll'), department: val('uDept'), branch: val('uBranch'), semester: num('uSem'), cgpa: num('uCgpa') });
+      if (role === 'Faculty') Object.assign(body, { designation: val('uDesig'), department: val('uFDept') });
+      const r = await send('POST', '/api/admin/user', body);
+      if (r.ok) {
+        show('uMsg', role + ' added.', true);
+        clear(['uName', 'uUsername', 'uPassword', 'uPhone', 'uRoll', 'uDept', 'uBranch', 'uSem', 'uCgpa', 'uDesig', 'uFDept']);
+        refresh();
+      } else show('uMsg', r.data.error || 'Failed', false);
+    }
+
+    async function addCourse() {
+      const r = await send('POST', '/api/admin/course', { courseCode: val('cCode'), courseName: val('cName'), credits: num('cCredits'), semester: num('cSem'), description: val('cDesc') });
+      if (r.ok) { show('cMsg', 'Course added.', true); clear(['cCode', 'cName', 'cCredits', 'cSem', 'cDesc']); refresh(); }
+      else show('cMsg', r.data.error || 'Failed', false);
+    }
+
+    async function enroll() {
+      const r = await send('POST', '/api/admin/enroll', { rollNo: num('eStudent'), courseCode: $('eCourse').value });
+      show('eMsg', r.ok ? 'Student enrolled.' : (r.data.error || 'Failed'), r.ok);
+    }
+
+    async function assign() {
+      const r = await send('POST', '/api/admin/assign', { facultyId: num('gFaculty'), courseCode: $('gCourse').value });
+      show('gMsg', r.ok ? 'Faculty assigned.' : (r.data.error || 'Failed'), r.ok);
+    }
+
+    async function addAssessment() {
+      const r = await send('POST', '/api/admin/assessment', { courseCode: $('aCourse').value, assessmentType: val('aType'), totalMarks: num('aTotal'), passingMarks: num('aPass') });
+      if (r.ok) { show('aMsg', 'Assessment added.', true); clear(['aType', 'aTotal', 'aPass']); }
+      else show('aMsg', r.data.error || 'Failed', false);
+    }
+
+    async function deleteUser(id, name) {
+      if (!confirm('Delete ' + name + '? This also removes their student/faculty data.')) return;
+      const r = await send('DELETE', '/api/admin/user/' + id);
+      if (r.ok) refresh(); else alert(r.data.error || 'Failed');
+    }
+
+    // ---------- dropdowns ----------
+    async function loadOptions() {
+      const o = await load('/api/admin/options');
+      if (!o) return;
+      const courses = o.courses.map(c => '<option value="' + esc(c.course_code) + '">' + esc(c.course_code) + ' - ' + esc(c.course_name) + '</option>').join('');
+      $('eStudent').innerHTML = o.students.map(s => '<option value="' + s.roll_no + '">' + esc(s.roll_no) + ' - ' + esc(s.name) + '</option>').join('');
+      $('gFaculty').innerHTML = o.faculty.map(f => '<option value="' + f.faculty_id + '">' + esc(f.faculty_id) + ' - ' + esc(f.name) + '</option>').join('');
+      $('eCourse').innerHTML = courses;
+      $('gCourse').innerHTML = courses;
+      $('aCourse').innerHTML = courses;
+    }
+
+    // ---------- dashboard ----------
+    async function loadDashboard() {
+      const d = await load('/api/admin/dashboard');
+      if (!d) return;
+
+      const summary = Array.isArray(d.summary) ? d.summary[0] : d.summary;
+      const users = d.users || [];
+      const risk = d.atRisk || [];
+
+      $('summary').innerHTML = renderStats(summary || {});
+      $('users').innerHTML = render(users.map(u => ({ ...u, action: '' })));
+      // add a Delete button to each row
+      $('users').querySelectorAll('tbody tr').forEach((tr, i) => {
+        const u = users[i];
+        tr.lastElementChild.innerHTML = '<button class="danger">Delete</button>';
+        tr.lastElementChild.firstChild.onclick = () => deleteUser(u.user_id, u.name);
+      });
+      $('atRisk').innerHTML = render(risk);
+
+      const counts = {};
+      users.forEach(u => { const r = u.role || 'Unknown'; counts[r] = (counts[r] || 0) + 1; });
+      $('roleChart').innerHTML = columnChart(Object.entries(counts).map(([label, value]) => ({ label, value })));
+
+      const total = counts['Student'] || 0;
+      const riskStudents = new Set(risk.map(r => r.roll_no)).size;
+      $('riskChart').innerHTML = total
+        ? donut((riskStudents / total) * 100, riskStudents + ' of ' + total + ' students are at risk', risk.length ? 'bad' : 'good')
+        : '<p class="empty">No students found.</p>';
+    }
+
+    function refresh() { loadDashboard(); loadOptions(); }
+
+    (async () => {
+      try {
+        await whoami();
+        await loadDashboard();
+        await loadOptions();
+      } catch (e) {
+        console.error(e);
+        $('error').textContent = 'Error: ' + e.message;
+      }
+    })();
+  </script>
+</body>
+</html>

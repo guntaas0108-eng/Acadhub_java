@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo-dot">A</span>AcadHub</div>
+    <div class="header-right"><span class="role-tag">Student</span><button onclick="logout()">Logout</button></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2 id="welcome">Welcome</h2>
+      <p><span id="today"></span> &middot; Your marks and attendance at a glance</p>
+    </section>
+
+    <div id="error"></div>
+
+    <div class="card">
+      <h2>My details</h2>
+      <div id="details" class="muted">Loading...</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card"><h2>Marks by assessment</h2><div id="marksChart" class="muted">Loading...</div></div>
+      <div class="card"><h2>Attendance</h2><div id="attChart" class="muted">Loading...</div></div>
+    </div>
+
+    <div class="card"><h2>My marks</h2><div id="marks" class="muted">Loading...</div></div>
+    <div class="card"><h2>My attendance</h2><div id="attendance" class="muted">Loading...</div></div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    function table(headers, rows) {
+      return '<table><thead><tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>'
+           + rows.map(r => '<tr>' + r.join('') + '</tr>').join('') + '</tbody></table>';
+    }
+
+    async function init() {
+      await whoami();
+      const data = await load('/api/student/dashboard');
+      if (!data) return;
+
+      const d = data.details;
+      $('welcome').textContent = 'Welcome, ' + d.name;
+      $('details').innerHTML =
+        '<div class="chips">'
+        + '<span class="chip"><b>Roll No</b>' + esc(d.rollNo) + '</span>'
+        + '<span class="chip"><b>Department</b>' + esc(d.department) + '</span>'
+        + '<span class="chip"><b>Semester</b>' + esc(d.semester) + '</span>'
+        + '</div>';
+
+      // ----- Marks -----
+      const marks = data.marks || [];
+      $('marks').innerHTML = marks.length === 0
+        ? '<p class="empty">No marks available yet.</p>'
+        : table(['Course', 'Assessment', 'Marks', 'Percentage'],
+            marks.map(m => [
+              '<td>' + esc(m.courseName) + '</td>',
+              '<td>' + esc(m.assessmentType) + '</td>',
+              '<td>' + esc(m.marksObtained) + '/' + esc(m.totalMarks) + '</td>',
+              '<td class="' + (m.percentage < 50 ? 'low' : 'ok') + '">' + m.percentage.toFixed(1) + '%</td>'
+            ]));
+
+      if (marks.length) {
+        const avg = marks.reduce((s, m) => s + m.percentage, 0) / marks.length;
+        $('marksChart').innerHTML =
+          donut(avg, 'Average across ' + marks.length + ' assessment(s)')
+          + barChart(marks.map(m => ({ label: m.courseName + ' - ' + m.assessmentType, value: Math.round(m.percentage) })), 100, '%');
+      } else {
+        $('marksChart').innerHTML = '<p class="empty">No marks to chart yet.</p>';
+      }
+
+      // ----- Attendance -----
+      const att = data.attendance || [];
+      $('attendance').innerHTML = att.length === 0
+        ? '<p class="empty">No attendance records yet.</p>'
+        : table(['Course', 'Present', 'Attendance'],
+            att.map(a => [
+              '<td>' + esc(a.courseCode) + '</td>',
+              '<td>' + esc(a.presentCount) + '/' + esc(a.totalClasses) + '</td>',
+              '<td class="' + (a.attendancePct < 75 ? 'low' : 'ok') + '">' + a.attendancePct.toFixed(1) + '%</td>'
+            ]));
+
+      if (att.length) {
+        const present = att.reduce((s, a) => s + a.presentCount, 0);
+        const total = att.reduce((s, a) => s + a.totalClasses, 0);
+        const overall = total ? (present / total) * 100 : 0;
+        $('attChart').innerHTML =
+          donut(overall, present + ' of ' + total + ' classes attended' + (overall < 75 ? ' (below 75%)' : ''))
+          + barChart(att.map(a => ({ label: a.courseCode, value: Math.round(a.attendancePct), tone: a.attendancePct < 75 ? 'bad' : 'good' })), 100, '%');
+      } else {
+        $('attChart').innerHTML = '<p class="empty">No attendance to chart yet.</p>';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

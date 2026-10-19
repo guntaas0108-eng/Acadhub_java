@@ -1,0 +1,34 @@
+
+USE Acadhub_java;
+
+START TRANSACTION;
+
+UPDATE STUDENT_PERFORMANCE
+SET marks_obtained = 45
+WHERE roll_no = 1024030101
+AND assessment_id = 1;
+
+COMMIT;
+
+START TRANSACTION;
+
+UPDATE STUDENT
+SET cgpa = 7.2
+WHERE roll_no = 1024030101;
+
+COMMIT;
+
+UPDATE STUDENT_PERFORMANCE
+SET grade = 'C'
+WHERE roll_no = 1024030101
+AND assessment_id = 1;
+
+START TRANSACTION;
+
+SAVEPOINT before_delete;
+
+DELETE FROM ATTENDANCE
+WHERE roll_no = 1024030101
+AND attendance_date = '2025-04-03';
+
+COMMIT;
