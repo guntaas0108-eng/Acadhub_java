@@ -1,107 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Student Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AcadHub · Student</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
-<body>
-  <header>
-    <div class="brand"><span class="logo-dot">A</span>AcadHub</div>
-    <div class="header-right"><span class="role-tag">Student</span><button onclick="logout()">Logout</button></div>
-  </header>
+<body data-page="student">
+<header class="app-header"><div class="hdr-in">
+  <a class="brand" href="student.html"><span class="logo">A</span>AcadHub</a>
+  <nav class="nav"><a class="active" href="student.html">Student</a></nav>
+  <div class="hdr-right">
+    <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
+    <a class="btn ghost" href="index.html" onclick="if(window.logout){window.logout();return false}" aria-label="Sign out"><i data-i="logout"></i></a>
+  </div>
+</div></header>
 
-  <main>
-    <section class="hero">
-      <h2 id="welcome">Welcome</h2>
-      <p><span id="today"></span> &middot; Your marks and attendance at a glance</p>
+<main class="container">
+  <div class="page-head">
+    <div><p class="eyebrow" data-clock></p><h1><span data-greeting>Hello</span>, <span id="welcomeName">Student</span></h1></div>
+    <button class="btn no-print" type="button" onclick="print()"><i data-i="printer"></i>Download report</button>
+  </div>
+
+  <div class="bento">
+    <!-- Overall Attendance Ring -->
+    <section class="card span-5">
+      <div class="card-head"><h2><i data-i="cal"></i>Overall attendance</h2></div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52"/></svg>
+          <div class="ring-center"><span class="ring-val" id="attPercent">0</span><span class="ring-sub">attendance</span></div>
+        </div>
+        <div>
+          <p class="muted" style="max-width:220px">Stay at <b style="color:var(--text)">75% or above</b> in every course to remain eligible for exams.</p>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><span class="chip ok">75% and above</span><span class="chip danger">Below 75%</span></div>
+        </div>
+      </div>
     </section>
 
-    <div id="error"></div>
+    <!-- GPA Stat -->
+    <article class="card stat lift span-3">
+      <div class="stat-top"><span class="stat-icon sky"><i data-i="award"></i></span><span class="pill">GPA</span></div>
+      <div><div class="stat-label">Current CGPA</div><div class="stat-value" id="cgpa">0</div></div>
+      <div data-spark="7.5,7.8,8.2,8.4,8.5,8.8"></div>
+    </article>
 
-    <div class="card">
-      <h2>My details</h2>
-      <div id="details" class="muted">Loading...</div>
-    </div>
+    <!-- Enrolled Courses Stat -->
+    <article class="card stat lift span-4">
+      <div class="stat-top"><span class="stat-icon"><i data-i="book"></i></span><span class="pill">Courses</span></div>
+      <div><div class="stat-label">Enrolled courses</div><div class="stat-value" id="totalCourses">0</div></div>
+      <div data-spark="2,3,4,4,5,6"></div>
+    </article>
 
-    <div class="grid-2">
-      <div class="card"><h2>Marks by assessment</h2><div id="marksChart" class="muted">Loading...</div></div>
-      <div class="card"><h2>Attendance</h2><div id="attChart" class="muted">Loading...</div></div>
-    </div>
+    <!-- Attendance by Course Table -->
+    <section class="card span-6">
+      <div class="card-head"><h2><i data-i="clip"></i>Attendance by course</h2></div>
+      <div class="table-wrap" data-empty-title="No attendance yet" data-empty-text="Your attendance will appear once classes are marked.">
+        <table><thead><tr><th>Course</th><th>Attendance</th></tr></thead><tbody id="attBody"></tbody></table>
+      </div>
+    </section>
 
-    <div class="card"><h2>My marks</h2><div id="marks" class="muted">Loading...</div></div>
-    <div class="card"><h2>My attendance</h2><div id="attendance" class="muted">Loading...</div></div>
-  </main>
+    <!-- Marks and Grades Table -->
+    <section class="card span-6">
+      <div class="card-head"><h2><i data-i="award"></i>Marks and grades</h2></div>
+      <div class="table-wrap" data-empty-title="No marks published" data-empty-text="Grades will show here as faculty publish them.">
+        <table><thead><tr><th>Course</th><th>Marks</th><th>Grade</th></tr></thead><tbody id="marksBody"></tbody></table>
+      </div>
+    </section>
+  </div>
+</main>
 
-  <script src="app.js"></script>
-  <script>
-    const $ = id => document.getElementById(id);
-
-    function table(headers, rows) {
-      return '<table><thead><tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>'
-           + rows.map(r => '<tr>' + r.join('') + '</tr>').join('') + '</tbody></table>';
-    }
-
-    async function init() {
-      await whoami();
-      const data = await load('/api/student/dashboard');
-      if (!data) return;
-
-      const d = data.details;
-      $('welcome').textContent = 'Welcome, ' + d.name;
-      $('details').innerHTML =
-        '<div class="chips">'
-        + '<span class="chip"><b>Roll No</b>' + esc(d.rollNo) + '</span>'
-        + '<span class="chip"><b>Department</b>' + esc(d.department) + '</span>'
-        + '<span class="chip"><b>Semester</b>' + esc(d.semester) + '</span>'
-        + '</div>';
-
-      // ----- Marks -----
-      const marks = data.marks || [];
-      $('marks').innerHTML = marks.length === 0
-        ? '<p class="empty">No marks available yet.</p>'
-        : table(['Course', 'Assessment', 'Marks', 'Percentage'],
-            marks.map(m => [
-              '<td>' + esc(m.courseName) + '</td>',
-              '<td>' + esc(m.assessmentType) + '</td>',
-              '<td>' + esc(m.marksObtained) + '/' + esc(m.totalMarks) + '</td>',
-              '<td class="' + (m.percentage < 50 ? 'low' : 'ok') + '">' + m.percentage.toFixed(1) + '%</td>'
-            ]));
-
-      if (marks.length) {
-        const avg = marks.reduce((s, m) => s + m.percentage, 0) / marks.length;
-        $('marksChart').innerHTML =
-          donut(avg, 'Average across ' + marks.length + ' assessment(s)')
-          + barChart(marks.map(m => ({ label: m.courseName + ' - ' + m.assessmentType, value: Math.round(m.percentage) })), 100, '%');
-      } else {
-        $('marksChart').innerHTML = '<p class="empty">No marks to chart yet.</p>';
-      }
-
-      // ----- Attendance -----
-      const att = data.attendance || [];
-      $('attendance').innerHTML = att.length === 0
-        ? '<p class="empty">No attendance records yet.</p>'
-        : table(['Course', 'Present', 'Attendance'],
-            att.map(a => [
-              '<td>' + esc(a.courseCode) + '</td>',
-              '<td>' + esc(a.presentCount) + '/' + esc(a.totalClasses) + '</td>',
-              '<td class="' + (a.attendancePct < 75 ? 'low' : 'ok') + '">' + a.attendancePct.toFixed(1) + '%</td>'
-            ]));
-
-      if (att.length) {
-        const present = att.reduce((s, a) => s + a.presentCount, 0);
-        const total = att.reduce((s, a) => s + a.totalClasses, 0);
-        const overall = total ? (present / total) * 100 : 0;
-        $('attChart').innerHTML =
-          donut(overall, present + ' of ' + total + ' classes attended' + (overall < 75 ? ' (below 75%)' : ''))
-          + barChart(att.map(a => ({ label: a.courseCode, value: Math.round(a.attendancePct), tone: a.attendancePct < 75 ? 'bad' : 'good' })), 100, '%');
-      } else {
-        $('attChart').innerHTML = '<p class="empty">No attendance to chart yet.</p>';
-      }
-    }
-
-    init();
-  </script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

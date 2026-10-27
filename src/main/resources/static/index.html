@@ -1,165 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <title>AcadHub - College Portal Login</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --text: #1d2939; --muted: #667085; --border: #dfe4ee;
-      --primary: #1f4e9c; --primary-dark: #163a78; --soft: #eef3fb; --bad: #c62828;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh;
-      display: flex; flex-direction: column;
-      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-      color: var(--text);
-      background: #f4f6fb;
-    }
-    :focus-visible { outline: 3px solid rgba(31, 78, 156, .3); outline-offset: 2px; }
-
-    /* top strip */
-    .topbar {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 32px;
-      background: #fff;
-      border-bottom: 3px solid var(--primary);
-    }
-    .crest {
-      width: 42px; height: 42px; border-radius: 50%;
-      display: grid; place-items: center;
-      background: var(--primary);
-    }
-    .topbar b { display: block; font-size: 18px; line-height: 1.2; }
-    .topbar span { font-size: 12px; color: var(--muted); }
-
-    /* centre */
-    .page { flex: 1; display: grid; place-items: center; padding: 28px 16px; }
-    .card {
-      width: 100%; max-width: 420px;
-      padding: 34px 32px 28px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 8px 28px rgba(31, 78, 156, .08);
-    }
-    .card h1 { margin: 0 0 4px; font-size: 24px; text-align: center; }
-    .card .sub { margin: 0 0 24px; text-align: center; color: var(--muted); font-size: 14px; }
-
-    label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
-    input {
-      width: 100%; padding: 11px 13px; margin-bottom: 16px;
-      font: inherit; font-size: 15px;
-      color: var(--text); background: #fff;
-      border: 1px solid var(--border); border-radius: 8px;
-      outline: none; transition: border-color .15s, box-shadow .15s;
-    }
-    input::placeholder { color: #9aa3b5; }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31, 78, 156, .14); }
-
-    .pw-wrap { position: relative; }
-    .pw-wrap input { padding-right: 70px; }
-    .pw-toggle {
-      position: absolute; right: 7px; top: 6px;
-      padding: 5px 11px; font: inherit; font-size: 12px; font-weight: 600;
-      background: var(--soft); color: var(--primary-dark);
-      border: 0; border-radius: 6px; cursor: pointer;
-    }
-
-    .btn-login {
-      width: 100%; padding: 12px;
-      font: inherit; font-size: 16px; font-weight: 600;
-      background: var(--primary); color: #fff;
-      border: 0; border-radius: 8px; cursor: pointer;
-      transition: background .15s;
-    }
-    .btn-login:hover { background: var(--primary-dark); }
-    .btn-login:disabled { opacity: .65; cursor: wait; }
-    #error { min-height: 22px; margin: 12px 0 0; text-align: center; font-size: 14px; font-weight: 500; color: var(--bad); }
-
-    .roles { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center; font-size: 13px; color: var(--muted); }
-
-    footer { padding: 16px; text-align: center; font-size: 12px; color: var(--muted); }
-
-    @media (max-width: 480px) {
-      .topbar { padding: 12px 16px; }
-      .card { padding: 26px 20px 22px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AcadHub · University Academic Management Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
-<body>
-  <div class="topbar">
-    <div class="crest" aria-hidden="true">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/>
-      </svg>
+<body data-page="login" class="auth-page">
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<!-- Top Navigation Strip -->
+<nav class="auth-nav">
+  <a class="brand" href="index.html">
+    <span class="logo">A</span>
+    <span>AcadHub</span>
+  </a>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div class="system-pulse" style="padding: 6px 14px; font-size: 12px;">
+      <span class="pulse-dot"></span>
+      <span>System Operational</span>
     </div>
-    <div><b>AcadHub</b><span>Academic Management Portal</span></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" type="button">
+      <i data-i="moon"></i><i data-i="sun"></i>
+    </button>
   </div>
+</nav>
 
-  <div class="page">
-    <form class="card" onsubmit="login(event)">
-      <h1>Sign in</h1>
-      <p class="sub">Use your college username and password</p>
-
-      <label for="username">Username</label>
-      <input id="username" placeholder="Enter your username" autocomplete="username" autofocus>
-
-      <label for="password">Password</label>
-      <div class="pw-wrap">
-        <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password">
-        <button type="button" class="pw-toggle" onclick="togglePw(this)">Show</button>
+<!-- Main Split Screen -->
+<main class="auth-main">
+  <div class="auth-grid">
+    <!-- Left: Showcase & Project Context -->
+    <div class="showcase">
+      <div class="showcase-badge">
+        <i data-i="cap"></i>
+        <span>University Academic Portal &middot; Term 2026</span>
       </div>
 
-      <button type="submit" class="btn-login" id="loginBtn">Login</button>
-      <div id="error"></div>
+      <h1 class="showcase-title">
+        Streamlined academic operations for <span>modern universities</span>.
+      </h1>
 
-      <div class="roles">For students, faculty and administrators</div>
-    </form>
+      <p class="showcase-desc">
+        A unified platform connecting students, faculty, and administration. Automated grade calculations, real-time 75% attendance threshold monitoring, and comprehensive course management.
+      </p>
+
+      <!-- Showcase Feature Bento Cards -->
+      <div class="showcase-bento">
+        <div class="preview-card">
+          <div class="preview-top">
+            <span class="preview-icon"><i data-i="cal"></i></span>
+            <span class="chip ok">&ge; 75% Safe</span>
+          </div>
+          <div class="preview-title">Attendance Guard</div>
+          <p class="preview-desc">Real-time daily tracking with automated triggers when attendance drops below 75%.</p>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-top">
+            <span class="preview-icon sky"><i data-i="award"></i></span>
+            <span class="grade g-ap">A+</span>
+          </div>
+          <div class="preview-title">Automated Grading</div>
+          <p class="preview-desc">Database-level triggers compute letter grades directly from assessment performance.</p>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-top">
+            <span class="preview-icon warn"><i data-i="alert"></i></span>
+            <span class="chip warn">Early Warning</span>
+          </div>
+          <div class="preview-title">At-Risk Analytics</div>
+          <p class="preview-desc">Proactive identification of struggling students before end-of-semester examinations.</p>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-top">
+            <span class="preview-icon"><i data-i="shield"></i></span>
+            <span class="pill">RBAC</span>
+          </div>
+          <div class="preview-title">Role-Based Security</div>
+          <p class="preview-desc">Isolated portals and workflows for Administrators, Teaching Faculty, and Students.</p>
+        </div>
+      </div>
+
+      <div class="system-pulse">
+        <span class="pulse-dot"></span>
+        <span>Spring Boot 3.5.6 &middot; MySQL 8.0 &middot; Java 17 LTS Core Active</span>
+      </div>
+    </div>
+
+    <!-- Right: Authentication Card -->
+    <div>
+      <section class="card auth-card">
+        <div class="brand big"><span class="logo">A</span>AcadHub</div>
+        <h1>Welcome back</h1>
+        <p class="muted">Select your role to load demo credentials or sign in.</p>
+
+        <div class="role-chips" role="group" aria-label="Sign in as">
+          <button type="button" class="role-chip" data-role="ADMIN" style="--rc:#14B8A6"><i data-i="shield"></i>Admin</button>
+          <button type="button" class="role-chip" data-role="FACULTY" style="--rc:#38BDF8"><i data-i="book"></i>Faculty</button>
+          <button type="button" class="role-chip active" data-role="STUDENT" style="--rc:#5EEAD4"><i data-i="cap"></i>Student</button>
+        </div>
+
+        <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
+          <select id="role" hidden>
+            <option value="ADMIN">Admin</option><option value="FACULTY">Faculty</option><option value="STUDENT" selected>Student</option>
+          </select>
+          <div class="field">
+            <input id="username" type="text" placeholder=" " autocomplete="username" required>
+            <label for="username">Username</label>
+          </div>
+          <div class="field">
+            <input id="password" type="password" placeholder=" " autocomplete="current-password" required>
+            <label for="password">Password</label>
+            <button class="icon-btn eye" type="button" data-eye="#password" aria-label="Show or hide password"><i data-i="eye"></i></button>
+          </div>
+          <p id="loginError" class="form-error" role="alert"></p>
+          <button id="loginBtn" class="btn primary full magnetic spin" type="submit">Sign in to AcadHub<i data-i="arrow"></i></button>
+        </form>
+        <p class="auth-foot">Press <kbd>T</kbd> to toggle theme &middot; Demo accounts loaded on chip click</p>
+      </section>
+    </div>
   </div>
+</main>
 
-  <footer>&copy; AcadHub &middot; Academic Management System</footer>
-
-  <script>
-    function togglePw(btn) {
-      const p = document.getElementById('password');
-      const show = p.type === 'password';
-      p.type = show ? 'text' : 'password';
-      btn.textContent = show ? 'Hide' : 'Show';
-    }
-
-    async function login(e) {
-      e.preventDefault();
-      const btn = document.getElementById('loginBtn');
-      const err = document.getElementById('error');
-      err.textContent = '';
-      btn.disabled = true;
-      btn.textContent = 'Signing in...';
-      let ok = false;
-      try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value
-          })
-        });
-        let data = {};
-        try { data = await res.json(); } catch (x) {}
-        if (!res.ok) { err.textContent = data.error || 'Login failed. Check your details.'; return; }
-        ok = true;
-        const pages = { Admin: 'admin.html', Faculty: 'faculty.html', Student: 'student.html' };
-        window.location.href = pages[data.role] || 'index.html';
-      } catch (x) {
-        err.textContent = 'Cannot reach the server. Is the app running?';
-      } finally {
-        if (!ok) { btn.disabled = false; btn.textContent = 'Login'; }
-      }
-    }
-  </script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
