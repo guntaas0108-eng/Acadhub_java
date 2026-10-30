@@ -26,30 +26,84 @@
       <p class="eyebrow" data-clock></p>
       <h1><span data-greeting>Hello</span>, <span id="welcomeName">Admin</span></h1>
     </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" type="button" onclick="window.refreshAdmin&&window.refreshAdmin()"><i data-i="clip"></i>Refresh Data</button>
+    </div>
   </div>
 
   <div class="bento">
-    <!-- Stat Cards -->
-    <article class="card stat lift span-4">
+    <!-- Stat Cards (4 columns for complete overview) -->
+    <article class="card stat lift span-3">
       <div class="stat-top"><span class="stat-icon"><i data-i="cap"></i></span><span class="pill"><i data-i="trend"></i>Students</span></div>
       <div><div class="stat-label">Total students</div><div class="stat-value" id="totalStudents">0</div></div>
       <div data-spark="2,5,7,12,18,24,30"></div>
     </article>
-    <article class="card stat lift span-4">
+    <article class="card stat lift span-3">
       <div class="stat-top"><span class="stat-icon sky"><i data-i="users"></i></span><span class="pill"><i data-i="trend"></i>Faculty</span></div>
       <div><div class="stat-label">Total faculty</div><div class="stat-value" id="totalFaculty">0</div></div>
       <div data-spark="1,2,3,4,6,7,8"></div>
     </article>
-    <article class="card stat lift span-4">
+    <article class="card stat lift span-3">
       <div class="stat-top"><span class="stat-icon warn"><i data-i="book"></i></span><span class="pill"><i data-i="trend"></i>Courses</span></div>
       <div><div class="stat-label">Courses offered</div><div class="stat-value" id="totalCourses">0</div></div>
       <div data-spark="2,4,4,5,7,8,10"></div>
+    </article>
+    <article class="card stat lift span-3">
+      <div class="stat-top"><span class="stat-icon ok"><i data-i="check"></i></span><span class="pill"><i data-i="trend"></i>Enrollments</span></div>
+      <div><div class="stat-label">Active Enrollments</div><div class="stat-value" id="totalEnrollments">0</div></div>
+      <div data-spark="3,6,8,11,14,17,20"></div>
     </article>
 
     <!-- Smart Insight -->
     <article class="card insight span-12" data-insight="#riskTable">
       <i data-i="info"></i><p class="insight-text">Checking attendance and performance across all courses…</p>
     </article>
+
+    <!-- LIVE COURSE ENROLLMENT DISTRIBUTION GRAPH -->
+    <section class="card span-12" id="enrollmentGraphSection">
+      <div class="card-head">
+        <div>
+          <h2><i data-i="trend"></i>Course Enrollment Distribution Graph</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Live student enrollment load across each academic course and assigned faculty instructor.</p>
+        </div>
+        <span class="pill ok" id="graphTotalBadge">Total Active: 0</span>
+      </div>
+      <div class="graph-container" id="enrollmentGraphBars"></div>
+    </section>
+
+    <!-- ACADEMIC ACCOUNTABILITY & CONNECTIVITY MATRIX -->
+    <section class="card span-12" id="accountabilityMatrixSection">
+      <div class="card-head">
+        <div>
+          <h2><i data-i="users"></i>Academic Accountability & Course Connectivity Matrix</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Full 360° accountability connecting each Course $\longleftrightarrow$ Assigned Faculty $\longleftrightarrow$ Enrolled Students roster.</p>
+        </div>
+      </div>
+      <div class="table-wrap" data-empty-title="No courses mapped" data-empty-text="Create courses and assign faculty to build accountability connections.">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:140px;">Course</th>
+              <th style="min-width:160px;">Assigned Faculty</th>
+              <th style="min-width:90px;">Enrolled Count</th>
+              <th>Connected Student Roster</th>
+            </tr>
+          </thead>
+          <tbody id="accountabilityBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FACULTY WORKLOAD & SUPERVISION -->
+    <section class="card span-12" id="facultyWorkloadSection">
+      <div class="card-head">
+        <div>
+          <h2><i data-i="award"></i>Faculty Accountability & Mentorship Workload</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Breakdown of courses taught and total unique students under each professor's instruction.</p>
+        </div>
+      </div>
+      <div class="fac-workload-grid" id="facultyWorkloadList"></div>
+    </section>
 
     <!-- At-Risk Students Table -->
     <section class="card span-12" id="riskTable">

@@ -139,14 +139,16 @@
   function countStat(el) {
     const txt = el.textContent.trim();
     if (el.dataset.counting || el.dataset.last === txt) return;
+    const oldN = parseFloat((el.dataset.last || '0').replace(/,/g, '')) || 0;
     el.dataset.last = txt;
     if (!/^\d[\d,]*(\.\d+)?$/.test(txt) || reduce) return;
     const n = parseFloat(txt.replace(/,/g, '')), dec = txt.includes('.') ? txt.split('.')[1].length : 0;
-    const t0 = performance.now(), dur = 900;
+    if (oldN === n) return;
+    const t0 = performance.now(), dur = 750;
     el.dataset.counting = '1';
     (function step(t) {
       const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
-      el.textContent = p < 1 ? (n * e).toFixed(dec) : txt;
+      el.textContent = p < 1 ? ((oldN + (n - oldN) * e)).toFixed(dec) : txt;
       if (p < 1) requestAnimationFrame(step); else delete el.dataset.counting;
     })(t0);
   }

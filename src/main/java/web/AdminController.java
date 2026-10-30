@@ -72,19 +72,75 @@ public class AdminController {
         }
     }
 
-    // ---------- dashboard ----------
+    // ---------- dashboard & total accountability analytics ----------
     @GetMapping("/dashboard")
     public ResponseEntity<?> dashboard(HttpSession session) {
         if (getAdmin(session) == null) return denied();
         try {
+            var sumRows = Rows.query(
+                "SELECT (SELECT COUNT(*) FROM USERS) AS total_users, "
+              + "(SELECT COUNT(*) FROM STUDENT) AS total_students, "
+              + "(SELECT COUNT(*) FROM FACULTY) AS total_faculty, "
+              + "(SELECT COUNT(*) FROM COURSE) AS total_courses, "
+              + "(SELECT COUNT(*) FROM ENROLLMENT) AS total_enrollments");
+
+            Map<String, Object> summary = sumRows.isEmpty() ? Map.of() : sumRows.get(0);
+
+            // Enrollment Distribution Graph Data
+            var enrollmentGraph = Rows.query(
+                "SELECT c.course_code, c.course_name, c.credits, c.semester, "
+              + "COUNT(DISTINCT e.roll_no) AS enrolled_students, "
+              + "COALESCE(GROUP_CONCAT(DISTINCT u_fac.name ORDER BY u_fac.name SEPARATOR ', '), 'Unassigned') AS faculty_names "
+              + "FROM course c "
+              + "LEFT JOIN enrollment e ON c.course_code = e.course_code "
+              + "LEFT JOIN faculty_course fc ON c.course_code = fc.course_code "
+              + "LEFT JOIN faculty f ON fc.faculty_id = f.faculty_id "
+              + "LEFT JOIN users u_fac ON f.user_id = u_fac.user_id "
+              + "GROUP BY c.course_code, c.course_name, c.credits, c.semester "
+              + "ORDER BY enrolled_students DESC, c.course_code");
+
+            // Complete Accountability Connectivity Matrix (Course -> Faculty -> Enrolled Students)
+            var accountabilityMatrix = Rows.query(
+                "SELECT c.course_code, c.course_name, c.credits, c.semester, "
+              + "COUNT(DISTINCT e.roll_no) AS enrolled_count, "
+              + "COALESCE(GROUP_CONCAT(DISTINCT u_fac.name ORDER BY u_fac.name SEPARATOR ', '), 'Unassigned') AS faculty_names, "
+              + "COALESCE(GROUP_CONCAT(DISTINCT CONCAT(u_stu.name, ' (Roll: ', s.roll_no, ')') ORDER BY u_stu.name SEPARATOR '; '), 'No students enrolled') AS enrolled_students_list "
+              + "FROM course c "
+              + "LEFT JOIN enrollment e ON c.course_code = e.course_code "
+              + "LEFT JOIN student s ON e.roll_no = s.roll_no "
+              + "LEFT JOIN users u_stu ON s.user_id = u_stu.user_id "
+              + "LEFT JOIN faculty_course fc ON c.course_code = fc.course_code "
+              + "LEFT JOIN faculty f ON fc.faculty_id = f.faculty_id "
+              + "LEFT JOIN users u_fac ON f.user_id = u_fac.user_id "
+              + "GROUP BY c.course_code, c.course_name, c.credits, c.semester "
+              + "ORDER BY enrolled_count DESC, c.course_code");
+
+            // Faculty Workload & Accountability
+            var facultyAccountability = Rows.query(
+                "SELECT f.faculty_id, u.name AS faculty_name, u.username, f.designation, f.department, "
+              + "COUNT(DISTINCT fc.course_code) AS total_courses, "
+              + "COALESCE(GROUP_CONCAT(DISTINCT fc.course_code ORDER BY fc.course_code SEPARATOR ', '), 'None') AS courses_taught, "
+              + "COUNT(DISTINCT e.roll_no) AS total_students_mentored "
+              + "FROM faculty f "
+              + "JOIN users u ON f.user_id = u.user_id "
+              + "LEFT JOIN faculty_course fc ON f.faculty_id = fc.faculty_id "
+              + "LEFT JOIN enrollment e ON fc.course_code = e.course_code "
+              + "GROUP BY f.faculty_id, u.name, u.username, f.designation, f.department "
+              + "ORDER BY total_students_mentored DESC");
+
+            var users = Rows.query("SELECT user_id, name, username, role, phone FROM USERS ORDER BY user_id");
+            var atRisk = Rows.query(
+                "SELECT roll_no, name, course_code, attendance_pct, avg_marks "
+              + "FROM at_risk_students WHERE risk_status = 'At Risk' ORDER BY roll_no");
+
             return ResponseEntity.ok(Map.of(
-                "summary", Rows.query("SELECT (SELECT COUNT(*) FROM USERS) AS total_users, "
-                    + "(SELECT COUNT(*) FROM STUDENT) AS total_students, "
-                    + "(SELECT COUNT(*) FROM FACULTY) AS total_faculty, "
-                    + "(SELECT COUNT(*) FROM COURSE) AS total_courses"),
-                "users", Rows.query("SELECT user_id, name, username, role, phone FROM USERS ORDER BY user_id"),
-                "atRisk", Rows.query("SELECT roll_no, name, course_code, attendance_pct, avg_marks "
-                    + "FROM at_risk_students WHERE risk_status = 'At Risk' ORDER BY roll_no")
+                "summary", summary,
+                "stats", summary,
+                "enrollmentGraph", enrollmentGraph,
+                "accountabilityMatrix", accountabilityMatrix,
+                "facultyAccountability", facultyAccountability,
+                "users", users,
+                "atRisk", atRisk
             ));
         } catch (Exception e) {
             e.printStackTrace();
@@ -141,7 +197,6 @@ public class AdminController {
         int sem = (r.semester() == null || r.semester() < 1 || r.semester() > 8) ? 1 : r.semester();
         double cgpa = (r.cgpa() == null || r.cgpa() < 0) ? 8.00 : r.cgpa();
 
-        // one transaction: either the user AND the profile row (and optional enrollment) are saved, or nothing is
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
             try {

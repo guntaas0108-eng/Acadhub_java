@@ -295,16 +295,118 @@
     const data = await apiGet('/api/admin/dashboard');
     if (!data) return;
 
-    const summary = (data.summary && data.summary[0]) || {};
-    const students = summary.total_students || 0;
-    const faculty = summary.total_faculty || 0;
-    const courses = summary.total_courses || 0;
+    // Support both direct Map and List<Map>
+    const summary = (Array.isArray(data.summary) ? data.summary[0] : data.summary) ||
+                    (Array.isArray(data.stats) ? data.stats[0] : data.stats) || {};
+    const students = Number(summary.total_students ?? summary.totalStudents ?? 0);
+    const faculty = Number(summary.total_faculty ?? summary.totalFaculty ?? 0);
+    const courses = Number(summary.total_courses ?? summary.totalCourses ?? 0);
+    const enrollments = Number(summary.total_enrollments ?? summary.totalEnrollments ?? 0);
 
     if ($('totalStudents')) $('totalStudents').textContent = students;
     if ($('totalFaculty')) $('totalFaculty').textContent = faculty;
     if ($('totalCourses')) $('totalCourses').textContent = courses;
+    if ($('totalEnrollments')) $('totalEnrollments').textContent = enrollments;
 
-    // At-Risk Table
+    // 1. Live Course Enrollment Distribution Graph
+    const graphBars = $('enrollmentGraphBars');
+    if (graphBars) {
+      const list = data.enrollmentGraph || [];
+      const maxCount = Math.max(...list.map(c => Number(c.enrolled_students || 0)), 1);
+      const totalActive = list.reduce((a, b) => a + Number(b.enrolled_students || 0), 0);
+      if ($('graphTotalBadge')) $('graphTotalBadge').textContent = `Total Active Enrollments: ${totalActive}`;
+
+      if (!list.length) {
+        graphBars.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">No course enrollments recorded yet.</p>';
+      } else {
+        graphBars.innerHTML = list.map(c => {
+          const count = Number(c.enrolled_students || 0);
+          const pct = Math.max(8, Math.round((count / maxCount) * 100));
+          return `
+            <div class="graph-bar-row">
+              <div class="graph-course-info">
+                <span class="graph-course-code">${esc(c.course_code)}</span>
+                <span class="graph-course-faculty">Instructor: ${esc(c.faculty_names || 'Unassigned')}</span>
+              </div>
+              <div class="graph-track" title="${count} enrolled in ${esc(c.course_name)}">
+                <div class="graph-fill" style="width: ${pct}%;"></div>
+              </div>
+              <div class="graph-val">${count} ${count === 1 ? 'student' : 'students'}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // 2. Academic Accountability & Connectivity Matrix (Course <-> Faculty <-> Students)
+    const accBody = $('accountabilityBody');
+    if (accBody) {
+      const matrix = data.accountabilityMatrix || [];
+      if (!matrix.length) {
+        accBody.innerHTML = '';
+      } else {
+        accBody.innerHTML = matrix.map(m => {
+          const rawStudents = m.enrolled_students_list || '';
+          const students = rawStudents.split(';').map(s => s.trim()).filter(Boolean);
+          const isAssigned = m.faculty_names && m.faculty_names !== 'Unassigned';
+          return `
+            <tr>
+              <td>
+                <b class="graph-course-code" style="font-size:14px;">${esc(m.course_code)}</b>
+                <div style="font-weight:600;font-size:13px;color:var(--text);margin-top:2px;">${esc(m.course_name)}</div>
+                <div class="muted" style="font-size:11.5px;margin-top:2px;">Semester ${esc(m.semester)} · ${esc(m.credits)} credits</div>
+              </td>
+              <td>
+                <span class="chip ${isAssigned ? 'ok' : 'warn'}">
+                  <i data-i="users"></i>${esc(m.faculty_names || 'Unassigned')}
+                </span>
+              </td>
+              <td>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--teal);">${esc(m.enrolled_count)}</span>
+              </td>
+              <td>
+                <div class="student-tags-wrap">
+                  ${students.length && rawStudents !== 'No students enrolled' ? students.map(st => `
+                    <span class="stu-tag"><i data-i="cap"></i>${esc(st)}</span>
+                  `).join('') : '<span class="muted" style="font-size:12px;">No students enrolled yet</span>'}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 3. Faculty Workload & Accountability Grid
+    const facWorkload = $('facultyWorkloadList');
+    if (facWorkload) {
+      const facList = data.facultyAccountability || [];
+      if (!facList.length) {
+        facWorkload.innerHTML = '<p class="muted" style="grid-column:1/-1;text-align:center;padding:16px;">No faculty members registered.</p>';
+      } else {
+        facWorkload.innerHTML = facList.map(f => `
+          <div class="fac-card">
+            <div class="fac-top">
+              <div class="fac-avatar">${esc((f.faculty_name || 'P').charAt(0))}</div>
+              <div>
+                <div style="font-weight:700;font-size:14.5px;color:var(--text);">${esc(f.faculty_name)}</div>
+                <div class="muted" style="font-size:12px;">${esc(f.designation || 'Faculty')} · ${esc(f.department || 'CSE')} (@${esc(f.username)})</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;font-size:13px;display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);">
+              <span class="muted">Courses Assigned:</span>
+              <strong class="graph-course-code">${esc(f.courses_taught || 'None')}</strong>
+            </div>
+            <div style="margin-top:6px;font-size:13px;display:flex;justify-content:space-between;">
+              <span class="muted">Students Mentored:</span>
+              <strong style="color:var(--teal);font-family:'JetBrains Mono',monospace;">${esc(f.total_students_mentored || 0)} enrolled</strong>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 4. At-Risk Table
     const riskBody = $('riskBody');
     if (riskBody) {
       const atRisk = data.atRisk || [];

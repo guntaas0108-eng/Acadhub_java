@@ -410,8 +410,62 @@ body[data-busy] .table-wrap.is-empty .empty { display: none; }
 }
 
 /* ============================================================
-   Study Materials, Submissions, Modals & Credential Cards
+   Accountability Matrix, Graphs & Connectivity Visualization
    ============================================================ */
+.graph-container {
+  display: flex; flex-direction: column; gap: 14px; margin-top: 14px;
+}
+.graph-bar-row {
+  display: grid; grid-template-columns: 180px 1fr 90px; align-items: center; gap: 14px;
+}
+@media (max-width: 640px) {
+  .graph-bar-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.graph-course-info { display: flex; flex-direction: column; }
+.graph-course-code { font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--teal); font-size: 13.5px; }
+.graph-course-faculty { font-size: 11.5px; color: var(--muted); }
+
+.graph-track {
+  position: relative; width: 100%; height: 26px; border-radius: 99px; background: var(--track);
+  overflow: hidden; border: 1px solid var(--border);
+}
+.graph-fill {
+  position: absolute; top: 0; left: 0; bottom: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--teal), var(--sky));
+  transition: width 1s cubic-bezier(.2,.8,.2,1);
+  box-shadow: 0 0 16px rgba(20,184,166,.4);
+}
+.graph-val {
+  font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 700;
+  text-align: right; color: var(--text);
+}
+
+.matrix-card {
+  padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 12px; transition: border-color .2s;
+}
+.matrix-card:hover { border-color: rgba(20,184,166,.45); }
+.matrix-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.student-tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.stu-tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px;
+  font-size: 12px; background: var(--raised); border: 1px solid var(--border); color: var(--text);
+}
+.stu-tag i { color: var(--teal); }
+
+.fac-workload-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 12px;
+}
+.fac-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.fac-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.fac-avatar {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--teal), var(--sky)); color: var(--on-accent); font-weight: 800; font-size: 14px;
+}
+
 .cred-card {
   margin-top: 18px; padding: 18px; border-radius: 14px;
   background: linear-gradient(135deg, rgba(20,184,166,.12), rgba(56,189,248,.08));
