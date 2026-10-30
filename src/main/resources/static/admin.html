@@ -12,7 +12,7 @@
 <body data-page="admin">
 <header class="app-header"><div class="hdr-in">
   <a class="brand" href="admin.html"><span class="logo">A</span>AcadHub</a>
-  <nav class="nav"><a class="active" href="admin.html">Admin</a></nav>
+  <nav class="nav"><a class="active" href="admin.html">Admin Portal</a></nav>
   <div class="hdr-right">
     <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
@@ -22,7 +22,10 @@
 
 <main class="container">
   <div class="page-head">
-    <div><p class="eyebrow" data-clock></p><h1><span data-greeting>Hello</span>, <span id="welcomeName">Admin</span></h1></div>
+    <div>
+      <p class="eyebrow" data-clock></p>
+      <h1><span data-greeting>Hello</span>, <span id="welcomeName">Admin</span></h1>
+    </div>
   </div>
 
   <div class="bento">
@@ -65,21 +68,59 @@
         <button type="button" data-tab="tabUsers" class="active">Add user</button>
         <button type="button" data-tab="tabCourses">Add course</button>
         <button type="button" data-tab="tabEnroll">Enroll / Assign</button>
-        <button type="button" data-tab="tabAssess">Assessment</button>
         <button type="button" data-tab="tabLists">Directory</button>
       </div>
 
       <!-- Add User Panel -->
       <div class="tab-panel show" data-group="admin" id="tabUsers">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <p class="muted">Generate student or faculty accounts with instant login credentials.</p>
+          <button class="btn" type="button" onclick="window.autoGenUserCreds&&window.autoGenUserCreds()"><i data-i="sparkle"></i>Auto-Generate Username & Password</button>
+        </div>
+
         <div class="form-grid">
-          <div class="field sel fixed"><select id="uRole"><option value="STUDENT">Student</option><option value="FACULTY">Faculty</option><option value="ADMIN">Admin</option></select><label for="uRole">Role</label></div>
+          <div class="field sel fixed">
+            <select id="uRole">
+              <option value="Student" selected>Student</option>
+              <option value="Faculty">Faculty</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <label for="uRole">Role</label>
+          </div>
           <div class="field"><input id="uName" placeholder=" " required><label for="uName">Full name</label></div>
           <div class="field"><input id="uUsername" placeholder=" " required><label for="uUsername">Username</label></div>
-          <div class="field"><input id="uPassword" type="password" placeholder=" " required><label for="uPassword">Password</label></div>
+          <div class="field"><input id="uPassword" type="text" placeholder=" " required><label for="uPassword">Password</label></div>
           <div class="field"><input id="uRoll" type="number" placeholder=" "><label for="uRoll">Roll No (for Student)</label></div>
           <div class="field"><input id="uDept" placeholder=" " value="CSE"><label for="uDept">Department</label></div>
+          <div class="field sel fixed">
+            <select id="uCourse">
+              <option value="">-- Optional: Enroll in Course --</option>
+            </select>
+            <label for="uCourse">Initial Course</label>
+          </div>
         </div>
-        <div class="form-actions"><button class="btn primary magnetic spin" type="button" onclick="window.addUser&&window.addUser()"><i data-i="plus"></i>Create user</button></div>
+
+        <div class="form-actions" style="margin-top:14px;">
+          <button class="btn primary magnetic spin" type="button" onclick="window.addUser&&window.addUser()"><i data-i="plus"></i>Create User Account</button>
+        </div>
+
+        <!-- Generated Credentials Display Card -->
+        <div id="createdCredsBox" style="display:none;" class="cred-card">
+          <div class="cred-card-header">
+            <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);">
+              <i data-i="check" style="color:var(--teal)"></i>Account Created Successfully!
+            </div>
+            <button class="btn ghost" type="button" onclick="window.copyCredentials&&window.copyCredentials()"><i data-i="copy"></i>Copy Login Info</button>
+          </div>
+          <p class="muted" style="font-size:13px;margin-bottom:12px;">Share these details with the student. They can immediately log into the student portal:</p>
+          <div class="cred-grid">
+            <div class="cred-item"><span>Full Name</span><strong id="credName">--</strong></div>
+            <div class="cred-item"><span>Roll Number</span><strong id="credRoll">--</strong></div>
+            <div class="cred-item"><span>Username</span><strong id="credUser">--</strong></div>
+            <div class="cred-item"><span>Password</span><strong id="credPass">--</strong></div>
+            <div class="cred-item"><span>Enrolled Course</span><strong id="credCourse">--</strong></div>
+          </div>
+        </div>
       </div>
 
       <!-- Add Course Panel -->
@@ -114,17 +155,6 @@
             <div class="form-actions"><button class="btn primary magnetic spin" type="button" onclick="window.assignFaculty&&window.assignFaculty()"><i data-i="check"></i>Assign to course</button></div>
           </div>
         </div>
-      </div>
-
-      <!-- Add Assessment Panel -->
-      <div class="tab-panel" data-group="admin" id="tabAssess">
-        <div class="form-grid">
-          <div class="field sel fixed"><select id="aCourse"></select><label for="aCourse">Course</label></div>
-          <div class="field"><input id="aType" placeholder=" " required><label for="aType">Type (e.g. Mid Term, Quiz 1)</label></div>
-          <div class="field"><input id="aTotal" type="number" min="1" placeholder=" " value="100"><label for="aTotal">Total Marks</label></div>
-          <div class="field"><input id="aPass" type="number" min="0" placeholder=" " value="40"><label for="aPass">Passing Marks</label></div>
-        </div>
-        <div class="form-actions"><button class="btn primary magnetic spin" type="button" onclick="window.addAssessment&&window.addAssessment()"><i data-i="plus"></i>Create Assessment</button></div>
       </div>
 
       <!-- Directory Panel -->

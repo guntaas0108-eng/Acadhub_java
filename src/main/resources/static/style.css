@@ -408,3 +408,65 @@ body[data-busy] .table-wrap.is-empty .empty { display: none; }
   .card { box-shadow: none; break-inside: avoid; } .bento > * { animation: none; opacity: 1; }
   .container { padding: 0; }
 }
+
+/* ============================================================
+   Study Materials, Submissions, Modals & Credential Cards
+   ============================================================ */
+.cred-card {
+  margin-top: 18px; padding: 18px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(20,184,166,.12), rgba(56,189,248,.08));
+  border: 1px solid rgba(20,184,166,.35); box-shadow: 0 10px 25px -10px rgba(20,184,166,.25);
+  animation: scaleIn .3s ease-out;
+}
+.cred-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.cred-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.cred-item { background: var(--surface); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); }
+.cred-item span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 3px; }
+.cred-item strong { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--teal); word-break: break-all; }
+
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.badge.notes { background: rgba(56,189,248,.15); color: #38BDF8; border: 1px solid rgba(56,189,248,.3); }
+.badge.slides { background: rgba(168,85,247,.15); color: #C084FC; border: 1px solid rgba(168,85,247,.3); }
+.badge.tutorials { background: rgba(34,197,94,.15); color: #4ADE80; border: 1px solid rgba(34,197,94,.3); }
+.badge.reference { background: rgba(245,158,11,.15); color: #FBBF24; border: 1px solid rgba(245,158,11,.3); }
+
+.materials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 14px; }
+.mat-card {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);
+  transition: transform .2s, border-color .2s; box-shadow: var(--shadow);
+}
+.mat-card:hover { transform: translateY(-3px); border-color: rgba(20,184,166,.45); }
+.mat-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.mat-course { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--teal); }
+.mat-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.mat-content { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; white-space: pre-line; word-break: break-word; }
+.mat-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 12px; margin-top: auto; font-size: 12px; color: var(--muted); }
+
+.submissions-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
+.sub-card {
+  padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 10px; transition: border-color .2s;
+}
+.sub-card:hover { border-color: rgba(56,189,248,.4); }
+.sub-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.sub-student { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.sub-body { font-size: 13.5px; color: var(--text); background: var(--raised); padding: 12px; border-radius: 10px; border: 1px solid var(--border); white-space: pre-line; word-break: break-word; }
+.sub-feedback { font-size: 13px; color: var(--teal); background: rgba(20,184,166,.08); padding: 10px 12px; border-radius: 9px; border: 1px solid rgba(20,184,166,.25); }
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 999; background: rgba(7,19,26,.8);
+  backdrop-filter: blur(8px); display: none; place-items: center; padding: 20px;
+}
+.modal-overlay.open { display: grid; animation: fade .2s; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  width: 100%; max-width: 540px; padding: 24px; box-shadow: 0 20px 50px -15px rgba(0,0,0,.7);
+  animation: scaleIn .25s cubic-bezier(.16,1,.3,1); max-height: 90vh; overflow-y: auto;
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-head h3 { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; padding: 4px; border-radius: 8px; }
+.modal-close:hover { color: var(--text); background: var(--raised); }
+

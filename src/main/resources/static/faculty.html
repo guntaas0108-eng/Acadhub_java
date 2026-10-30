@@ -12,7 +12,7 @@
 <body data-page="faculty">
 <header class="app-header"><div class="hdr-in">
   <a class="brand" href="faculty.html"><span class="logo">A</span>AcadHub</a>
-  <nav class="nav"><a class="active" href="faculty.html">Faculty</a></nav>
+  <nav class="nav"><a class="active" href="faculty.html">Faculty Portal</a></nav>
   <div class="hdr-right">
     <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
@@ -22,7 +22,13 @@
 
 <main class="container">
   <div class="page-head">
-    <div><p class="eyebrow" data-clock></p><h1><span data-greeting>Hello</span>, <span id="welcomeName">Professor</span></h1></div>
+    <div>
+      <p class="eyebrow" data-clock></p>
+      <h1><span data-greeting>Hello</span>, <span id="welcomeName">Professor</span></h1>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" type="button" onclick="window.refreshFaculty&&window.refreshFaculty()"><i data-i="clip"></i>Refresh Dashboard</button>
+    </div>
   </div>
 
   <div class="bento">
@@ -30,6 +36,9 @@
       <div class="seg" data-group="fac" role="tablist">
         <button type="button" data-tab="tabAtt" class="active">Attendance</button>
         <button type="button" data-tab="tabMarks">Enter Marks</button>
+        <button type="button" data-tab="tabAssess">Assignments</button>
+        <button type="button" data-tab="tabMaterial">Study Material</button>
+        <button type="button" data-tab="tabSubmissions">Student Submissions</button>
         <button type="button" data-tab="tabSummary">Class Summary</button>
       </div>
 
@@ -53,11 +62,84 @@
       <div class="tab-panel" data-group="fac" id="tabMarks">
         <div class="form-grid">
           <div class="field sel fixed"><select id="mCourse" onchange="window.loadStudents&&window.loadStudents()"></select><label for="mCourse">Course</label></div>
-          <div class="field sel fixed"><select id="mAssess"></select><label for="mAssess">Assessment</label></div>
+          <div class="field sel fixed"><select id="mAssess"></select><label for="mAssess">Assessment / Assignment</label></div>
           <div class="field"><input id="mStudent" type="number" placeholder=" " required><label for="mStudent">Student Roll No</label></div>
-          <div class="field"><input id="mMarks" type="number" min="0" max="100" placeholder=" " required><label for="mMarks">Marks (0-100)</label></div>
+          <div class="field"><input id="mMarks" type="number" min="0" max="100" placeholder=" " required><label for="mMarks">Marks</label></div>
         </div>
-        <div class="form-actions"><button class="btn primary magnetic spin" type="button" onclick="window.saveMarks&&window.saveMarks()"><i data-i="award"></i>Save marks</button></div>
+        <div class="form-actions">
+          <button class="btn primary magnetic spin" type="button" onclick="window.saveMarks&&window.saveMarks()"><i data-i="award"></i>Save marks</button>
+        </div>
+      </div>
+
+      <!-- Assignments & Assessments Tab (Empowering Faculty) -->
+      <div class="tab-panel" data-group="fac" id="tabAssess">
+        <div style="margin-bottom:18px;">
+          <h2 style="margin-bottom:6px;"><i data-i="award"></i>Create New Assignment / Assessment</h2>
+          <p class="muted">Add quizzes, homework, mid terms or class tests for courses you teach.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field sel fixed"><select id="faCourse"></select><label for="faCourse">Course</label></div>
+          <div class="field"><input id="faType" placeholder=" " required><label for="faType">Title / Type (e.g. Assignment 1, Quiz 2, Mid Term)</label></div>
+          <div class="field"><input id="faTotal" type="number" min="1" placeholder=" " value="100"><label for="faTotal">Total Marks</label></div>
+          <div class="field"><input id="faPass" type="number" min="0" placeholder=" " value="40"><label for="faPass">Passing Marks</label></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary magnetic spin" type="button" onclick="window.addFacultyAssessment&&window.addFacultyAssessment()"><i data-i="plus"></i>Publish Assignment</button>
+        </div>
+        <div class="spacer"></div>
+        <h3 style="margin-bottom:12px;font-size:16px;">Active Assessments for this Course</h3>
+        <div class="table-wrap" data-empty-title="No assessments yet" data-empty-text="Publish an assessment above to begin tracking scores.">
+          <table>
+            <thead><tr><th>Assessment</th><th>Total Marks</th><th>Passing Marks</th></tr></thead>
+            <tbody id="facAssessBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Study Material Tab -->
+      <div class="tab-panel" data-group="fac" id="tabMaterial">
+        <div style="margin-bottom:18px;">
+          <h2 style="margin-bottom:6px;"><i data-i="book"></i>Publish Study Material</h2>
+          <p class="muted">Upload course notes, slides, tutorial links, or reference material for enrolled students.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field sel fixed"><select id="smCourse"></select><label for="smCourse">Course</label></div>
+          <div class="field"><input id="smTitle" placeholder=" " required><label for="smTitle">Title (e.g. Unit 3 Normalization Guide)</label></div>
+          <div class="field sel fixed">
+            <select id="smType">
+              <option value="Notes" selected>Lecture Notes</option>
+              <option value="Slides">Presentation Slides</option>
+              <option value="Tutorials">Tutorial / Lab Exercise</option>
+              <option value="Reference">Reference Material / Reading</option>
+            </select>
+            <label for="smType">Material Type</label>
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <textarea id="smContent" rows="3" placeholder=" " style="width:100%;min-height:90px;background:transparent;border:none;color:var(--text);font:inherit;resize:vertical;padding:8px 0;"></textarea>
+            <label for="smContent">Notes, Instructions, or External Document Link (Google Drive / GitHub)</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary magnetic spin" type="button" onclick="window.uploadStudyMaterial&&window.uploadStudyMaterial()"><i data-i="upload"></i>Publish Material</button>
+        </div>
+        <div class="spacer"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <h3 style="font-size:16px;margin:0;">Course Material Library</h3>
+          <span class="muted" style="font-size:13px;">Visible only to enrolled students</span>
+        </div>
+        <div class="materials-grid" id="facultyMaterialsList"></div>
+      </div>
+
+      <!-- Student Submissions Tab -->
+      <div class="tab-panel" data-group="fac" id="tabSubmissions">
+        <div style="margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <h2 style="margin-bottom:6px;"><i data-i="clip"></i>Student Submissions & Assignments</h2>
+            <p class="muted">Review work sent by students enrolled in your courses.</p>
+          </div>
+          <button class="btn" type="button" onclick="window.loadFacultySubmissions&&window.loadFacultySubmissions()"><i data-i="search"></i>Refresh In-box</button>
+        </div>
+        <div class="submissions-grid" id="facultySubmissionsList"></div>
       </div>
 
       <!-- Summary Tab -->
@@ -69,6 +151,47 @@
     </section>
   </div>
 </main>
+
+<!-- Grade / Review Submission Modal -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3><i data-i="award"></i>Review Student Submission</h3>
+      <button class="modal-close" onclick="window.closeReviewModal()">&times;</button>
+    </div>
+    <input type="hidden" id="revSubId">
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Student</div>
+      <div style="font-weight:700;" id="revStudentName"></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Submission Title</div>
+      <div style="font-weight:600;" id="revTitle"></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Submitted Content / Solution</div>
+      <div class="sub-body" id="revContent" style="max-height:160px;overflow-y:auto;"></div>
+    </div>
+    <div class="form-grid" style="grid-template-columns:1fr;gap:12px;margin-bottom:16px;">
+      <div class="field sel fixed">
+        <select id="revStatus">
+          <option value="Reviewed" selected>Reviewed</option>
+          <option value="Approved">Approved</option>
+          <option value="Needs Revision">Needs Revision</option>
+        </select>
+        <label for="revStatus">Status</label>
+      </div>
+      <div class="field">
+        <input id="revFeedback" placeholder=" " value="Good work! Verified.">
+        <label for="revFeedback">Teacher Feedback / Notes to Student</label>
+      </div>
+    </div>
+    <div class="form-actions" style="justify-content:flex-end;">
+      <button class="btn" type="button" onclick="window.closeReviewModal()">Cancel</button>
+      <button class="btn primary magnetic spin" type="button" onclick="window.submitReview&&window.submitReview()"><i data-i="check"></i>Save Review</button>
+    </div>
+  </div>
+</div>
 
 <script src="ui.js"></script>
 <script src="app.js"></script>

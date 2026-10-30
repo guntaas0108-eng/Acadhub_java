@@ -12,7 +12,7 @@
 <body data-page="student">
 <header class="app-header"><div class="hdr-in">
   <a class="brand" href="student.html"><span class="logo">A</span>AcadHub</a>
-  <nav class="nav"><a class="active" href="student.html">Student</a></nav>
+  <nav class="nav"><a class="active" href="student.html">Student Workspace</a></nav>
   <div class="hdr-right">
     <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
@@ -22,8 +22,15 @@
 
 <main class="container">
   <div class="page-head">
-    <div><p class="eyebrow" data-clock></p><h1><span data-greeting>Hello</span>, <span id="welcomeName">Student</span></h1></div>
-    <button class="btn no-print" type="button" onclick="print()"><i data-i="printer"></i>Download report</button>
+    <div>
+      <p class="eyebrow" data-clock></p>
+      <h1><span data-greeting>Hello</span>, <span id="welcomeName">Student</span></h1>
+      <p class="muted" style="margin-top:4px;" id="studentSubMeta">Roll No: -- · Department: --</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" type="button" onclick="window.refreshStudent&&window.refreshStudent()"><i data-i="clip"></i>Refresh</button>
+      <button class="btn no-print" type="button" onclick="print()"><i data-i="printer"></i>Download report</button>
+    </div>
   </div>
 
   <div class="bento">
@@ -33,7 +40,7 @@
       <div class="ring-card">
         <div class="ring-wrap">
           <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52"/></svg>
-          <div class="ring-center"><span class="ring-val" id="attPercent">0</span><span class="ring-sub">attendance</span></div>
+          <div class="ring-center"><span class="ring-val" id="attPercent">0%</span><span class="ring-sub">attendance</span></div>
         </div>
         <div>
           <p class="muted" style="max-width:220px">Stay at <b style="color:var(--text)">75% or above</b> in every course to remain eligible for exams.</p>
@@ -45,7 +52,7 @@
     <!-- GPA Stat -->
     <article class="card stat lift span-3">
       <div class="stat-top"><span class="stat-icon sky"><i data-i="award"></i></span><span class="pill">GPA</span></div>
-      <div><div class="stat-label">Current CGPA</div><div class="stat-value" id="cgpa">0</div></div>
+      <div><div class="stat-label">Current CGPA</div><div class="stat-value" id="cgpa">8.00</div></div>
       <div data-spark="7.5,7.8,8.2,8.4,8.5,8.8"></div>
     </article>
 
@@ -71,8 +78,77 @@
         <table><thead><tr><th>Course</th><th>Marks</th><th>Grade</th></tr></thead><tbody id="marksBody"></tbody></table>
       </div>
     </section>
+
+    <!-- Enrolled Courses Study Material (Strict Course Isolation) -->
+    <section class="card span-12">
+      <div class="card-head" style="flex-wrap:wrap;">
+        <div>
+          <h2><i data-i="book"></i>Course Study Materials</h2>
+          <p class="muted" style="margin-top:4px;font-size:13px;">
+            🔒 Displaying study materials exclusively for courses you are enrolled in.
+          </p>
+        </div>
+        <div class="field sel fixed" style="width:220px;margin-bottom:0;">
+          <select id="stCourseFilter" onchange="window.filterStudentMaterials&&window.filterStudentMaterials(this.value)">
+            <option value="">All My Enrolled Courses</option>
+          </select>
+          <label for="stCourseFilter">Filter Course</label>
+        </div>
+      </div>
+      <div class="materials-grid" id="studentMaterialsList"></div>
+    </section>
+
+    <!-- My Submissions & Teacher Feedback -->
+    <section class="card span-12">
+      <div class="card-head">
+        <div>
+          <h2><i data-i="clip"></i>My Submissions & Teacher Feedback</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Solutions and work sent to faculty with their review status and grades.</p>
+        </div>
+        <button class="btn" type="button" onclick="window.loadStudentSubmissions&&window.loadStudentSubmissions()"><i data-i="search"></i>Refresh Status</button>
+      </div>
+      <div class="submissions-grid" id="studentSubmissionsList"></div>
+    </section>
   </div>
 </main>
+
+<!-- Submit Work Modal for Students -->
+<div class="modal-overlay" id="submitWorkModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3><i data-i="clip"></i>Send Work to Professor</h3>
+      <button class="modal-close" onclick="window.closeSubmitModal()">&times;</button>
+    </div>
+    <input type="hidden" id="subMaterialId">
+    <input type="hidden" id="subCourseCode">
+    
+    <div style="margin-bottom:14px;background:var(--raised);padding:12px;border-radius:10px;border:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--teal);font-weight:700;font-family:'JetBrains Mono',monospace;" id="subCourseBadge"></div>
+      <div style="font-size:15px;font-weight:700;margin-top:4px;" id="subMaterialTitle"></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="subFacultyName"></div>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns:1fr;gap:14px;">
+      <div class="field">
+        <input id="subTitle" placeholder=" " required>
+        <label for="subTitle">Submission Title (e.g. Exercise 1 Solutions)</label>
+      </div>
+      <div class="field">
+        <textarea id="subContent" rows="4" placeholder=" " style="width:100%;min-height:100px;background:transparent;border:none;color:var(--text);font:inherit;resize:vertical;padding:8px 0;" required></textarea>
+        <label for="subContent">Your Solutions / Answer Notes / Explanation</label>
+      </div>
+      <div class="field">
+        <input id="subFileUrl" placeholder=" ">
+        <label for="subFileUrl">Document or Project Link (Google Drive / GitHub / PDF link)</label>
+      </div>
+    </div>
+
+    <div class="form-actions" style="justify-content:flex-end;margin-top:18px;">
+      <button class="btn" type="button" onclick="window.closeSubmitModal()">Cancel</button>
+      <button class="btn primary magnetic spin" type="button" onclick="window.confirmSubmitWork&&window.confirmSubmitWork()"><i data-i="check"></i>Send to Teacher</button>
+    </div>
+  </div>
+</div>
 
 <script src="ui.js"></script>
 <script src="app.js"></script>

@@ -29,6 +29,9 @@ public class FacultyController {
     public record EnrollReq(Integer rollNo, String course) {}
     public record AssessReq(String course, String assessmentType, Integer totalMarks, Integer passingMarks) {}
 
+    public record MaterialReq(String course, String title, String type, String content) {}
+    public record GradeSubmissionReq(int submissionId, String status, String feedback) {}
+
     // ---------- helpers ----------
     private User getFaculty(HttpSession session) {
         Object o = session.getAttribute("user");
@@ -46,7 +49,6 @@ public class FacultyController {
 
     private ResponseEntity<?> dbError(SQLException e) {
         e.printStackTrace();
-        // 45000 = validation message from our own triggers (safe to show)
         if ("45000".equals(e.getSQLState())) return bad(e.getMessage());
         if (e.getErrorCode() == 1062) return bad("That record already exists (duplicate value)");
         if (e.getErrorCode() == 1452) return bad("Related record not found");
@@ -71,7 +73,6 @@ public class FacultyController {
         return ((Number) n).intValue();
     }
 
-    // same helpers, but on an open connection (used inside transactions)
     private static void run(Connection con, String sql, Object... params) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
@@ -87,22 +88,26 @@ public class FacultyController {
         }
     }
 
-    // ---------- dashboard (profile + courses) ----------
+    // ---------- dashboard (profile + courses + overview statistics) ----------
     @GetMapping("/dashboard")
     public ResponseEntity<?> dashboard(HttpSession session) {
         User user = getFaculty(session);
         if (user == null) return notLoggedIn();
 
         try {
-            return ResponseEntity.ok(Map.of(
-                "profile", Rows.query("SELECT faculty_id, designation, department FROM FACULTY WHERE user_id = ?",
-                    user.getUserId()),
-                "courses", Rows.query("SELECT c.course_code, c.course_name, ca.total_students, ca.avg_marks, "
-                    + "ca.highest_marks, ca.lowest_marks, ca.fail_count "
+            var profileList = Rows.query("SELECT faculty_id, designation, department FROM FACULTY WHERE user_id = ?",
+                    user.getUserId());
+            var coursesList = Rows.query("SELECT c.course_code, c.course_name, c.credits, c.semester, "
+                    + "COALESCE(ca.total_students, (SELECT COUNT(*) FROM ENROLLMENT e WHERE e.course_code = c.course_code)) AS total_students, "
+                    + "ca.avg_marks, ca.highest_marks, ca.lowest_marks, ca.fail_count "
                     + "FROM FACULTY f JOIN FACULTY_COURSE fc ON f.faculty_id = fc.faculty_id "
                     + "JOIN COURSE c ON fc.course_code = c.course_code "
                     + "LEFT JOIN course_analytics ca ON c.course_code = ca.course_code "
-                    + "WHERE f.user_id = ?", user.getUserId())
+                    + "WHERE f.user_id = ?", user.getUserId());
+
+            return ResponseEntity.ok(Map.of(
+                "profile", profileList,
+                "courses", coursesList
             ));
         } catch (SQLException e) {
             return dbError(e);
@@ -120,14 +125,16 @@ public class FacultyController {
 
             return ResponseEntity.ok(Map.of(
                 "students", Rows.query(
-                    "SELECT s.roll_no, u.name FROM ENROLLMENT e "
+                    "SELECT s.roll_no, u.name, s.department, s.branch, s.semester "
+                  + "FROM ENROLLMENT e "
                   + "JOIN STUDENT s ON e.roll_no = s.roll_no JOIN USERS u ON s.user_id = u.user_id "
                   + "WHERE e.course_code = ? ORDER BY s.roll_no", course),
                 "assessments", Rows.query(
-                    "SELECT assessment_id, assessment_type, total_marks FROM ASSESSMENT "
+                    "SELECT assessment_id, assessment_type, total_marks, passing_marks FROM ASSESSMENT "
                   + "WHERE course_code = ? ORDER BY assessment_id", course),
                 "marks", Rows.query(
-                    "SELECT sp.roll_no, sp.assessment_id, sp.marks_obtained FROM STUDENT_PERFORMANCE sp "
+                    "SELECT sp.roll_no, sp.assessment_id, sp.marks_obtained, sp.grade, sp.result "
+                  + "FROM STUDENT_PERFORMANCE sp "
                   + "JOIN ASSESSMENT a ON sp.assessment_id = a.assessment_id WHERE a.course_code = ?", course)
             ));
         } catch (SQLException e) {
@@ -151,7 +158,6 @@ public class FacultyController {
         try {
             if (!teaches(user.getUserId(), r.course())) return bad("You do not teach " + r.course());
 
-            // one transaction: user + student + enrollment are saved together, or not at all
             try (Connection con = DBConnection.getConnection()) {
                 con.setAutoCommit(false);
                 try {
@@ -162,7 +168,7 @@ public class FacultyController {
 
                     run(con, "INSERT INTO STUDENT (roll_no, department, branch, semester, user_id, cgpa) VALUES (?,?,?,?,?,?)",
                             r.rollNo(), r.department().trim(), r.branch().trim(), r.semester(),
-                            userId, r.cgpa() == null ? 5.00 : r.cgpa());
+                            userId, r.cgpa() == null ? 8.00 : r.cgpa());
 
                     run(con, "INSERT INTO ENROLLMENT (enrollment_id, roll_no, course_code) VALUES (?,?,?)",
                             nextId(con, "ENROLLMENT", "enrollment_id"), r.rollNo(), r.course());
@@ -173,7 +179,7 @@ public class FacultyController {
                     throw e;
                 }
             }
-            return ResponseEntity.ok(Map.of("status", "saved"));
+            return ResponseEntity.ok(Map.of("status", "saved", "username", r.username().trim(), "rollNo", r.rollNo()));
 
         } catch (SQLException e) {
             if (e.getErrorCode() == 1062) return bad("Username or roll number already exists");
@@ -181,7 +187,7 @@ public class FacultyController {
         }
     }
 
-    // ---------- enroll an EXISTING student (by roll number) in one of my courses ----------
+    // ---------- enroll an EXISTING student in one of my courses ----------
     @PostMapping("/enroll")
     public ResponseEntity<?> enroll(@RequestBody EnrollReq r, HttpSession session) {
         User user = getFaculty(session);
@@ -203,7 +209,7 @@ public class FacultyController {
         }
     }
 
-    // ---------- add an assessment (Mid Term, End Term, Quiz ...) to one of my courses ----------
+    // ---------- add an assessment to one of my courses ----------
     @PostMapping("/assessment")
     public ResponseEntity<?> addAssessment(@RequestBody AssessReq r, HttpSession session) {
         User user = getFaculty(session);
@@ -217,16 +223,17 @@ public class FacultyController {
         try {
             if (!teaches(user.getUserId(), r.course())) return bad("You do not teach " + r.course());
 
+            int assessId = nextId("ASSESSMENT", "assessment_id");
             Rows.update("INSERT INTO ASSESSMENT (assessment_id, course_code, assessment_type, total_marks, passing_marks) "
                       + "VALUES (?,?,?,?,?)",
-                    nextId("ASSESSMENT", "assessment_id"), r.course(), r.assessmentType().trim(), r.totalMarks(), pass);
-            return ResponseEntity.ok(Map.of("status", "saved"));
+                    assessId, r.course(), r.assessmentType().trim(), r.totalMarks(), pass);
+            return ResponseEntity.ok(Map.of("status", "saved", "assessmentId", assessId));
         } catch (SQLException e) {
             return dbError(e);
         }
     }
 
-    // ---------- save one student's marks (insert or update) ----------
+    // ---------- save one student's marks ----------
     @PostMapping("/marks")
     public ResponseEntity<?> saveMarks(@RequestBody MarkReq req, HttpSession session) {
         User user = getFaculty(session);
@@ -240,7 +247,6 @@ public class FacultyController {
             if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
             if (!enrolled(req.rollNo(), course)) return bad("Roll " + req.rollNo() + " is not enrolled in " + course);
 
-            // The DB triggers check the range and set grade/result automatically
             var existing = Rows.query(
                 "SELECT performance_id FROM STUDENT_PERFORMANCE WHERE roll_no = ? AND assessment_id = ?",
                 req.rollNo(), req.assessmentId());
@@ -261,7 +267,7 @@ public class FacultyController {
         }
     }
 
-    // ---------- save attendance of a whole class for one date ----------
+    // ---------- save attendance for a class on a date ----------
     @PostMapping("/attendance")
     public ResponseEntity<?> saveAttendance(@RequestBody AttReq req, HttpSession session) {
         User user = getFaculty(session);
@@ -279,7 +285,6 @@ public class FacultyController {
                 return bad("Invalid date");
             }
 
-            // validate everything first, so we never save half of the class
             for (AttRow r : req.records()) {
                 if (!"Present".equals(r.status()) && !"Absent".equals(r.status()))
                     return bad("Status must be Present or Absent");
@@ -301,8 +306,156 @@ public class FacultyController {
                             r.status(), existing.get(0).get("attendance_id"));
                 }
             }
-            return ResponseEntity.ok(Map.of("status", "saved", "count", req.records().size()));
+            return ResponseEntity.ok(Map.of("status", "saved"));
 
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ============================================================
+    //   STUDY MATERIALS & STUDENT SUBMISSIONS (FACULTY VIEW)
+    // ============================================================
+
+    // ---------- list all materials uploaded by this faculty for a course ----------
+    @GetMapping("/materials")
+    public ResponseEntity<?> listMaterials(@RequestParam(required = false) String course, HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+
+        try {
+            var fac = Rows.query("SELECT faculty_id FROM FACULTY WHERE user_id = ?", user.getUserId());
+            if (fac.isEmpty()) return bad("Faculty profile not found");
+            int facultyId = ((Number) fac.get(0).get("faculty_id")).intValue();
+
+            if (course != null && !course.isBlank()) {
+                if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
+                var materials = Rows.query(
+                    "SELECT sm.material_id, sm.course_code, sm.title, sm.material_type, sm.content, sm.upload_date, "
+                  + "c.course_name, (SELECT COUNT(*) FROM student_submission ss WHERE ss.material_id = sm.material_id) AS submissions_count "
+                  + "FROM study_material sm JOIN course c ON sm.course_code = c.course_code "
+                  + "WHERE sm.course_code = ? AND sm.faculty_id = ? ORDER BY sm.material_id DESC", course, facultyId);
+                return ResponseEntity.ok(materials);
+            } else {
+                var materials = Rows.query(
+                    "SELECT sm.material_id, sm.course_code, sm.title, sm.material_type, sm.content, sm.upload_date, "
+                  + "c.course_name, (SELECT COUNT(*) FROM student_submission ss WHERE ss.material_id = sm.material_id) AS submissions_count "
+                  + "FROM study_material sm JOIN course c ON sm.course_code = c.course_code "
+                  + "WHERE sm.faculty_id = ? ORDER BY sm.material_id DESC", facultyId);
+                return ResponseEntity.ok(materials);
+            }
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- upload study material (Notes / Slides / Tutorials / Reference) ----------
+    @PostMapping("/material")
+    public ResponseEntity<?> addMaterial(@RequestBody MaterialReq r, HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+
+        if (blank(r.course()) || blank(r.title()))
+            return bad("Course and title are required");
+
+        String type = blank(r.type()) ? "Notes" : r.type().trim();
+        if (!List.of("Notes", "Slides", "Tutorials", "Reference").contains(type)) {
+            type = "Notes";
+        }
+
+        try {
+            if (!teaches(user.getUserId(), r.course())) return bad("You do not teach " + r.course());
+
+            var fac = Rows.query("SELECT faculty_id FROM FACULTY WHERE user_id = ?", user.getUserId());
+            if (fac.isEmpty()) return bad("Faculty record not found");
+            int facultyId = ((Number) fac.get(0).get("faculty_id")).intValue();
+
+            int materialId = nextId("study_material", "material_id");
+            Rows.update(
+                "INSERT INTO study_material (material_id, course_code, faculty_id, title, material_type, content, upload_date) "
+              + "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                materialId, r.course().trim().toUpperCase(), facultyId, r.title().trim(), type,
+                blank(r.content()) ? "" : r.content().trim(), java.sql.Date.valueOf(LocalDate.now()));
+
+            return ResponseEntity.ok(Map.of("status", "saved", "materialId", materialId));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- delete a study material ----------
+    @DeleteMapping("/material/{id}")
+    public ResponseEntity<?> deleteMaterial(@PathVariable int id, HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+
+        try {
+            var fac = Rows.query("SELECT faculty_id FROM FACULTY WHERE user_id = ?", user.getUserId());
+            if (fac.isEmpty()) return bad("Faculty record not found");
+            int facultyId = ((Number) fac.get(0).get("faculty_id")).intValue();
+
+            int n = Rows.update("DELETE FROM study_material WHERE material_id = ? AND faculty_id = ?", id, facultyId);
+            return n == 0 ? bad("Material not found or not owned by you") : ResponseEntity.ok(Map.of("status", "deleted"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- view submissions submitted by enrolled students for teacher's courses ----------
+    @GetMapping("/submissions")
+    public ResponseEntity<?> getSubmissions(@RequestParam(required = false) String course, HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+
+        try {
+            if (course != null && !course.isBlank()) {
+                if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
+                var list = Rows.query(
+                    "SELECT ss.submission_id, ss.material_id, ss.course_code, ss.roll_no, u.name AS student_name, "
+                  + "ss.title, ss.submission_text, ss.file_url, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
+                  + "FROM student_submission ss "
+                  + "JOIN student s ON ss.roll_no = s.roll_no "
+                  + "JOIN users u ON s.user_id = u.user_id "
+                  + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id "
+                  + "WHERE ss.course_code = ? ORDER BY ss.submission_id DESC", course);
+                return ResponseEntity.ok(list);
+            } else {
+                var list = Rows.query(
+                    "SELECT ss.submission_id, ss.material_id, ss.course_code, ss.roll_no, u.name AS student_name, "
+                  + "ss.title, ss.submission_text, ss.file_url, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
+                  + "FROM student_submission ss "
+                  + "JOIN student s ON ss.roll_no = s.roll_no "
+                  + "JOIN users u ON s.user_id = u.user_id "
+                  + "JOIN faculty_course fc ON ss.course_code = fc.course_code "
+                  + "JOIN faculty f ON fc.faculty_id = f.faculty_id "
+                  + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id "
+                  + "WHERE f.user_id = ? ORDER BY ss.submission_id DESC", user.getUserId());
+                return ResponseEntity.ok(list);
+            }
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- grade / give feedback on student submission ----------
+    @PostMapping("/submission/grade")
+    public ResponseEntity<?> gradeSubmission(@RequestBody GradeSubmissionReq r, HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+
+        try {
+            var sub = Rows.query("SELECT course_code FROM student_submission WHERE submission_id = ?", r.submissionId());
+            if (sub.isEmpty()) return bad("Submission not found");
+
+            String course = (String) sub.get(0).get("course_code");
+            if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
+
+            String status = blank(r.status()) ? "Reviewed" : r.status().trim();
+            Rows.update(
+                "UPDATE student_submission SET status = ?, feedback = ? WHERE submission_id = ?",
+                status, blank(r.feedback()) ? null : r.feedback().trim(), r.submissionId());
+
+            return ResponseEntity.ok(Map.of("status", "saved"));
         } catch (SQLException e) {
             return dbError(e);
         }

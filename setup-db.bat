@@ -44,6 +44,9 @@ if errorlevel 1 goto failed
 "%MYSQL_EXE%" -u root -p"%MYSQL_PASS%" < "sql\10_cursor_procedures.sql"
 if errorlevel 1 goto failed
 
+"%MYSQL_EXE%" -u root -p"%MYSQL_PASS%" < "sql\14_study_material_submissions.sql"
+if errorlevel 1 goto failed
+
 echo.
 echo ====================================================
 echo  Database 'acadhub_java' setup completed successfully!
