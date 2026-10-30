@@ -8,3 +8,5 @@ mysql-data/
 *.log
 .DS_Store
 Thumbs.db
+
+target/
