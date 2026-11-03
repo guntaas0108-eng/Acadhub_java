@@ -6,7 +6,105 @@
 <title>AcadHub · Faculty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261103.2">
+<style>
+  /* Guaranteed Scoped Layout for Publish Study Material */
+  .publish-box {
+    background: rgba(13, 27, 34, 0.72); border: 1px solid rgba(20, 184, 166, 0.22);
+    border-radius: 18px; padding: 24px; margin-bottom: 24px;
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .publish-box-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .publish-box-title-wrap { display: flex; align-items: center; gap: 14px; }
+  .publish-box-icon {
+    width: 44px; height: 44px; border-radius: 12px; background: rgba(20, 184, 166, 0.12);
+    color: var(--teal); display: grid; place-items: center; font-size: 20px; flex-shrink: 0;
+    border: 1px solid rgba(20, 184, 166, 0.25);
+  }
+  .publish-box-title { font-size: 18px; font-weight: 800; color: var(--text); margin: 0; }
+  .publish-box-desc { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .publish-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px;
+    font-size: 12px; font-weight: 700; background: rgba(20, 184, 166, 0.1);
+    border: 1px solid rgba(20, 184, 166, 0.3); color: var(--teal);
+  }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .form-row-2 { grid-template-columns: 1fr; } }
+  .field textarea {
+    width: 100%; min-height: 85px; padding: 24px 12px 10px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--raised); color: var(--text);
+    font: 500 14px "Plus Jakarta Sans", sans-serif; resize: vertical; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.28); }
+  .upload-zone-wrap { margin-top: 16px; }
+  .upload-zone-label {
+    display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .modern-dropzone {
+    position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
+    padding: 24px 20px; background: rgba(20, 184, 166, 0.02); text-align: center;
+    cursor: pointer; transition: all .25s ease; display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+  }
+  .modern-dropzone:hover, .modern-dropzone.dragover {
+    border-color: var(--teal); background: rgba(20, 184, 166, 0.08);
+    box-shadow: 0 0 24px -4px rgba(20, 184, 166, 0.3); transform: translateY(-1px);
+  }
+  .dropzone-bubble {
+    width: 46px; height: 46px; border-radius: 50%; background: rgba(20, 184, 166, 0.12);
+    color: var(--teal); display: grid; place-items: center; transition: transform .25s ease;
+  }
+  .modern-dropzone:hover .dropzone-bubble, .modern-dropzone.dragover .dropzone-bubble {
+    transform: scale(1.12); background: rgba(20, 184, 166, 0.24);
+  }
+  .dropzone-primary { font-size: 14px; font-weight: 700; color: var(--text); }
+  .dropzone-secondary { font-size: 12px; color: var(--muted); max-width: 460px; margin: 3px auto 0; line-height: 1.4; }
+  .dropzone-browse-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 9px;
+    background: var(--raised); border: 1px solid var(--border); color: var(--teal);
+    font-size: 12.5px; font-weight: 700; cursor: pointer; margin-top: 4px; transition: all .2s;
+  }
+  .dropzone-browse-btn:hover { background: rgba(20, 184, 166, 0.15); border-color: var(--teal); color: var(--text); }
+  .file-card-preview {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 14px 18px; border-radius: 12px; background: var(--raised);
+    border: 1px solid rgba(20, 184, 166, 0.35); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    animation: scaleIn .22s cubic-bezier(.16, 1, .3, 1);
+  }
+  .file-card-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .file-ext-badge {
+    padding: 6px 10px; border-radius: 8px; background: rgba(20, 184, 166, 0.18);
+    border: 1px solid rgba(20, 184, 166, 0.4); color: var(--teal);
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 800;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .file-name-text {
+    font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; max-width: 320px;
+  }
+  .file-sub-row { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .file-size-badge { font-size: 11.5px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+  .file-status-chip {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700;
+    color: #4ADE80; background: rgba(34, 197, 94, 0.12); padding: 2px 8px; border-radius: 99px;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+  }
+  .file-remove-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #F87171; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s;
+    flex-shrink: 0;
+  }
+  .file-remove-btn:hover { background: rgba(239, 68, 68, 0.22); border-color: #EF4444; color: #FCA5A5; }
+  .publish-actions { display: flex; align-items: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .publish-status-hint { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); margin-left: auto; }
+</style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
 <body data-page="faculty">
@@ -98,56 +196,109 @@
 
       <!-- Study Material Tab -->
       <div class="tab-panel" data-group="fac" id="tabMaterial">
-        <div style="margin-bottom:18px;">
-          <h2 style="margin-bottom:6px;"><i data-i="book"></i>Publish Study Material</h2>
-          <p class="muted">Upload course notes, slides, tutorial files, or reference documents from your PC / laptop for enrolled students.</p>
-        </div>
-        <div class="form-grid">
-          <div class="field sel fixed"><select id="smCourse"></select><label for="smCourse">Course</label></div>
-          <div class="field"><input id="smTitle" placeholder=" " required><label for="smTitle">Title (e.g. Unit 3 Normalization Guide)</label></div>
-          <div class="field sel fixed">
-            <select id="smType">
-              <option value="Notes" selected>Lecture Notes</option>
-              <option value="Slides">Presentation Slides</option>
-              <option value="Tutorials">Tutorial / Lab Exercise</option>
-              <option value="Reference">Reference Material / Reading</option>
-            </select>
-            <label for="smType">Material Type</label>
-          </div>
-          <div class="field" style="grid-column: 1 / -1;">
-            <textarea id="smContent" rows="2" placeholder=" " style="width:100%;min-height:70px;background:transparent;border:none;color:var(--text);font:inherit;resize:vertical;padding:8px 0;"></textarea>
-            <label for="smContent">Notes, Instructions, or External Document Link (Optional)</label>
+        <!-- Organized Publishing Panel -->
+        <div class="publish-box">
+          <div class="publish-box-head">
+            <div class="publish-box-title-wrap">
+              <div class="publish-box-icon"><i data-i="book"></i></div>
+              <div>
+                <h3 class="publish-box-title">Publish Course Study Material</h3>
+                <p class="publish-box-desc">Upload lecture notes, presentation slides, or reference documents from your PC. Accessible only to enrolled students.</p>
+              </div>
+            </div>
+            <span class="publish-pill"><i data-i="shield"></i> Enrolled Students Scoped</span>
           </div>
 
-          <!-- File Upload Zone from Laptop / PC -->
-          <div style="grid-column: 1 / -1; margin-top: 4px;">
-            <div class="file-dropzone" id="smDropzone">
-              <input type="file" id="smFileInput" onchange="window.handleMaterialFileSelect&&window.handleMaterialFileSelect(this)">
-              <div class="file-dropzone-content">
-                <div class="file-dropzone-icon"><i data-i="upload"></i></div>
-                <div class="file-dropzone-title">Upload File from PC / Laptop (Any format)</div>
-                <div class="file-dropzone-sub">PDF, Word Document, PowerPoint, ZIP, Images, Text, or Code (Up to 50MB)</div>
+          <div class="publish-form-body">
+            <!-- Row 1: Course & Material Category -->
+            <div class="form-row-2">
+              <div class="field sel fixed">
+                <select id="smCourse"></select>
+                <label for="smCourse">Target Course</label>
+              </div>
+              <div class="field sel fixed">
+                <select id="smType">
+                  <option value="Notes" selected>Lecture Notes (PDF, DOCX, TXT)</option>
+                  <option value="Slides">Presentation Slides (PPTX, PDF)</option>
+                  <option value="Tutorials">Tutorial / Lab Exercise</option>
+                  <option value="Reference">Reference Material / Reading</option>
+                </select>
+                <label for="smType">Material Category</label>
               </div>
             </div>
-            <div class="file-selected-box" id="smSelectedBox">
-              <div class="file-selected-info">
-                <i data-i="file" style="color:var(--teal)"></i>
-                <div>
-                  <div class="file-selected-name" id="smSelectedName">file.pdf</div>
-                  <div class="file-selected-size" id="smSelectedSize">0 KB</div>
+
+            <!-- Row 2: Title -->
+            <div class="field fixed" style="margin-top:14px;">
+              <input id="smTitle" placeholder="e.g. Unit 4: B+ Trees & Multi-Level Indexing" required>
+              <label for="smTitle">Material Title *</label>
+            </div>
+
+            <!-- Row 3: Notes / Content -->
+            <div class="field fixed" style="margin-top:14px;">
+              <textarea id="smContent" rows="3" placeholder="Add topic overview, chapter guidelines, or external reference links (optional)..."></textarea>
+              <label for="smContent">Notes & Instructions (Optional)</label>
+            </div>
+
+            <!-- Row 4: Dedicated File Attachment Zone from Laptop / PC -->
+            <div class="upload-zone-wrap">
+              <div class="upload-zone-label"><i data-i="clip"></i> Attach File from PC / Laptop (Optional)</div>
+
+              <!-- Hidden Real File Input -->
+              <input type="file" id="smFileInput" style="display:none;" onchange="window.handleMaterialFileSelect&&window.handleMaterialFileSelect(this)">
+
+              <!-- Interactive Dropzone -->
+              <div class="modern-dropzone" id="smDropzone" onclick="document.getElementById('smFileInput').click()">
+                <div class="dropzone-bubble">
+                  <i data-i="upload"></i>
                 </div>
+                <div class="dropzone-text">
+                  <div class="dropzone-primary">Click to browse or drag & drop file from PC</div>
+                  <div class="dropzone-secondary">Supported: PDF, Word (DOCX), PowerPoint (PPTX), ZIP archives, Code files, Images (Up to 50MB)</div>
+                </div>
+                <button type="button" class="dropzone-browse-btn" onclick="event.stopPropagation();document.getElementById('smFileInput').click()">
+                  <i data-i="file"></i> Browse from PC
+                </button>
               </div>
-              <button class="btn ghost" type="button" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.clearMaterialFile&&window.clearMaterialFile()"><i data-i="x"></i>Remove</button>
+
+              <!-- File Attached Preview Card (Hidden initially, shown dynamically when file chosen) -->
+              <div class="file-card-preview" id="smSelectedBox" style="display:none;">
+                <div class="file-card-left">
+                  <div class="file-ext-badge" id="smExtBadge">FILE</div>
+                  <div class="file-meta">
+                    <div class="file-name-text" id="smSelectedName"></div>
+                    <div class="file-sub-row">
+                      <span class="file-size-badge" id="smSelectedSize">0 KB</span>
+                      <span class="file-status-chip"><i data-i="check"></i> Ready to attach</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="file-remove-btn" onclick="window.clearMaterialFile&&window.clearMaterialFile()" title="Remove file">
+                  <i data-i="trash"></i> Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Row 5: Actions Bar -->
+            <div class="publish-actions">
+              <button class="btn primary magnetic spin" type="button" onclick="window.uploadStudyMaterial&&window.uploadStudyMaterial()">
+                <i data-i="upload"></i> Publish Study Material
+              </button>
+              <button class="btn ghost" type="button" onclick="window.resetMaterialForm&&window.resetMaterialForm()">
+                <i data-i="x"></i> Clear
+              </button>
+              <div class="publish-status-hint">
+                <i data-i="info"></i> Instant publication to enrolled student library
+              </div>
             </div>
           </div>
         </div>
-        <div class="form-actions" style="margin-top:14px;">
-          <button class="btn primary magnetic spin" type="button" onclick="window.uploadStudyMaterial&&window.uploadStudyMaterial()"><i data-i="upload"></i>Publish Material & File</button>
-        </div>
-        <div class="spacer"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <h3 style="font-size:16px;margin:0;">Course Material Library</h3>
-          <span class="muted" style="font-size:13px;">Visible only to enrolled students</span>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:24px 0 14px;">
+          <div>
+            <h3 style="font-size:17px;font-weight:700;margin:0;"><i data-i="book"></i> Published Course Material Library</h3>
+            <span class="muted" style="font-size:12.5px;">All study materials, slides, and files published for your courses</span>
+          </div>
+          <span class="muted" style="font-size:12.5px;"><i data-i="shield"></i> Visible only to enrolled students</span>
         </div>
         <div class="materials-grid" id="facultyMaterialsList"></div>
       </div>

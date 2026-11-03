@@ -6,7 +6,56 @@
 <title>AcadHub · Student</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261103.2">
+<style>
+  .modern-dropzone {
+    position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
+    padding: 20px; background: rgba(20, 184, 166, 0.02); text-align: center;
+    cursor: pointer; transition: all .25s ease; display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+  }
+  .modern-dropzone:hover, .modern-dropzone.dragover {
+    border-color: var(--teal); background: rgba(20, 184, 166, 0.08);
+    box-shadow: 0 0 24px -4px rgba(20, 184, 166, 0.3); transform: translateY(-1px);
+  }
+  .dropzone-bubble {
+    width: 42px; height: 42px; border-radius: 50%; background: rgba(20, 184, 166, 0.12);
+    color: var(--teal); display: grid; place-items: center;
+  }
+  .dropzone-primary { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .dropzone-secondary { font-size: 11.5px; color: var(--muted); max-width: 380px; }
+  .dropzone-browse-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px;
+    background: var(--raised); border: 1px solid var(--border); color: var(--teal);
+    font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px;
+  }
+  .file-card-preview {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 16px; border-radius: 12px; background: var(--raised);
+    border: 1px solid rgba(20, 184, 166, 0.35); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+  .file-card-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .file-ext-badge {
+    padding: 5px 8px; border-radius: 6px; background: rgba(20, 184, 166, 0.18);
+    border: 1px solid rgba(20, 184, 166, 0.4); color: var(--teal);
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 800;
+  }
+  .file-name-text {
+    font-weight: 700; font-size: 13.5px; color: var(--text); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; max-width: 260px;
+  }
+  .file-sub-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .file-size-badge { font-size: 11px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+  .file-status-chip {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700;
+    color: #4ADE80; background: rgba(34, 197, 94, 0.12); padding: 2px 6px; border-radius: 99px;
+  }
+  .file-remove-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #F87171; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+</style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
 <body data-page="student">
@@ -139,24 +188,41 @@
       </div>
 
       <!-- Attach File from PC / Laptop -->
-      <div>
-        <div class="file-dropzone" id="subDropzone">
-          <input type="file" id="subFileInput" onchange="window.handleStudentFileSelect&&window.handleStudentFileSelect(this)">
-          <div class="file-dropzone-content">
-            <div class="file-dropzone-icon"><i data-i="upload"></i></div>
-            <div class="file-dropzone-title">Attach Solution File from Laptop / PC</div>
-            <div class="file-dropzone-sub">PDF, Word, Code, ZIP, or Image (Up to 50MB)</div>
+      <div class="upload-zone-wrap" style="margin-top:0;">
+        <div class="upload-zone-label"><i data-i="clip"></i> Attach Solution File from PC / Laptop</div>
+
+        <!-- Hidden Real File Input -->
+        <input type="file" id="subFileInput" style="display:none;" onchange="window.handleStudentFileSelect&&window.handleStudentFileSelect(this)">
+
+        <!-- Interactive Dropzone -->
+        <div class="modern-dropzone" id="subDropzone" onclick="document.getElementById('subFileInput').click()">
+          <div class="dropzone-bubble">
+            <i data-i="upload"></i>
           </div>
+          <div class="dropzone-text">
+            <div class="dropzone-primary">Click to browse or drop solution file</div>
+            <div class="dropzone-secondary">Supported: PDF, Word (DOCX), Code files, ZIP, Images (Up to 50MB)</div>
+          </div>
+          <button type="button" class="dropzone-browse-btn" onclick="event.stopPropagation();document.getElementById('subFileInput').click()">
+            <i data-i="file"></i> Choose File from PC
+          </button>
         </div>
-        <div class="file-selected-box" id="subSelectedBox">
-          <div class="file-selected-info">
-            <i data-i="file" style="color:var(--teal)"></i>
-            <div>
-              <div class="file-selected-name" id="subSelectedName">solution.pdf</div>
-              <div class="file-selected-size" id="subSelectedSize">0 KB</div>
+
+        <!-- File Attached Preview Card (Hidden initially) -->
+        <div class="file-card-preview" id="subSelectedBox" style="display:none;">
+          <div class="file-card-left">
+            <div class="file-ext-badge" id="subExtBadge">FILE</div>
+            <div class="file-meta">
+              <div class="file-name-text" id="subSelectedName"></div>
+              <div class="file-sub-row">
+                <span class="file-size-badge" id="subSelectedSize">0 KB</span>
+                <span class="file-status-chip"><i data-i="check"></i> Attached</span>
+              </div>
             </div>
           </div>
-          <button class="btn ghost" type="button" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.clearStudentFile&&window.clearStudentFile()"><i data-i="x"></i>Remove</button>
+          <button type="button" class="file-remove-btn" onclick="window.clearStudentFile&&window.clearStudentFile()" title="Remove file">
+            <i data-i="trash"></i> Remove
+          </button>
         </div>
       </div>
 

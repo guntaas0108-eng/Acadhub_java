@@ -488,8 +488,48 @@
   // ============================================================
   //   3. FACULTY DASHBOARD (faculty.html)
   // ============================================================
+  function getFileExtBadge(name) {
+    if (!name) return 'FILE';
+    const parts = name.split('.');
+    if (parts.length < 2) return 'FILE';
+    const ext = parts.pop().toUpperCase();
+    return ext.length > 5 ? ext.slice(0, 4) : ext;
+  }
+
+  function setupDropzoneEvents(dropzoneId, inputId, handlerFn) {
+    const dropzone = $(dropzoneId);
+    const input = $(inputId);
+    if (!dropzone || !input) return;
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt && dt.files;
+      if (files && files.length > 0) {
+        input.files = files;
+        handlerFn(input);
+      }
+    }, false);
+  }
+
   async function initFacultyPage() {
     if (document.body.dataset.page !== 'faculty') return;
+    setupDropzoneEvents('smDropzone', 'smFileInput', window.handleMaterialFileSelect);
     await whoami();
     await window.refreshFaculty();
   }
@@ -654,15 +694,25 @@
     if (!file) { window.clearMaterialFile(); return; }
     if ($('smSelectedName')) $('smSelectedName').textContent = file.name;
     if ($('smSelectedSize')) $('smSelectedSize').textContent = formatBytes(file.size);
+    if ($('smExtBadge')) $('smExtBadge').textContent = getFileExtBadge(file.name);
     const box = $('smSelectedBox');
-    if (box) box.classList.add('show');
+    if (box) box.style.display = 'flex';
+    const dropzone = $('smDropzone');
+    if (dropzone) dropzone.style.display = 'none';
   };
 
   window.clearMaterialFile = function () {
     const inp = $('smFileInput');
     if (inp) inp.value = '';
     const box = $('smSelectedBox');
-    if (box) box.classList.remove('show');
+    if (box) box.style.display = 'none';
+    const dropzone = $('smDropzone');
+    if (dropzone) dropzone.style.display = 'flex';
+  };
+
+  window.resetMaterialForm = function () {
+    ['smTitle', 'smContent'].forEach(id => { if ($(id)) $(id).value = ''; });
+    window.clearMaterialFile();
   };
 
   // Faculty: Upload Study Material (Supports any file from PC / laptop)
@@ -858,6 +908,7 @@
 
   async function initStudentPage() {
     if (document.body.dataset.page !== 'student') return;
+    setupDropzoneEvents('subDropzone', 'subFileInput', window.handleStudentFileSelect);
     await whoami();
     await window.refreshStudent();
   }
@@ -929,15 +980,20 @@
     if (!file) { window.clearStudentFile(); return; }
     if ($('subSelectedName')) $('subSelectedName').textContent = file.name;
     if ($('subSelectedSize')) $('subSelectedSize').textContent = formatBytes(file.size);
+    if ($('subExtBadge')) $('subExtBadge').textContent = getFileExtBadge(file.name);
     const box = $('subSelectedBox');
-    if (box) box.classList.add('show');
+    if (box) box.style.display = 'flex';
+    const dropzone = $('subDropzone');
+    if (dropzone) dropzone.style.display = 'none';
   };
 
   window.clearStudentFile = function () {
     const inp = $('subFileInput');
     if (inp) inp.value = '';
     const box = $('subSelectedBox');
-    if (box) box.classList.remove('show');
+    if (box) box.style.display = 'none';
+    const dropzone = $('subDropzone');
+    if (dropzone) dropzone.style.display = 'flex';
   };
 
   // Student: Load Study Materials (Strict Course Isolation: only for enrolled courses)
