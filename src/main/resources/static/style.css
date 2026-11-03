@@ -524,3 +524,47 @@ body[data-busy] .table-wrap.is-empty .empty { display: none; }
 .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; padding: 4px; border-radius: 8px; }
 .modal-close:hover { color: var(--text); background: var(--raised); }
 
+/* File Upload Zone & File Attachments */
+.file-dropzone {
+  position: relative; border: 2px dashed rgba(20,184,166,.35); border-radius: 14px;
+  padding: 18px; text-align: center; background: rgba(20,184,166,.03);
+  transition: border-color .2s, background-color .2s; cursor: pointer;
+}
+.file-dropzone:hover {
+  border-color: var(--teal); background: rgba(20,184,166,.07);
+}
+.file-dropzone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.file-dropzone-content {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none;
+}
+.file-dropzone-icon {
+  width: 38px; height: 38px; border-radius: 10px; background: rgba(20,184,166,.12);
+  color: var(--teal); display: grid; place-items: center; font-size: 18px; margin-bottom: 2px;
+}
+.file-dropzone-title { font-weight: 700; font-size: 14px; color: var(--text); }
+.file-dropzone-sub { font-size: 12px; color: var(--muted); }
+
+.file-selected-box {
+  display: none; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--raised); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; margin-top: 10px;
+}
+.file-selected-box.show { display: flex; animation: scaleIn .2s ease-out; }
+.file-selected-info { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.file-selected-name { font-weight: 700; font-size: 13.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.file-selected-size { font-size: 11.5px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+
+.mat-file-link {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px;
+  background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.25); color: var(--sky);
+  text-decoration: none; font-weight: 600; font-size: 12.5px; transition: background .2s, border-color .2s;
+  margin-top: 8px; word-break: break-all;
+}
+.mat-file-link:hover {
+  background: rgba(56,189,248,.16); border-color: var(--sky); text-decoration: none;
+}
+.mat-file-link i { color: var(--sky); flex-shrink: 0; }
+
+

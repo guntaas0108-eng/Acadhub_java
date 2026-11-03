@@ -53,6 +53,27 @@
     return { ok: res.ok, status: res.status, data };
   }
 
+  async function apiPostFormData(url, formData) {
+    const res = await fetch(url, {
+      method: 'POST',
+      body: formData
+    });
+    if (res.status === 401 || res.status === 403) {
+      location.href = 'index.html';
+      return { ok: false, data: {} };
+    }
+    let data = {};
+    try { data = await res.json(); } catch (e) {}
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes || bytes <= 0) return '0 B';
+    const k = 1024, dm = 1, sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
   window.logout = async function () {
     await fetch('/api/logout', { method: 'POST' });
     location.href = 'index.html';
@@ -627,22 +648,51 @@
     }
   };
 
-  // Faculty: Upload Study Material
+  // Faculty File Handling
+  window.handleMaterialFileSelect = function (input) {
+    const file = input.files && input.files[0];
+    if (!file) { window.clearMaterialFile(); return; }
+    if ($('smSelectedName')) $('smSelectedName').textContent = file.name;
+    if ($('smSelectedSize')) $('smSelectedSize').textContent = formatBytes(file.size);
+    const box = $('smSelectedBox');
+    if (box) box.classList.add('show');
+  };
+
+  window.clearMaterialFile = function () {
+    const inp = $('smFileInput');
+    if (inp) inp.value = '';
+    const box = $('smSelectedBox');
+    if (box) box.classList.remove('show');
+  };
+
+  // Faculty: Upload Study Material (Supports any file from PC / laptop)
   window.uploadStudyMaterial = async function () {
     const course = $('smCourse') ? $('smCourse').value : '';
     const title = $('smTitle') ? $('smTitle').value.trim() : '';
     const type = $('smType') ? $('smType').value : 'Notes';
     const content = $('smContent') ? $('smContent').value.trim() : '';
+    const fileInput = $('smFileInput');
+    const file = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
 
     if (!course || !title) {
       if (window.UI && window.UI.toast) window.UI.toast('error', 'Course and Title are required.');
       return;
     }
 
-    const r = await apiPost('/api/faculty/material', { course, title, type, content });
+    const fd = new FormData();
+    fd.append('course', course);
+    fd.append('title', title);
+    fd.append('type', type);
+    fd.append('content', content);
+    if (file) fd.append('file', file);
+
+    const r = await apiPostFormData('/api/faculty/material-upload', fd);
     if (r.ok) {
-      if (window.UI && window.UI.toast) window.UI.toast('success', 'Study Material published successfully!');
+      if (window.UI && window.UI.toast) {
+        window.UI.toast('success', file ? `Material & file "${file.name}" uploaded successfully!` : 'Study Material published!');
+      }
       ['smTitle', 'smContent'].forEach(id => { if ($(id)) $(id).value = ''; });
+      window.clearMaterialFile();
       window.loadFacultyMaterials();
     } else {
       const err = r.data.error || 'Failed to upload material';
@@ -671,6 +721,15 @@
           </div>
           <div class="mat-title">${esc(m.title)}</div>
           <div class="mat-content">${esc(m.content || 'No description provided.')}</div>
+          ${m.file_name ? `
+            <div style="margin-top:6px;margin-bottom:12px;">
+              <a href="/api/files/material/${m.material_id}" target="_blank" class="mat-file-link" download="${esc(m.file_name)}">
+                <i data-i="file"></i>
+                <span>File: <b>${esc(m.file_name)}</b></span>
+                <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(m.file_size || 'Attached')})</span>
+              </a>
+            </div>
+          ` : ''}
           <div class="mat-footer">
             <span>Uploaded: ${esc(m.upload_date || 'Recent')}</span>
             <div style="display:flex;gap:6px;align-items:center;">
@@ -705,6 +764,7 @@
 
     listEl.innerHTML = submissions.map(s => {
       const isRev = s.status === 'Reviewed' || s.status === 'Approved';
+      const hasLocalFile = !!s.file_name;
       return `
         <div class="sub-card">
           <div class="sub-top">
@@ -716,12 +776,20 @@
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
               <span class="chip ${isRev ? 'ok' : 'sky'}">${esc(s.status || 'Submitted')}</span>
-              <button class="btn" style="padding:4px 10px;font-size:12px;" onclick="window.openReviewModal(${s.submission_id}, '${esc(s.student_name)}', '${esc(s.title)}', '${encodeURIComponent(s.submission_text || '')}', '${esc(s.status || 'Reviewed')}', '${encodeURIComponent(s.feedback || '')}')"><i data-i="award"></i>Review</button>
+              <button class="btn" style="padding:4px 10px;font-size:12px;" onclick="window.openReviewModal(${s.submission_id}, '${esc(s.student_name)}', '${esc(s.title)}', '${encodeURIComponent(s.submission_text || '')}', '${esc(s.status || 'Reviewed')}', '${encodeURIComponent(s.feedback || '')}', '${esc(s.file_name || '')}', '${esc(s.file_size || '')}', '${esc(s.file_url || '')}')"><i data-i="award"></i>Review</button>
             </div>
           </div>
           <div style="font-weight:700;font-size:15px;color:var(--text);">${esc(s.title)}</div>
           <div class="sub-body">${esc(s.submission_text)}</div>
-          ${s.file_url ? `<div style="font-size:13px;"><a href="${esc(s.file_url)}" target="_blank" rel="noopener" style="color:var(--sky);text-decoration:underline;"><i data-i="file"></i>View Attached Work / Document</a></div>` : ''}
+          ${hasLocalFile ? `
+            <div style="margin-top:4px;">
+              <a href="/api/files/submission/${s.submission_id}" target="_blank" class="mat-file-link" download="${esc(s.file_name)}">
+                <i data-i="file"></i>
+                <span>Download Attached File: <b>${esc(s.file_name)}</b></span>
+                <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(s.file_size || 'Attached')})</span>
+              </a>
+            </div>
+          ` : (s.file_url ? `<div style="font-size:13px;"><a href="${esc(s.file_url)}" target="_blank" rel="noopener" style="color:var(--sky);text-decoration:underline;"><i data-i="file"></i>View Attached Work / Document</a></div>` : '')}
           ${s.feedback ? `<div class="sub-feedback"><strong>Teacher Feedback:</strong> ${esc(s.feedback)}</div>` : ''}
         </div>
       `;
@@ -729,13 +797,35 @@
   };
 
   // Review Modal Handlers
-  window.openReviewModal = function (subId, studentName, title, encContent, status, encFeedback) {
+  window.openReviewModal = function (subId, studentName, title, encContent, status, encFeedback, fileName, fileSize, fileUrl) {
     if ($('revSubId')) $('revSubId').value = subId;
     if ($('revStudentName')) $('revStudentName').textContent = studentName;
     if ($('revTitle')) $('revTitle').textContent = title;
     if ($('revContent')) $('revContent').textContent = decodeURIComponent(encContent);
     if ($('revStatus')) $('revStatus').value = status || 'Reviewed';
     if ($('revFeedback')) $('revFeedback').value = decodeURIComponent(encFeedback) || 'Good work!';
+
+    const fileSection = $('revFileSection');
+    if (fileSection) {
+      if (fileName) {
+        fileSection.innerHTML = `
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Attached File from PC / Laptop:</div>
+          <a href="/api/files/submission/${subId}" target="_blank" class="mat-file-link" download="${esc(fileName)}">
+            <i data-i="file"></i>
+            <span>Download File: <b>${esc(fileName)}</b></span>
+            <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(fileSize || 'Attached')})</span>
+          </a>
+        `;
+      } else if (fileUrl && fileUrl.startsWith('http')) {
+        fileSection.innerHTML = `
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">External Link:</div>
+          <a href="${esc(fileUrl)}" target="_blank" rel="noopener" style="color:var(--sky);text-decoration:underline;"><i data-i="file"></i>${esc(fileUrl)}</a>
+        `;
+      } else {
+        fileSection.innerHTML = '';
+      }
+    }
+
     const modal = $('reviewModal');
     if (modal) modal.classList.add('open');
   };
@@ -833,6 +923,23 @@
     await window.loadStudentSubmissions();
   };
 
+  // Student File Handling
+  window.handleStudentFileSelect = function (input) {
+    const file = input.files && input.files[0];
+    if (!file) { window.clearStudentFile(); return; }
+    if ($('subSelectedName')) $('subSelectedName').textContent = file.name;
+    if ($('subSelectedSize')) $('subSelectedSize').textContent = formatBytes(file.size);
+    const box = $('subSelectedBox');
+    if (box) box.classList.add('show');
+  };
+
+  window.clearStudentFile = function () {
+    const inp = $('subFileInput');
+    if (inp) inp.value = '';
+    const box = $('subSelectedBox');
+    if (box) box.classList.remove('show');
+  };
+
   // Student: Load Study Materials (Strict Course Isolation: only for enrolled courses)
   window.loadStudentMaterials = async function () {
     const listEl = $('studentMaterialsList');
@@ -862,6 +969,15 @@
           </div>
           <div class="mat-title">${esc(m.title)}</div>
           <div class="mat-content">${esc(m.content || 'Study notes and instructions.')}</div>
+          ${m.file_name ? `
+            <div style="margin-top:6px;margin-bottom:12px;">
+              <a href="/api/files/material/${m.material_id}" target="_blank" class="mat-file-link" download="${esc(m.file_name)}">
+                <i data-i="file"></i>
+                <span>Download File: <b>${esc(m.file_name)}</b></span>
+                <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(m.file_size || 'Attached')})</span>
+              </a>
+            </div>
+          ` : ''}
           <div class="mat-footer">
             <div>
               <span style="display:block;font-weight:600;color:var(--text);">${esc(m.faculty_name || 'Professor')}</span>
@@ -895,6 +1011,7 @@
     if ($('subTitle')) $('subTitle').value = 'Solution for: ' + (title || 'Assignment');
     if ($('subContent')) $('subContent').value = '';
     if ($('subFileUrl')) $('subFileUrl').value = '';
+    window.clearStudentFile();
 
     const modal = $('submitWorkModal');
     if (modal) modal.classList.add('open');
@@ -903,24 +1020,37 @@
   window.closeSubmitModal = function () {
     const modal = $('submitWorkModal');
     if (modal) modal.classList.remove('open');
+    window.clearStudentFile();
   };
 
-  // Student: Confirm Send Work to Teacher
+  // Student: Confirm Send Work to Teacher (Supports file upload from laptop/PC)
   window.confirmSubmitWork = async function () {
     const materialId = $('subMaterialId') && $('subMaterialId').value ? Number($('subMaterialId').value) : null;
     const courseCode = $('subCourseCode') ? $('subCourseCode').value : '';
     const title = $('subTitle') ? $('subTitle').value.trim() : '';
     const submissionText = $('subContent') ? $('subContent').value.trim() : '';
     const fileUrl = $('subFileUrl') ? $('subFileUrl').value.trim() : '';
+    const fileInput = $('subFileInput');
+    const file = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
 
-    if (!courseCode || !title || !submissionText) {
-      if (window.UI && window.UI.toast) window.UI.toast('error', 'Please provide submission title and content.');
+    if (!courseCode || !title || (!submissionText && !file && !fileUrl)) {
+      if (window.UI && window.UI.toast) window.UI.toast('error', 'Please provide a title and either answer notes, attached file, or link.');
       return;
     }
 
-    const r = await apiPost('/api/student/submit', { materialId, courseCode, title, submissionText, fileUrl });
+    const fd = new FormData();
+    fd.append('courseCode', courseCode);
+    fd.append('title', title);
+    fd.append('submissionText', submissionText || '');
+    if (materialId) fd.append('materialId', materialId);
+    if (fileUrl) fd.append('fileUrl', fileUrl);
+    if (file) fd.append('file', file);
+
+    const r = await apiPostFormData('/api/student/submit-upload', fd);
     if (r.ok) {
-      if (window.UI && window.UI.toast) window.UI.toast('success', 'Work sent successfully to your professor!');
+      if (window.UI && window.UI.toast) {
+        window.UI.toast('success', file ? `Work with file "${file.name}" sent to professor!` : 'Work sent successfully to professor!');
+      }
       window.closeSubmitModal();
       window.loadStudentSubmissions();
     } else {
@@ -942,6 +1072,7 @@
 
     listEl.innerHTML = submissions.map(s => {
       const isRev = s.status === 'Reviewed' || s.status === 'Approved';
+      const hasLocalFile = !!s.file_name;
       return `
         <div class="sub-card">
           <div class="sub-top">
@@ -955,12 +1086,20 @@
             </div>
           </div>
           <div class="sub-body">${esc(s.submission_text)}</div>
-          ${s.file_url ? `<div style="font-size:13px;"><a href="${esc(s.file_url)}" target="_blank" rel="noopener" style="color:var(--sky);text-decoration:underline;"><i data-i="file"></i>View Attached Work</a></div>` : ''}
+          ${hasLocalFile ? `
+            <div style="margin-top:6px;">
+              <a href="/api/files/submission/${s.submission_id}" target="_blank" class="mat-file-link" download="${esc(s.file_name)}">
+                <i data-i="file"></i>
+                <span>Attached File: <b>${esc(s.file_name)}</b></span>
+                <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(s.file_size || 'Attached')})</span>
+              </a>
+            </div>
+          ` : (s.file_url ? `<div style="font-size:13px;margin-top:6px;"><a href="${esc(s.file_url)}" target="_blank" rel="noopener" style="color:var(--sky);text-decoration:underline;"><i data-i="file"></i>View Attached Work</a></div>` : '')}
           ${s.feedback ? `
-            <div class="sub-feedback">
+            <div class="sub-feedback" style="margin-top:6px;">
               <strong>Professor Feedback:</strong> ${esc(s.feedback)}
             </div>
-          ` : '<p class="muted" style="font-size:12px;margin:0;"><i data-i="info"></i>Waiting for professor review.</p>'}
+          ` : '<p class="muted" style="font-size:12px;margin:4px 0 0;"><i data-i="info"></i>Waiting for professor review.</p>'}
         </div>
       `;
     }).join('');

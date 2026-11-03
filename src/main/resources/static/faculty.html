@@ -100,7 +100,7 @@
       <div class="tab-panel" data-group="fac" id="tabMaterial">
         <div style="margin-bottom:18px;">
           <h2 style="margin-bottom:6px;"><i data-i="book"></i>Publish Study Material</h2>
-          <p class="muted">Upload course notes, slides, tutorial links, or reference material for enrolled students.</p>
+          <p class="muted">Upload course notes, slides, tutorial files, or reference documents from your PC / laptop for enrolled students.</p>
         </div>
         <div class="form-grid">
           <div class="field sel fixed"><select id="smCourse"></select><label for="smCourse">Course</label></div>
@@ -115,12 +115,34 @@
             <label for="smType">Material Type</label>
           </div>
           <div class="field" style="grid-column: 1 / -1;">
-            <textarea id="smContent" rows="3" placeholder=" " style="width:100%;min-height:90px;background:transparent;border:none;color:var(--text);font:inherit;resize:vertical;padding:8px 0;"></textarea>
-            <label for="smContent">Notes, Instructions, or External Document Link (Google Drive / GitHub)</label>
+            <textarea id="smContent" rows="2" placeholder=" " style="width:100%;min-height:70px;background:transparent;border:none;color:var(--text);font:inherit;resize:vertical;padding:8px 0;"></textarea>
+            <label for="smContent">Notes, Instructions, or External Document Link (Optional)</label>
+          </div>
+
+          <!-- File Upload Zone from Laptop / PC -->
+          <div style="grid-column: 1 / -1; margin-top: 4px;">
+            <div class="file-dropzone" id="smDropzone">
+              <input type="file" id="smFileInput" onchange="window.handleMaterialFileSelect&&window.handleMaterialFileSelect(this)">
+              <div class="file-dropzone-content">
+                <div class="file-dropzone-icon"><i data-i="upload"></i></div>
+                <div class="file-dropzone-title">Upload File from PC / Laptop (Any format)</div>
+                <div class="file-dropzone-sub">PDF, Word Document, PowerPoint, ZIP, Images, Text, or Code (Up to 50MB)</div>
+              </div>
+            </div>
+            <div class="file-selected-box" id="smSelectedBox">
+              <div class="file-selected-info">
+                <i data-i="file" style="color:var(--teal)"></i>
+                <div>
+                  <div class="file-selected-name" id="smSelectedName">file.pdf</div>
+                  <div class="file-selected-size" id="smSelectedSize">0 KB</div>
+                </div>
+              </div>
+              <button class="btn ghost" type="button" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.clearMaterialFile&&window.clearMaterialFile()"><i data-i="x"></i>Remove</button>
+            </div>
           </div>
         </div>
-        <div class="form-actions">
-          <button class="btn primary magnetic spin" type="button" onclick="window.uploadStudyMaterial&&window.uploadStudyMaterial()"><i data-i="upload"></i>Publish Material</button>
+        <div class="form-actions" style="margin-top:14px;">
+          <button class="btn primary magnetic spin" type="button" onclick="window.uploadStudyMaterial&&window.uploadStudyMaterial()"><i data-i="upload"></i>Publish Material & File</button>
         </div>
         <div class="spacer"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -172,6 +194,7 @@
       <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Submitted Content / Solution</div>
       <div class="sub-body" id="revContent" style="max-height:160px;overflow-y:auto;"></div>
     </div>
+    <div id="revFileSection" style="margin-bottom:14px;"></div>
     <div class="form-grid" style="grid-template-columns:1fr;gap:12px;margin-bottom:16px;">
       <div class="field sel fixed">
         <select id="revStatus">
