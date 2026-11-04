@@ -39,30 +39,42 @@ exit /b 1
 echo [*] Java detected: %JAVA_HOME%
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 
-:: 2. Auto-Detect Maven
+:: 2. Auto-Detect Maven or Maven Wrapper
+set "MVN_CMD="
 where mvn >nul 2>&1
-if %ERRORLEVEL% equ 0 goto maven_found
+if %ERRORLEVEL% equ 0 set "MVN_CMD=mvn"
 
-for %%M in (
-    "%LOCALAPPDATA%\Programs\apache-maven-*\bin"
-    "C:\Program Files\apache-maven-*\bin"
-    "C:\apache-maven-*\bin"
-) do (
-    for /d %%P in (%%M) do (
-        if exist "%%P\mvn.cmd" (
-            set "PATH=%%P;%PATH%"
-            goto maven_found
+if not defined MVN_CMD (
+    for %%M in (
+        "%LOCALAPPDATA%\Programs\apache-maven-*\bin"
+        "C:\Program Files\apache-maven-*\bin"
+        "C:\apache-maven-*\bin"
+    ) do (
+        for /d %%P in (%%M) do (
+            if exist "%%P\mvn.cmd" (
+                set "PATH=%%P;%PATH%"
+                set "MVN_CMD=mvn"
+            )
         )
     )
 )
 
-echo [ERROR] Apache Maven was not found in PATH.
-echo Please ensure Maven is installed and in your PATH.
-pause
-exit /b 1
+if not defined MVN_CMD (
+    if exist "%~dp0mvnw.cmd" (
+        set "MVN_CMD=%~dp0mvnw.cmd"
+        echo [*] Using bundled Maven Wrapper (mvnw.cmd).
+    )
+)
+
+if not defined MVN_CMD (
+    echo [ERROR] Neither Apache Maven nor Maven Wrapper (mvnw.cmd) was found.
+    echo Please make sure you cloned the repository completely.
+    pause
+    exit /b 1
+)
 
 :maven_found
-echo [*] Maven detected.
+echo [*] Maven build tool ready: %MVN_CMD%
 
 :: 3. Ensure Upload Directories Exist Automatically
 if not exist "%~dp0uploads\materials" mkdir "%~dp0uploads\materials"
@@ -94,5 +106,5 @@ echo [*] Launching AcadHub on http://localhost:8085 ...
 start "" /b powershell -Command "Start-Sleep -Seconds 4; Start-Process 'http://localhost:8085'"
 
 :: 6. Run Spring Boot
-mvn spring-boot:run
+call %MVN_CMD% spring-boot:run
 pause

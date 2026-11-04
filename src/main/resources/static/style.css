@@ -732,4 +732,72 @@ body[data-busy] .table-wrap.is-empty .empty { display: none; }
 }
 .mat-file-link i, .mat-file-link svg { color: var(--sky); flex-shrink: 0; }
 
+/* Mode Indicator Pill (Online Cloud vs Standalone Offline Engine) */
+.acadhub-mode-pill {
+  position: fixed;
+  bottom: 18px;
+  right: 20px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+.acadhub-mode-pill.live {
+  background: rgba(7, 26, 20, 0.9);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34D399;
+}
+.acadhub-mode-pill.live .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #10B981; box-shadow: 0 0 10px #10B981;
+}
+.acadhub-mode-pill.standalone {
+  background: rgba(22, 10, 36, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  color: #C084FC;
+}
+.acadhub-mode-pill.standalone .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #A855F7; box-shadow: 0 0 10px #A855F7;
+}
+
+/* Material card action buttons */
+.mat-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.mat-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.mat-view-btn:hover {
+  background: rgba(20, 184, 166, 0.15);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+
 

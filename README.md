@@ -6,11 +6,24 @@ Featuring real-time 75% attendance threshold monitoring, automated trigger-based
 
 ---
 
-## 🚀 Quick Start Guide (1-Click Run)
+## 🚀 Quick Start Guide (Two Flexible Ways to Run)
 
-### Prerequisites
+AcadHub is engineered to run in **two seamless modes** so you and your team can operate without any friction on any laptop:
+
+### 🌟 Option 1: Instant Zero-Setup Browser Mode (No Java or MySQL required!)
+*Best for quick reviews, collaborator testing, laptops without MySQL, or running directly from GitHub / GitHub Pages!*
+1. Simply double-click **`index.html`** in the repository root to open it in Chrome, Edge, or Firefox.
+2. Sign in with any of the demo accounts (Student `kriti16`, Faculty `rumneek24`, or Admin `doaa30`).
+3. You can browse courses, read lecture notes, upload solution files from your laptop, review submissions, and download attached documents — **100% locally with zero installation required!**
+
+---
+
+### 💻 Option 2: Full-Stack Enterprise Mode (Spring Boot 3.5 + MySQL 8.0)
+*Best for persistent database operations and production simulation.*
+
+#### Prerequisites
 - **Java 17 or higher** (JDK 17, 21, or Corretto / Eclipse Adoptium)
-- **Maven 3.8+** (Optional if already configured)
+- **Maven**: Optional (bundled Maven Wrapper `mvnw.cmd` is included)
 - **MySQL 8.0+** (Running locally on default port `3306` or `3307`)
 
 ---
