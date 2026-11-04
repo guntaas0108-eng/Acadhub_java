@@ -54,17 +54,26 @@
   }
 
   async function apiPostFormData(url, formData) {
-    const res = await fetch(url, {
-      method: 'POST',
-      body: formData
-    });
-    if (res.status === 401 || res.status === 403) {
-      location.href = 'index.html';
-      return { ok: false, data: {} };
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+      if (res.status === 401 || res.status === 403) {
+        location.href = 'index.html';
+        return { ok: false, data: {} };
+      }
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      if (!res.ok) {
+        const errMsg = (data && data.error) || ('Upload failed with status ' + res.status);
+        if (window.UI && window.UI.toast) window.UI.toast('error', errMsg);
+      }
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      if (window.UI && window.UI.toast) window.UI.toast('error', 'Network error while uploading: ' + e.message);
+      return { ok: false, status: 0, data: { error: e.message } };
     }
-    let data = {};
-    try { data = await res.json(); } catch (e) {}
-    return { ok: res.ok, status: res.status, data };
   }
 
   function formatBytes(bytes) {
@@ -692,6 +701,11 @@
   window.handleMaterialFileSelect = function (input) {
     const file = input.files && input.files[0];
     if (!file) { window.clearMaterialFile(); return; }
+    if (file.size > 50 * 1024 * 1024) {
+      if (window.UI && window.UI.toast) window.UI.toast('error', 'File size exceeds 50MB limit (' + formatBytes(file.size) + '). Please choose a smaller file.');
+      input.value = '';
+      return;
+    }
     if ($('smSelectedName')) $('smSelectedName').textContent = file.name;
     if ($('smSelectedSize')) $('smSelectedSize').textContent = formatBytes(file.size);
     if ($('smExtBadge')) $('smExtBadge').textContent = getFileExtBadge(file.name);
@@ -978,6 +992,11 @@
   window.handleStudentFileSelect = function (input) {
     const file = input.files && input.files[0];
     if (!file) { window.clearStudentFile(); return; }
+    if (file.size > 50 * 1024 * 1024) {
+      if (window.UI && window.UI.toast) window.UI.toast('error', 'File size exceeds 50MB limit (' + formatBytes(file.size) + '). Please choose a smaller file.');
+      input.value = '';
+      return;
+    }
     if ($('subSelectedName')) $('subSelectedName').textContent = file.name;
     if ($('subSelectedSize')) $('subSelectedSize').textContent = formatBytes(file.size);
     if ($('subExtBadge')) $('subExtBadge').textContent = getFileExtBadge(file.name);
