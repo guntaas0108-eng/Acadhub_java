@@ -50,6 +50,9 @@ if errorlevel 1 goto failed
 "%MYSQL_EXE%" -u root -p"%MYSQL_PASS%" < "sql\15_accountability_seed.sql"
 if errorlevel 1 goto failed
 
+"%MYSQL_EXE%" -u root -p"%MYSQL_PASS%" < "sql\16_file_upload_support.sql"
+if errorlevel 1 goto failed
+
 echo.
 echo ====================================================
 echo  Database 'acadhub_java' setup completed successfully!

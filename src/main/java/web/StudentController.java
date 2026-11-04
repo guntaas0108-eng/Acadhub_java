@@ -2,16 +2,16 @@ package web;
 
 import dao.ReportDAO;
 import dao.StudentDAO;
-import db.DBConnection;
 import db.Rows;
 import jakarta.servlet.http.HttpSession;
 import model.Student;
 import model.User;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,6 +20,11 @@ public class StudentController {
 
     private final StudentDAO studentDao = new StudentDAO();
     private final ReportDAO reportDao = new ReportDAO();
+    private final FileStorageService storageService;
+
+    public StudentController(FileStorageService storageService) {
+        this.storageService = storageService;
+    }
 
     public record SubmissionReq(Integer materialId, String courseCode, String title, String submissionText, String fileUrl) {}
 
@@ -42,6 +47,8 @@ public class StudentController {
         return ResponseEntity.status(500).body(Map.of("error", "Server error"));
     }
 
+    private static boolean blank(String s) { return s == null || s.trim().isEmpty(); }
+
     private int nextId(String table, String col) throws SQLException {
         Object n = Rows.query("SELECT COALESCE(MAX(" + col + "), 0) + 1 AS n FROM " + table).get(0).get("n");
         return ((Number) n).intValue();
@@ -61,7 +68,6 @@ public class StudentController {
 
             int rollNo = student.getStudentId(); // studentId holds the roll number
 
-            // Get list of courses enrolled by this student
             var enrolledCourses = Rows.query(
                 "SELECT c.course_code, c.course_name, c.credits, c.semester, "
               + "COALESCE(u.name, 'Assigned Professor') AS faculty_name "
@@ -101,53 +107,45 @@ public class StudentController {
             if (student == null) return bad("Student profile not found");
             int rollNo = Integer.parseInt(student.getRollNo());
 
-            // Strict security: verify student is enrolled in requested course if provided
+            String sql = "SELECT sm.material_id, sm.course_code, c.course_name, sm.title, sm.material_type, "
+                       + "sm.content, sm.upload_date, sm.file_name, sm.file_path, sm.file_size, u.name AS faculty_name "
+                       + "FROM study_material sm "
+                       + "JOIN course c ON sm.course_code = c.course_code "
+                       + "JOIN faculty f ON sm.faculty_id = f.faculty_id "
+                       + "JOIN users u ON f.user_id = u.user_id ";
+
             if (course != null && !course.isBlank()) {
                 var isEnrolled = Rows.query("SELECT 1 FROM ENROLLMENT WHERE roll_no = ? AND course_code = ?", rollNo, course);
                 if (isEnrolled.isEmpty()) {
                     return ResponseEntity.status(403).body(Map.of("error", "Access denied: You are not enrolled in " + course));
                 }
 
-                var materials = Rows.query(
-                    "SELECT sm.material_id, sm.course_code, c.course_name, sm.title, sm.material_type, "
-                  + "sm.content, sm.upload_date, u.name AS faculty_name "
-                  + "FROM study_material sm "
-                  + "JOIN course c ON sm.course_code = c.course_code "
-                  + "JOIN faculty f ON sm.faculty_id = f.faculty_id "
-                  + "JOIN users u ON f.user_id = u.user_id "
-                  + "WHERE sm.course_code = ? "
-                  + "ORDER BY sm.material_id DESC", course);
-                return ResponseEntity.ok(materials);
+                sql += "WHERE sm.course_code = ? ORDER BY sm.material_id DESC";
+                return ResponseEntity.ok(Rows.query(sql, course));
             } else {
-                // Fetch study materials strictly for all courses this student is enrolled in
-                var materials = Rows.query(
-                    "SELECT sm.material_id, sm.course_code, c.course_name, sm.title, sm.material_type, "
-                  + "sm.content, sm.upload_date, u.name AS faculty_name "
-                  + "FROM study_material sm "
-                  + "JOIN course c ON sm.course_code = c.course_code "
-                  + "JOIN faculty f ON sm.faculty_id = f.faculty_id "
-                  + "JOIN users u ON f.user_id = u.user_id "
-                  + "JOIN ENROLLMENT e ON sm.course_code = e.course_code "
-                  + "WHERE e.roll_no = ? "
-                  + "ORDER BY sm.material_id DESC", rollNo);
-                return ResponseEntity.ok(materials);
+                sql += "JOIN ENROLLMENT e ON sm.course_code = e.course_code WHERE e.roll_no = ? ORDER BY sm.material_id DESC";
+                return ResponseEntity.ok(Rows.query(sql, rollNo));
             }
         } catch (SQLException e) {
             return dbError(e);
         }
     }
 
-    // ---------- submit assignment / work to faculty for an enrolled course ----------
-    @PostMapping("/submit")
-    public ResponseEntity<?> submitWork(@RequestBody SubmissionReq r, HttpSession session) {
+    // ---------- submit assignment / work with file from Laptop / PC ----------
+    @PostMapping(value = "/submit-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> submitWorkWithFile(
+            @RequestParam("courseCode") String courseCode,
+            @RequestParam("title") String title,
+            @RequestParam(value = "submissionText", required = false) String submissionText,
+            @RequestParam(value = "materialId", required = false) Integer materialId,
+            @RequestParam(value = "fileUrl", required = false) String fileUrl,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            HttpSession session) {
         User user = getStudent(session);
         if (user == null) return notLoggedIn();
 
-        if (r.courseCode() == null || r.courseCode().isBlank() || r.title() == null || r.title().isBlank()) {
+        if (blank(courseCode) || blank(title)) {
             return bad("Course and submission title are required");
-        }
-        if (r.submissionText() == null || r.submissionText().isBlank()) {
-            return bad("Please include submission content, notes or answers");
         }
 
         try {
@@ -157,22 +155,50 @@ public class StudentController {
 
             // Security check: Must be enrolled in this course
             var isEnrolled = Rows.query("SELECT 1 FROM ENROLLMENT WHERE roll_no = ? AND course_code = ?",
-                    rollNo, r.courseCode().trim().toUpperCase());
+                    rollNo, courseCode.trim().toUpperCase());
             if (isEnrolled.isEmpty()) {
                 return ResponseEntity.status(403).body(Map.of("error", "You can only submit work for courses you are enrolled in"));
             }
 
+            String fileName = null;
+            String storedPath = blank(fileUrl) ? null : fileUrl.trim();
+            String fileSize = null;
+
+            if (file != null && !file.isEmpty()) {
+                try {
+                    var saved = storageService.saveSubmissionFile(rollNo, file);
+                    fileName = saved.originalName();
+                    storedPath = saved.storagePath();
+                    fileSize = saved.formattedSize();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return bad("Failed to save uploaded file: " + e.getMessage());
+                }
+            }
+
             int subId = nextId("student_submission", "submission_id");
             Rows.update(
-                "INSERT INTO student_submission (submission_id, material_id, course_code, roll_no, title, submission_text, file_url, submitted_at, status) "
-              + "VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'Submitted')",
-                subId, r.materialId(), r.courseCode().trim().toUpperCase(), rollNo, r.title().trim(),
-                r.submissionText().trim(), r.fileUrl() == null ? null : r.fileUrl().trim());
+                "INSERT INTO student_submission (submission_id, material_id, course_code, roll_no, title, submission_text, file_url, file_name, file_size, submitted_at, status) "
+              + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Submitted')",
+                subId, materialId, courseCode.trim().toUpperCase(), rollNo, title.trim(),
+                blank(submissionText) ? (fileName != null ? "File attached: " + fileName : "Assignment submission") : submissionText.trim(),
+                storedPath, fileName, fileSize);
 
-            return ResponseEntity.ok(Map.of("status", "saved", "submissionId", subId));
+            return ResponseEntity.ok(Map.of(
+                "status", "saved",
+                "submissionId", subId,
+                "fileName", fileName == null ? "" : fileName,
+                "fileSize", fileSize == null ? "" : fileSize
+            ));
         } catch (SQLException e) {
             return dbError(e);
         }
+    }
+
+    // ---------- submit assignment / work (Legacy JSON fallback) ----------
+    @PostMapping("/submit")
+    public ResponseEntity<?> submitWork(@RequestBody SubmissionReq r, HttpSession session) {
+        return submitWorkWithFile(r.courseCode(), r.title(), r.submissionText(), r.materialId(), r.fileUrl(), null, session);
     }
 
     // ---------- list my submissions + teacher reviews/feedback ----------
@@ -188,7 +214,7 @@ public class StudentController {
 
             var list = Rows.query(
                 "SELECT ss.submission_id, ss.material_id, ss.course_code, c.course_name, ss.title, "
-              + "ss.submission_text, ss.file_url, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
+              + "ss.submission_text, ss.file_url, ss.file_name, ss.file_size, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
               + "FROM student_submission ss "
               + "JOIN course c ON ss.course_code = c.course_code "
               + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id "

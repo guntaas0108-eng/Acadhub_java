@@ -4,6 +4,12 @@ target/
 # Local MySQL data
 mysql-data/
 
+# Uploaded files
+uploads/materials/*
+!uploads/materials/.gitkeep
+uploads/submissions/*
+!uploads/submissions/.gitkeep
+
 # OS / Temporary files
 *.log
 .DS_Store

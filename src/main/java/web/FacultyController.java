@@ -4,8 +4,10 @@ import db.DBConnection;
 import db.Rows;
 import jakarta.servlet.http.HttpSession;
 import model.User;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,6 +20,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/faculty")
 public class FacultyController {
+
+    private final FileStorageService storageService;
+
+    public FacultyController(FileStorageService storageService) {
+        this.storageService = storageService;
+    }
 
     public record MarkReq(int rollNo, int assessmentId, int marks) {}
     public record AttRow(int rollNo, String status) {}
@@ -328,59 +336,90 @@ public class FacultyController {
             if (fac.isEmpty()) return bad("Faculty profile not found");
             int facultyId = ((Number) fac.get(0).get("faculty_id")).intValue();
 
+            String sql = "SELECT sm.material_id, sm.course_code, sm.title, sm.material_type, sm.content, sm.upload_date, "
+                       + "sm.file_name, sm.file_path, sm.file_size, c.course_name, "
+                       + "(SELECT COUNT(*) FROM student_submission ss WHERE ss.material_id = sm.material_id) AS submissions_count "
+                       + "FROM study_material sm JOIN course c ON sm.course_code = c.course_code ";
+
             if (course != null && !course.isBlank()) {
                 if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
-                var materials = Rows.query(
-                    "SELECT sm.material_id, sm.course_code, sm.title, sm.material_type, sm.content, sm.upload_date, "
-                  + "c.course_name, (SELECT COUNT(*) FROM student_submission ss WHERE ss.material_id = sm.material_id) AS submissions_count "
-                  + "FROM study_material sm JOIN course c ON sm.course_code = c.course_code "
-                  + "WHERE sm.course_code = ? AND sm.faculty_id = ? ORDER BY sm.material_id DESC", course, facultyId);
-                return ResponseEntity.ok(materials);
+                sql += "WHERE sm.course_code = ? AND sm.faculty_id = ? ORDER BY sm.material_id DESC";
+                return ResponseEntity.ok(Rows.query(sql, course, facultyId));
             } else {
-                var materials = Rows.query(
-                    "SELECT sm.material_id, sm.course_code, sm.title, sm.material_type, sm.content, sm.upload_date, "
-                  + "c.course_name, (SELECT COUNT(*) FROM student_submission ss WHERE ss.material_id = sm.material_id) AS submissions_count "
-                  + "FROM study_material sm JOIN course c ON sm.course_code = c.course_code "
-                  + "WHERE sm.faculty_id = ? ORDER BY sm.material_id DESC", facultyId);
-                return ResponseEntity.ok(materials);
+                sql += "WHERE sm.faculty_id = ? ORDER BY sm.material_id DESC";
+                return ResponseEntity.ok(Rows.query(sql, facultyId));
             }
         } catch (SQLException e) {
             return dbError(e);
         }
     }
 
-    // ---------- upload study material (Notes / Slides / Tutorials / Reference) ----------
-    @PostMapping("/material")
-    public ResponseEntity<?> addMaterial(@RequestBody MaterialReq r, HttpSession session) {
+    // ---------- upload study material (Notes / Slides / Tutorials / Reference with Laptop File) ----------
+    @PostMapping(value = "/material-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadMaterialWithFile(
+            @RequestParam("course") String course,
+            @RequestParam("title") String title,
+            @RequestParam(value = "type", defaultValue = "Notes") String type,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            HttpSession session) {
         User user = getFaculty(session);
         if (user == null) return notLoggedIn();
 
-        if (blank(r.course()) || blank(r.title()))
+        if (blank(course) || blank(title))
             return bad("Course and title are required");
 
-        String type = blank(r.type()) ? "Notes" : r.type().trim();
-        if (!List.of("Notes", "Slides", "Tutorials", "Reference").contains(type)) {
-            type = "Notes";
+        String safeType = blank(type) ? "Notes" : type.trim();
+        if (!List.of("Notes", "Slides", "Tutorials", "Reference").contains(safeType)) {
+            safeType = "Notes";
         }
 
         try {
-            if (!teaches(user.getUserId(), r.course())) return bad("You do not teach " + r.course());
+            if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
 
             var fac = Rows.query("SELECT faculty_id FROM FACULTY WHERE user_id = ?", user.getUserId());
             if (fac.isEmpty()) return bad("Faculty record not found");
             int facultyId = ((Number) fac.get(0).get("faculty_id")).intValue();
 
+            String fileName = null;
+            String filePath = null;
+            String fileSize = null;
+
+            if (file != null && !file.isEmpty()) {
+                try {
+                    var saved = storageService.saveMaterialFile(file);
+                    fileName = saved.originalName();
+                    filePath = saved.storagePath();
+                    fileSize = saved.formattedSize();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return bad("Could not upload file: " + e.getMessage());
+                }
+            }
+
             int materialId = nextId("study_material", "material_id");
             Rows.update(
-                "INSERT INTO study_material (material_id, course_code, faculty_id, title, material_type, content, upload_date) "
-              + "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                materialId, r.course().trim().toUpperCase(), facultyId, r.title().trim(), type,
-                blank(r.content()) ? "" : r.content().trim(), java.sql.Date.valueOf(LocalDate.now()));
+                "INSERT INTO study_material (material_id, course_code, faculty_id, title, material_type, content, upload_date, file_name, file_path, file_size) "
+              + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                materialId, course.trim().toUpperCase(), facultyId, title.trim(), safeType,
+                blank(content) ? "" : content.trim(), java.sql.Date.valueOf(LocalDate.now()),
+                fileName, filePath, fileSize);
 
-            return ResponseEntity.ok(Map.of("status", "saved", "materialId", materialId));
+            return ResponseEntity.ok(Map.of(
+                "status", "saved",
+                "materialId", materialId,
+                "fileName", fileName == null ? "" : fileName,
+                "fileSize", fileSize == null ? "" : fileSize
+            ));
         } catch (SQLException e) {
             return dbError(e);
         }
+    }
+
+    // ---------- upload study material (Legacy JSON fallback) ----------
+    @PostMapping("/material")
+    public ResponseEntity<?> addMaterial(@RequestBody MaterialReq r, HttpSession session) {
+        return uploadMaterialWithFile(r.course(), r.title(), r.type(), r.content(), null, session);
     }
 
     // ---------- delete a study material ----------
@@ -408,29 +447,22 @@ public class FacultyController {
         if (user == null) return notLoggedIn();
 
         try {
+            String sql = "SELECT ss.submission_id, ss.material_id, ss.course_code, ss.roll_no, u.name AS student_name, "
+                       + "ss.title, ss.submission_text, ss.file_url, ss.file_name, ss.file_size, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
+                       + "FROM student_submission ss "
+                       + "JOIN student s ON ss.roll_no = s.roll_no "
+                       + "JOIN users u ON s.user_id = u.user_id "
+                       + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id ";
+
             if (course != null && !course.isBlank()) {
                 if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
-                var list = Rows.query(
-                    "SELECT ss.submission_id, ss.material_id, ss.course_code, ss.roll_no, u.name AS student_name, "
-                  + "ss.title, ss.submission_text, ss.file_url, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
-                  + "FROM student_submission ss "
-                  + "JOIN student s ON ss.roll_no = s.roll_no "
-                  + "JOIN users u ON s.user_id = u.user_id "
-                  + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id "
-                  + "WHERE ss.course_code = ? ORDER BY ss.submission_id DESC", course);
-                return ResponseEntity.ok(list);
+                sql += "WHERE ss.course_code = ? ORDER BY ss.submission_id DESC";
+                return ResponseEntity.ok(Rows.query(sql, course));
             } else {
-                var list = Rows.query(
-                    "SELECT ss.submission_id, ss.material_id, ss.course_code, ss.roll_no, u.name AS student_name, "
-                  + "ss.title, ss.submission_text, ss.file_url, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
-                  + "FROM student_submission ss "
-                  + "JOIN student s ON ss.roll_no = s.roll_no "
-                  + "JOIN users u ON s.user_id = u.user_id "
-                  + "JOIN faculty_course fc ON ss.course_code = fc.course_code "
-                  + "JOIN faculty f ON fc.faculty_id = f.faculty_id "
-                  + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id "
-                  + "WHERE f.user_id = ? ORDER BY ss.submission_id DESC", user.getUserId());
-                return ResponseEntity.ok(list);
+                sql += "JOIN faculty_course fc ON ss.course_code = fc.course_code "
+                    + "JOIN faculty f ON fc.faculty_id = f.faculty_id "
+                    + "WHERE f.user_id = ? ORDER BY ss.submission_id DESC";
+                return ResponseEntity.ok(Rows.query(sql, user.getUserId()));
             }
         } catch (SQLException e) {
             return dbError(e);
