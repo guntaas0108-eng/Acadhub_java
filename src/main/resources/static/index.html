@@ -5,11 +5,290 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AcadHub · University Academic Management Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261103.2">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261104.1">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
+<style>
+  /* ============================================================
+     AcadHub Centered Dynamic Hero & 3D Cursor Parallax
+     ============================================================ */
+  body.auth-page {
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--bg);
+  }
+
+  /* Interactive Canvas Background */
+  #dynamicCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Dynamic Cursor Spotlight */
+  .cursor-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 650px;
+    height: 650px;
+    margin-left: -325px;
+    margin-top: -325px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.18) 0%, rgba(56, 189, 248, 0.08) 45%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(30px);
+    will-change: transform;
+    opacity: 0.9;
+  }
+
+  /* Top Navigation */
+  .auth-nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 36px;
+    background: rgba(7, 19, 26, 0.45);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(20, 184, 166, 0.15);
+  }
+
+  /* Main Centered Stage */
+  .center-stage {
+    position: relative;
+    z-index: 5;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px 45px;
+    perspective: 1200px;
+  }
+
+  /* Hero Centerpiece (Brand & Tagline in Middle) */
+  .hero-center {
+    text-align: center;
+    margin-bottom: 24px;
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+    will-change: transform;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--teal);
+    background: rgba(20, 184, 166, 0.12);
+    border: 1px solid rgba(20, 184, 166, 0.32);
+    margin-bottom: 14px;
+    box-shadow: 0 0 20px -5px rgba(20, 184, 166, 0.3);
+    backdrop-filter: blur(10px);
+  }
+
+  .hero-brand-title {
+    font-size: clamp(48px, 6.5vw, 76px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin: 0 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #FFFFFF 20%, #2DD4BF 60%, #38BDF8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 35px rgba(45, 212, 191, 0.35));
+  }
+
+  [data-theme="light"] .hero-brand-title {
+    background: linear-gradient(135deg, #0F172A 20%, #0D9488 65%, #0284C7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-logo-box {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #14B8A6, #38BDF8);
+    display: grid;
+    place-items: center;
+    color: #07131A;
+    font-size: 34px;
+    font-weight: 900;
+    box-shadow: 0 8px 30px -4px rgba(20, 184, 166, 0.6);
+    flex-shrink: 0;
+    animation: pulseGlow 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 8px 24px -4px rgba(20, 184, 166, 0.5), 0 0 15px rgba(56, 189, 248, 0.3); transform: scale(1); }
+    100% { box-shadow: 0 12px 34px -2px rgba(20, 184, 166, 0.8), 0 0 28px rgba(56, 189, 248, 0.6); transform: scale(1.05); }
+  }
+
+  .hero-subtitle {
+    font-size: clamp(15px, 1.8vw, 19px);
+    font-weight: 600;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
+  }
+
+  /* Centered Interactive 3D Card */
+  .auth-card-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+    will-change: transform;
+  }
+
+  .auth-card-wrap .auth-card {
+    position: relative;
+    background: rgba(13, 27, 34, 0.78);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 22px;
+    padding: 30px 28px;
+    box-shadow: 0 24px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px -10px rgba(20, 184, 166, 0.25);
+    overflow: hidden;
+  }
+
+  /* Dynamic Card Surface Light Follower */
+  .auth-card-wrap .auth-card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 22px;
+    background: radial-gradient(circle 380px at var(--card-mx, 50%) var(--card-my, 50%), rgba(56, 189, 248, 0.22), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .auth-card-wrap .auth-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Floating Dynamic Parallax Chips Orbiting the Center */
+  .float-chip {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: rgba(13, 27, 34, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(20, 184, 166, 0.25);
+    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), 0 0 25px -6px rgba(20, 184, 166, 0.2);
+    transition: transform 0.12s ease-out, border-color 0.25s, box-shadow 0.25s;
+    will-change: transform;
+    pointer-events: auto;
+    cursor: default;
+    z-index: 4;
+  }
+
+  .float-chip:hover {
+    border-color: var(--teal);
+    box-shadow: 0 20px 45px -6px rgba(0, 0, 0, 0.6), 0 0 30px -4px var(--teal);
+  }
+
+  .float-chip .chip-ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: rgba(20, 184, 166, 0.15);
+    color: var(--teal);
+    border: 1px solid rgba(20, 184, 166, 0.3);
+    flex-shrink: 0;
+  }
+  .float-chip .chip-ic.sky { background: rgba(56, 189, 248, 0.15); color: var(--sky); border-color: rgba(56, 189, 248, 0.3); }
+  .float-chip .chip-ic.aqua { background: rgba(94, 234, 212, 0.15); color: #5EEAD4; border-color: rgba(94, 234, 212, 0.3); }
+  .float-chip .chip-ic.warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); border-color: rgba(245, 158, 11, 0.3); }
+
+  .float-chip .chip-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .float-chip .chip-meta b {
+    font-size: 13.5px;
+    color: var(--text);
+    font-weight: 700;
+  }
+  .float-chip .chip-meta span {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  /* Orbital positions for desktop */
+  .f-pos-1 { top: 6%; left: 8%; }
+  .f-pos-2 { top: 8%; right: 8%; }
+  .f-pos-3 { bottom: 12%; left: 7%; }
+  .f-pos-4 { bottom: 10%; right: 7%; }
+  .f-pos-5 { top: 48%; left: 3%; }
+  .f-pos-6 { top: 46%; right: 3%; }
+
+  @media (max-width: 1120px) {
+    .f-pos-5, .f-pos-6 { display: none; }
+  }
+  @media (max-width: 860px) {
+    .float-chip { display: none; }
+  }
+
+  /* Footer */
+  .auth-bottom {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 16px 20px;
+    color: var(--muted);
+    font-size: 12.5px;
+    border-top: 1px solid rgba(20, 184, 166, 0.12);
+    background: rgba(7, 19, 26, 0.45);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+</style>
 </head>
 <body data-page="login" class="auth-page">
+
+<!-- Interactive Particle Constellation Canvas -->
+<canvas id="dynamicCanvas"></canvas>
+
+<!-- Dynamic Cursor Spotlight Follower -->
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- Background Aurora Glow -->
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 
 <!-- Top Navigation Strip -->
@@ -21,7 +300,7 @@
   <div style="display:flex; align-items:center; gap:16px;">
     <div class="system-pulse" style="padding: 6px 14px; font-size: 12px;">
       <span class="pulse-dot"></span>
-      <span>System Operational</span>
+      <span>System Operational &middot; Term 2026</span>
     </div>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" type="button">
       <i data-i="moon"></i><i data-i="sun"></i>
@@ -29,105 +308,283 @@
   </div>
 </nav>
 
-<!-- Main Split Screen -->
-<main class="auth-main">
-  <div class="auth-grid">
-    <!-- Left: Showcase & Project Context -->
-    <div class="showcase">
-      <div class="showcase-badge">
-        <i data-i="cap"></i>
-        <span>University Academic Portal &middot; Term 2026</span>
-      </div>
+<!-- Main Centered Stage -->
+<main class="center-stage">
 
-      <h1 class="showcase-title">
-        Streamlined academic operations for <span>modern universities</span>.
-      </h1>
+  <!-- Floating Dynamic Parallax Chips Orbiting Central Stage -->
+  <div class="float-chip f-pos-1" data-depth="-1.8">
+    <span class="chip-ic"><i data-i="cal"></i></span>
+    <div class="chip-meta">
+      <b>75% Attendance Guard</b>
+      <span>Automated risk triggers</span>
+    </div>
+    <span class="chip ok">&ge; 75% Safe</span>
+  </div>
 
-      <p class="showcase-desc">
-        A unified platform connecting students, faculty, and administration. Automated grade calculations, real-time 75% attendance threshold monitoring, and comprehensive course management.
-      </p>
+  <div class="float-chip f-pos-2" data-depth="2.2">
+    <span class="chip-ic sky"><i data-i="award"></i></span>
+    <div class="chip-meta">
+      <b>Automated Grading</b>
+      <span>Database triggers & scales</span>
+    </div>
+    <span class="grade g-ap">A+</span>
+  </div>
 
-      <!-- Showcase Feature Bento Cards -->
-      <div class="showcase-bento">
-        <div class="preview-card">
-          <div class="preview-top">
-            <span class="preview-icon"><i data-i="cal"></i></span>
-            <span class="chip ok">&ge; 75% Safe</span>
-          </div>
-          <div class="preview-title">Attendance Guard</div>
-          <p class="preview-desc">Real-time daily tracking with automated triggers when attendance drops below 75%.</p>
-        </div>
+  <div class="float-chip f-pos-3" data-depth="1.6">
+    <span class="chip-ic aqua"><i data-i="file"></i></span>
+    <div class="chip-meta">
+      <b>Laptop / PC File Hub</b>
+      <span>Study materials & solutions</span>
+    </div>
+    <span class="chip ok">50 MB</span>
+  </div>
 
-        <div class="preview-card">
-          <div class="preview-top">
-            <span class="preview-icon sky"><i data-i="award"></i></span>
-            <span class="grade g-ap">A+</span>
-          </div>
-          <div class="preview-title">Automated Grading</div>
-          <p class="preview-desc">Database-level triggers compute letter grades directly from assessment performance.</p>
-        </div>
+  <div class="float-chip f-pos-4" data-depth="-1.9">
+    <span class="chip-ic warn"><i data-i="shield"></i></span>
+    <div class="chip-meta">
+      <b>Role-Based RBAC</b>
+      <span>Admin &middot; Faculty &middot; Student</span>
+    </div>
+    <span class="chip warn">Secure</span>
+  </div>
 
-        <div class="preview-card">
-          <div class="preview-top">
-            <span class="preview-icon warn"><i data-i="alert"></i></span>
-            <span class="chip warn">Early Warning</span>
-          </div>
-          <div class="preview-title">At-Risk Analytics</div>
-          <p class="preview-desc">Proactive identification of struggling students before end-of-semester examinations.</p>
-        </div>
+  <div class="float-chip f-pos-5" data-depth="1.3">
+    <span class="chip-ic"><i data-i="cap"></i></span>
+    <div class="chip-meta">
+      <b>Student Workspace</b>
+      <span>Real-time marks & attendance</span>
+    </div>
+  </div>
 
-        <div class="preview-card">
-          <div class="preview-top">
-            <span class="preview-icon"><i data-i="shield"></i></span>
-            <span class="pill">RBAC</span>
-          </div>
-          <div class="preview-title">Role-Based Security</div>
-          <p class="preview-desc">Isolated portals and workflows for Administrators, Teaching Faculty, and Students.</p>
-        </div>
-      </div>
+  <div class="float-chip f-pos-6" data-depth="-1.5">
+    <span class="chip-ic sky"><i data-i="book"></i></span>
+    <div class="chip-meta">
+      <b>Faculty Desk</b>
+      <span>Class materials & assessment</span>
+    </div>
+  </div>
 
-      <div class="system-pulse">
-        <span class="pulse-dot"></span>
-        <span>Spring Boot 3.5.6 &middot; MySQL 8.0 &middot; Java 17 LTS Core Active</span>
-      </div>
+  <!-- Hero Centerpiece: Project Name AcadHub in Middle -->
+  <div class="hero-center" id="heroCenter">
+    <div class="hero-badge">
+      <i data-i="sparkle"></i>
+      <span>Next-Gen Academic Operating System</span>
     </div>
 
-    <!-- Right: Authentication Card -->
-    <div>
-      <section class="card auth-card">
-        <div class="brand big"><span class="logo">A</span>AcadHub</div>
-        <h1>Welcome back</h1>
-        <p class="muted">Select your role to load demo credentials or sign in.</p>
-
-        <div class="role-chips" role="group" aria-label="Sign in as">
-          <button type="button" class="role-chip" data-role="ADMIN" style="--rc:#14B8A6"><i data-i="shield"></i>Admin</button>
-          <button type="button" class="role-chip" data-role="FACULTY" style="--rc:#38BDF8"><i data-i="book"></i>Faculty</button>
-          <button type="button" class="role-chip active" data-role="STUDENT" style="--rc:#5EEAD4"><i data-i="cap"></i>Student</button>
-        </div>
-
-        <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
-          <select id="role" hidden>
-            <option value="ADMIN">Admin</option><option value="FACULTY">Faculty</option><option value="STUDENT" selected>Student</option>
-          </select>
-          <div class="field">
-            <input id="username" type="text" placeholder=" " autocomplete="username" required>
-            <label for="username">Username</label>
-          </div>
-          <div class="field">
-            <input id="password" type="password" placeholder=" " autocomplete="current-password" required>
-            <label for="password">Password</label>
-            <button class="icon-btn eye" type="button" data-eye="#password" aria-label="Show or hide password"><i data-i="eye"></i></button>
-          </div>
-          <p id="loginError" class="form-error" role="alert"></p>
-          <button id="loginBtn" class="btn primary full magnetic spin" type="submit">Sign in to AcadHub<i data-i="arrow"></i></button>
-        </form>
-        <p class="auth-foot">Press <kbd>T</kbd> to toggle theme &middot; Demo accounts loaded on chip click</p>
-      </section>
+    <div class="hero-brand-title">
+      <span class="hero-logo-box">A</span>
+      <span>AcadHub</span>
     </div>
+
+    <p class="hero-subtitle">
+      Unified academic accountability, real-time analytics, and secure course workflows.
+    </p>
+  </div>
+
+  <!-- Centered Interactive 3D Authentication Card -->
+  <div class="auth-card-wrap" id="authCardWrap">
+    <section class="card auth-card" id="authCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <h2 style="font-size:20px;font-weight:800;margin:0 0 4px;color:var(--text);">Portal Sign In</h2>
+          <p class="muted" style="font-size:13px;margin:0;">Select your role to load demo credentials</p>
+        </div>
+        <span class="pill" style="font-size:11px;">Term 2026</span>
+      </div>
+
+      <div class="role-chips" role="group" aria-label="Sign in as">
+        <button type="button" class="role-chip" data-role="ADMIN" style="--rc:#14B8A6"><i data-i="shield"></i>Admin</button>
+        <button type="button" class="role-chip" data-role="FACULTY" style="--rc:#38BDF8"><i data-i="book"></i>Faculty</button>
+        <button type="button" class="role-chip active" data-role="STUDENT" style="--rc:#5EEAD4"><i data-i="cap"></i>Student</button>
+      </div>
+
+      <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
+        <select id="role" hidden>
+          <option value="ADMIN">Admin</option>
+          <option value="FACULTY">Faculty</option>
+          <option value="STUDENT" selected>Student</option>
+        </select>
+        <div class="field">
+          <input id="username" type="text" placeholder=" " autocomplete="username" required>
+          <label for="username">Username</label>
+        </div>
+        <div class="field">
+          <input id="password" type="password" placeholder=" " autocomplete="current-password" required>
+          <label for="password">Password</label>
+          <button class="icon-btn eye" type="button" data-eye="#password" aria-label="Show or hide password"><i data-i="eye"></i></button>
+        </div>
+        <p id="loginError" class="form-error" role="alert"></p>
+        <button id="loginBtn" class="btn primary full magnetic spin" type="submit">
+          Sign in to AcadHub <i data-i="arrow"></i>
+        </button>
+      </form>
+      <p class="auth-foot">Press <kbd>T</kbd> to toggle theme &middot; Demo accounts loaded on chip click</p>
+    </section>
   </div>
 </main>
 
+<!-- Bottom Footer -->
+<footer class="auth-bottom">
+  <span>Spring Boot 3.5.6 &middot; MySQL 8.0 &middot; Java 17 LTS Core Active</span>
+  <span style="opacity:0.4;">|</span>
+  <span>Connected to Dual Git Repositories</span>
+  <span style="opacity:0.4;">|</span>
+  <span>&copy; 2026 AcadHub University Platform</span>
+</footer>
+
 <script src="ui.js"></script>
 <script src="app.js"></script>
+
+<!-- Interactive Cursor Dynamics & Particle Constellation Engine -->
+<script>
+(function() {
+  'use strict';
+  const heroCenter = document.getElementById('heroCenter');
+  const cardWrap = document.getElementById('authCardWrap');
+  const card = document.getElementById('authCard');
+  const glow = document.getElementById('cursorGlow');
+  const floatChips = document.querySelectorAll('.float-chip');
+  const canvas = document.getElementById('dynamicCanvas');
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let targetX = mouseX;
+  let targetY = mouseY;
+  let currentCardRotX = 0;
+  let currentCardRotY = 0;
+
+  // Track cursor coordinates across entire window
+  window.addEventListener('mousemove', (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+  }, { passive: true });
+
+  // Smooth 60fps RAF loop for mouse physics, 3D tilt & parallax
+  function updateDynamics() {
+    mouseX += (targetX - mouseX) * 0.12;
+    mouseY += (targetY - mouseY) * 0.12;
+
+    // 1. Move dynamic cursor spotlight
+    if (glow) {
+      glow.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    }
+
+    // Normalized center offset from -1 to 1
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const nx = (mouseX - cx) / cx;
+    const ny = (mouseY - cy) / cy;
+
+    // 2. 3D Tilt on the central authentication card
+    const targetRotX = -ny * 9;
+    const targetRotY = nx * 9;
+    currentCardRotX += (targetRotX - currentCardRotX) * 0.1;
+    currentCardRotY += (targetRotY - currentCardRotY) * 0.1;
+
+    if (cardWrap) {
+      cardWrap.style.transform = `perspective(1000px) rotateX(${currentCardRotX.toFixed(2)}deg) rotateY(${currentCardRotY.toFixed(2)}deg)`;
+    }
+
+    // 3. Dynamic specular reflection on card surface
+    if (card) {
+      const rect = card.getBoundingClientRect();
+      const cardX = mouseX - rect.left;
+      const cardY = mouseY - rect.top;
+      card.style.setProperty('--card-mx', `${cardX}px`);
+      card.style.setProperty('--card-my', `${cardY}px`);
+    }
+
+    // 4. Subtle tilt on Hero Centerpiece
+    if (heroCenter) {
+      const heroRotX = -ny * 4;
+      const heroRotY = nx * 4;
+      heroCenter.style.transform = `perspective(1000px) rotateX(${heroRotX.toFixed(2)}deg) rotateY(${heroRotY.toFixed(2)}deg) translateZ(10px)`;
+    }
+
+    // 5. Multi-layer floating chips parallax drift
+    floatChips.forEach(chip => {
+      const depth = parseFloat(chip.dataset.depth) || 1;
+      const moveX = nx * depth * 24;
+      const moveY = ny * depth * 24;
+      chip.style.transform = `translate3d(${moveX.toFixed(1)}px, ${moveY.toFixed(1)}px, 0)`;
+    });
+
+    requestAnimationFrame(updateDynamics);
+  }
+  requestAnimationFrame(updateDynamics);
+
+  // Dynamic Interactive Particle Constellation on Canvas
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const count = Math.min(38, Math.floor((width * height) / 28000));
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.65,
+        vy: (Math.random() - 0.5) * 0.65,
+        r: Math.random() * 2 + 1.2,
+        color: Math.random() > 0.4 ? 'rgba(45, 212, 191,' : 'rgba(56, 189, 248,'
+      });
+    }
+
+    function renderCanvas() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        p1.x += p1.vx;
+        p1.y += p1.vy;
+
+        if (p1.x < 0 || p1.x > width) p1.vx *= -1;
+        if (p1.y < 0 || p1.y > height) p1.vy *= -1;
+
+        // Draw particle dot
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, p1.r, 0, Math.PI * 2);
+        ctx.fillStyle = p1.color + '0.65)';
+        ctx.fill();
+
+        // Connect nearby particles
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+          if (dist < 115) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = p1.color + (1 - dist / 115) * 0.18 + ')';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+
+        // Connect to mouse cursor when close
+        const mouseDist = Math.hypot(p1.x - mouseX, p1.y - mouseY);
+        if (mouseDist < 145) {
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(mouseX, mouseY);
+          ctx.strokeStyle = 'rgba(45, 212, 191,' + (1 - mouseDist / 145) * 0.35 + ')';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+      requestAnimationFrame(renderCanvas);
+    }
+    requestAnimationFrame(renderCanvas);
+  }
+})();
+</script>
 </body>
 </html>
