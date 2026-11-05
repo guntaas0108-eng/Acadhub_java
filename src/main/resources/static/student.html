@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AcadHub · Athena Student Dashboard</title>
+<title>AcadHub · Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261105.5">
+<link rel="stylesheet" href="style.css?v=20261105.6">
 <style>
   .modern-dropzone {
     position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
@@ -69,10 +69,10 @@
   <!-- Persistent Left Slidebar / Navigation -->
   <aside class="athena-sidebar" id="athenaSidebar">
     <a href="student.html" class="athena-brand">
-      <div class="logo-icon"><i data-i="book"></i></div>
+      <div class="logo-icon">A</div>
       <div>
-        <span class="brand-title">Athena</span>
-        <span class="brand-sub">Student Desk</span>
+        <span class="brand-title">AcadHub</span>
+        <span class="brand-sub">Student Portal</span>
       </div>
     </a>
 
@@ -157,7 +157,7 @@
           <div class="athena-action-pills">
             <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Services &amp; Tools</button>
             <button type="button" class="athena-action-pill" onclick="window.scrollToSection('ttSection')">Timetable</button>
-            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('workflowSection')">Learning</button>
+            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('submissionsSection')">Submissions</button>
           </div>
         </div>
 
@@ -225,66 +225,6 @@
             <span class="athena-bar-tooltip">HIST105: 50%</span>
           </div>
           <span class="athena-bar-label">HIST105</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- One Connected Academic Workflow (Screenshot 5) -->
-    <div class="workflow-stepper-box" id="workflowSection">
-      <div class="workflow-title-row">
-        <div class="workflow-title">
-          <i data-i="award" style="color:var(--teal)"></i>
-          <span>One connected academic workflow</span>
-        </div>
-        <span class="chip ok">0 Errors · End-to-End Verified</span>
-      </div>
-
-      <div class="workflow-steps-vertical">
-        <!-- Step 1 -->
-        <div class="workflow-step-card step-teal">
-          <div class="workflow-step-icon"><i data-i="user"></i></div>
-          <div class="workflow-step-name">Faculty creates Assignment 1</div>
-          <div class="workflow-step-meta">Course: UCS310 · Due date · Maximum marks: 20</div>
-        </div>
-        <div class="workflow-down-arrow">↓</div>
-
-        <!-- Step 2 -->
-        <div class="workflow-step-card step-cyan">
-          <div class="workflow-step-icon"><i data-i="db"></i></div>
-          <div class="workflow-step-name">Spring Boot saves it in MySQL</div>
-          <div class="workflow-step-meta">Assignment details + course mapping + file metadata</div>
-        </div>
-        <div class="workflow-down-arrow">↓</div>
-
-        <!-- Step 3 -->
-        <div class="workflow-step-card step-cyan">
-          <div class="workflow-step-icon"><i data-i="book"></i></div>
-          <div class="workflow-step-name">Enrolled students see it</div>
-          <div class="workflow-step-meta">Only students enrolled in UCS310</div>
-        </div>
-        <div class="workflow-down-arrow">↓</div>
-
-        <!-- Step 4 -->
-        <div class="workflow-step-card step-purple">
-          <div class="workflow-step-icon"><i data-i="upload"></i></div>
-          <div class="workflow-step-name">Student uploads PDF / DOCX / ZIP</div>
-          <div class="workflow-step-meta">Submission stored against student and assignment IDs</div>
-        </div>
-        <div class="workflow-down-arrow">↓</div>
-
-        <!-- Step 5 -->
-        <div class="workflow-step-card step-teal">
-          <div class="workflow-step-icon"><i data-i="check"></i></div>
-          <div class="workflow-step-name">Faculty evaluates submission</div>
-          <div class="workflow-step-meta">Marks + feedback + Reviewed status</div>
-        </div>
-        <div class="workflow-down-arrow">↓</div>
-
-        <!-- Step 6 -->
-        <div class="workflow-step-card step-purple">
-          <div class="workflow-step-icon"><i data-i="award"></i></div>
-          <div class="workflow-step-name">Student sees updated result</div>
-          <div class="workflow-step-meta">Marks, feedback and assessment performance</div>
         </div>
       </div>
     </div>
@@ -630,7 +570,7 @@
         </div>
         <div>
           <h3 style="margin:0; font-size:17px;">User &amp; Portal Settings</h3>
-          <p class="muted" style="margin:2px 0 0; font-size:12px;">Customize your Athena experience &amp; security</p>
+          <p class="muted" style="margin:2px 0 0; font-size:12px;">Customize your AcadHub experience &amp; security</p>
         </div>
       </div>
       <button class="modal-close" onclick="window.closeSettingsModal()">&times;</button>
@@ -674,7 +614,7 @@
   </div>
 </div>
 
-<script src="ui.js?v=20261105.5"></script>
-<script src="app.js?v=20261105.5"></script>
+<script src="ui.js?v=20261105.6"></script>
+<script src="app.js?v=20261105.6"></script>
 </body>
 </html>
