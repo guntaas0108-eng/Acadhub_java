@@ -2399,7 +2399,7 @@
       window.scrollToSection('submissionsSection');
       if (window.loadStudentSubmissions) window.loadStudentSubmissions();
     } else if (view === 'grades') {
-      window.scrollToSection('gradesSection');
+      window.scrollToSection('overviewChartsGrid');
     }
   };
 

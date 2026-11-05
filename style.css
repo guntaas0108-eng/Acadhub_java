@@ -1839,7 +1839,7 @@ body[data-busy] .table-wrap.is-empty .empty { display: none; }
 }
 
 @media (max-width: 860px) {
-  #overviewChartsGrid, #gradesSection {
+  #overviewChartsGrid {
     grid-template-columns: 1fr !important;
   }
 }
