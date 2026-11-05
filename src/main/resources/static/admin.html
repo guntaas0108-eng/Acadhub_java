@@ -6,7 +6,7 @@
 <title>AcadHub · Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261105.6">
+<link rel="stylesheet" href="style.css?v=20261105.7">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
 <body data-page="admin">
@@ -28,35 +28,35 @@
     </a>
 
     <nav class="athena-nav-list">
-      <a href="#dashboardSection" class="athena-nav-link active">
+      <a href="#dashboardSection" class="athena-nav-link active" onclick="window.switchAdminTab&&window.switchAdminTab('home', this);return false;">
         <i data-i="home" class="nav-icon"></i>
         <span>Dashboard</span>
       </a>
-      <a href="#usersSection" class="athena-nav-link">
+      <a href="#tabLists" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('tabLists', this);return false;">
         <i data-i="users" class="nav-icon"></i>
         <span>User Accounts</span>
       </a>
-      <a href="#accountabilityMatrixSection" class="athena-nav-link">
+      <a href="#tabCourses" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('tabCourses', this);return false;">
         <i data-i="book" class="nav-icon"></i>
         <span>Courses &amp; Rosters</span>
       </a>
-      <a href="#riskTable" class="athena-nav-link">
+      <a href="#riskTable" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('riskTable', this);return false;">
         <i data-i="alert" class="nav-icon"></i>
         <span>At-Risk Guard</span>
       </a>
-      <a href="#transcriptsSection" class="athena-nav-link">
+      <a href="#tabTranscripts" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('tabTranscripts', this);return false;">
         <i data-i="award" class="nav-icon"></i>
         <span>Transcripts</span>
       </a>
-      <a href="#timetablesSection" class="athena-nav-link">
+      <a href="#tabTimetables" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('tabTimetables', this);return false;">
         <i data-i="cal" class="nav-icon"></i>
         <span>Timetables</span>
       </a>
-      <a href="#announcementsSection" class="athena-nav-link">
+      <a href="#tabAnnouncements" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('tabAnnouncements', this);return false;">
         <i data-i="trend" class="nav-icon"></i>
         <span>Announcements</span>
       </a>
-      <a href="#auditLogsSection" class="athena-nav-link">
+      <a href="#tabAudit" class="athena-nav-link" onclick="window.switchAdminTab&&window.switchAdminTab('tabAudit', this);return false;">
         <i data-i="clip" class="nav-icon"></i>
         <span>Audit Logs</span>
       </a>
@@ -107,7 +107,7 @@
 
     <!-- Scrollable Interior Content -->
     <div class="athena-interior" id="dashboardSection">
-      <div class="page-head" style="margin-bottom:0;">
+      <div class="page-head" id="home" style="margin-bottom:0;">
         <div>
           <p class="eyebrow" data-clock></p>
           <h1><span data-greeting>Hello</span>, <span id="welcomeName">Admin</span></h1>
@@ -575,7 +575,7 @@
   </div>
 </div>
 
-<script src="ui.js?v=20261105.6"></script>
-<script src="app.js?v=20261105.6"></script>
+<script src="ui.js?v=20261105.7"></script>
+<script src="app.js?v=20261105.7"></script>
 </body>
 </html>

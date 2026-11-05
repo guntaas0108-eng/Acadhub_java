@@ -40,6 +40,21 @@
   // ---------- Preloaded Standalone Store (For GitHub & Offline Frictionless Operation) ----------
   const DEFAULT_MATERIALS = [
     {
+      material_id: 12,
+      course_code: 'UCS310',
+      course_name: 'Database Management Systems',
+      title: 'Lab Assignment 4 - Advanced Relational Queries & Triggers',
+      material_type: 'Assignment',
+      content: 'Implement automated audit logging triggers for fee payment transactions and GPA calculation stored procedures. Submit PDF report and SQL source files.',
+      due_date: '2026-11-28',
+      max_marks: 25,
+      upload_date: '2026-11-05',
+      file_name: 'UCS310_Lab4_Trigger_Specification.pdf',
+      file_size: '1.8 MB',
+      submissions_count: 1,
+      faculty_name: 'Dr. Rumneek Kaur'
+    },
+    {
       material_id: 10,
       course_code: 'UCS310',
       course_name: 'Database Management Systems',
@@ -108,6 +123,23 @@
 
   const DEFAULT_SUBMISSIONS = [
     {
+      submission_id: 6,
+      material_id: 12,
+      course_code: 'UCS310',
+      roll_no: 1024030111,
+      student_name: 'Kriti',
+      title: 'Kriti_1024030111_Lab4_Trigger_Audit_Solution.pdf',
+      submission_text: 'Attached complete solution with audit table triggers, before/after row validation, and transaction rollback tests.',
+      file_name: 'Kriti_1024030111_Lab4_Trigger_Audit_Solution.pdf',
+      file_size: '1.2 MB',
+      submitted_at: '2026-11-05T12:00:00',
+      status: 'Reviewed',
+      marks_awarded: 24.5,
+      max_marks: 25,
+      feedback: 'Outstanding trigger logic and transaction rollback handling. Full audit trail verified. 24.5/25 awarded!',
+      material_title: 'Lab Assignment 4 - Advanced Relational Queries & Triggers'
+    },
+    {
       submission_id: 3,
       material_id: 10,
       course_code: 'UCS310',
@@ -157,7 +189,14 @@
   function getLocalMaterials() {
     try {
       const raw = localStorage.getItem('acadhub_materials');
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && !arr.some(m => m.material_id === 12)) {
+          arr.unshift(DEFAULT_MATERIALS[0]);
+          saveLocalMaterials(arr);
+        }
+        return arr;
+      }
     } catch (e) {}
     try { localStorage.setItem('acadhub_materials', JSON.stringify(DEFAULT_MATERIALS)); } catch (e) {}
     return DEFAULT_MATERIALS.slice();
@@ -170,7 +209,14 @@
   function getLocalSubmissions() {
     try {
       const raw = localStorage.getItem('acadhub_submissions');
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && !arr.some(s => s.submission_id === 6)) {
+          arr.unshift(DEFAULT_SUBMISSIONS[0]);
+          saveLocalSubmissions(arr);
+        }
+        return arr;
+      }
     } catch (e) {}
     try { localStorage.setItem('acadhub_submissions', JSON.stringify(DEFAULT_SUBMISSIONS)); } catch (e) {}
     return DEFAULT_SUBMISSIONS.slice();
@@ -2205,12 +2251,88 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (view === 'modules') {
       window.scrollToSection('studyMaterialsSection');
+      if (window.loadStudentMaterials) window.loadStudentMaterials();
     } else if (view === 'activity') {
       window.scrollToSection('submissionsSection');
-    } else if (view === 'chat') {
-      window.openChatBox();
-    } else if (view === 'settings') {
-      window.openSettingsModal();
+      if (window.loadStudentSubmissions) window.loadStudentSubmissions();
+    } else if (view === 'timetable') {
+      window.scrollToSection('ttSection');
+    } else if (view === 'grades') {
+      window.scrollToSection('gradesSection');
+    }
+  };
+
+  // Faculty Sidebar Tab Switcher connecting Sidebar Buttons to Output Panels
+  window.switchFacultyTab = function (tabId, el) {
+    document.querySelectorAll('.athena-nav-link').forEach(l => l.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    if (tabId === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Trigger tab button click in .seg[data-group="fac"]
+    const tabBtn = document.querySelector(`.seg[data-group="fac"] button[data-tab="${tabId}"]`);
+    if (tabBtn) {
+      tabBtn.click();
+    } else {
+      document.querySelectorAll('.tab-panel[data-group="fac"]').forEach(p => {
+        p.classList.toggle('show', p.id === tabId);
+      });
+    }
+
+    // Scroll to the active tab panel
+    const panel = document.getElementById(tabId);
+    if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Immediately load relevant live data
+    if (tabId === 'tabMaterial' && window.loadFacultyMaterials) {
+      window.loadFacultyMaterials();
+    } else if (tabId === 'tabSubmissions' && window.loadFacultySubmissions) {
+      window.loadFacultySubmissions();
+    } else if (tabId === 'tabAtt' && window.loadStudents) {
+      window.loadStudents();
+    }
+  };
+
+  // Admin Sidebar Tab Switcher connecting Sidebar Buttons to Output Panels
+  window.switchAdminTab = function (tabId, el) {
+    document.querySelectorAll('.athena-nav-link').forEach(l => l.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    if (tabId === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (tabId === 'riskTable') {
+      const elRisk = document.getElementById('riskTable');
+      if (elRisk) elRisk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // Trigger tab button click in .seg[data-group="admin"]
+    const tabBtn = document.querySelector(`.seg[data-group="admin"] button[data-tab="${tabId}"]`);
+    if (tabBtn) {
+      tabBtn.click();
+    } else {
+      document.querySelectorAll('.tab-panel[data-group="admin"]').forEach(p => {
+        p.classList.toggle('show', p.id === tabId);
+      });
+    }
+
+    // Scroll to the active tab panel
+    const panel = document.getElementById(tabId);
+    if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (tabId === 'tabAudit' && window.loadAuditLogs) {
+      window.loadAuditLogs();
+    } else if (tabId === 'tabLists' && window.loadUsersTable) {
+      window.loadUsersTable();
     }
   };
 

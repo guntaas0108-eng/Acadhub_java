@@ -6,7 +6,7 @@
 <title>AcadHub · Faculty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261105.6">
+<link rel="stylesheet" href="style.css?v=20261105.7">
 <style>
   /* Guaranteed Scoped Layout for Publish Study Material */
   .publish-box {
@@ -126,31 +126,31 @@
     </a>
 
     <nav class="athena-nav-list">
-      <a href="#facOverview" class="athena-nav-link active">
+      <a href="#facOverview" class="athena-nav-link active" onclick="window.switchFacultyTab&&window.switchFacultyTab('home', this);return false;">
         <i data-i="home" class="nav-icon"></i>
         <span>Home</span>
       </a>
-      <a href="#assignedCoursesCard" class="athena-nav-link">
+      <a href="#tabAtt" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabAtt', this);return false;">
         <i data-i="users" class="nav-icon"></i>
         <span>My Courses &amp; Roster</span>
       </a>
-      <a href="#takeAttendanceCard" class="athena-nav-link">
+      <a href="#tabAtt" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabAtt', this);return false;">
         <i data-i="cal" class="nav-icon"></i>
         <span>Mark Attendance</span>
       </a>
-      <a href="#createAssignmentSection" class="athena-nav-link">
+      <a href="#tabAssess" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabAssess', this);return false;">
         <i data-i="clip" class="nav-icon"></i>
         <span>Assignments &amp; Quizzes</span>
       </a>
-      <a href="#publishMaterialSection" class="athena-nav-link">
+      <a href="#tabMaterial" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabMaterial', this);return false;">
         <i data-i="upload" class="nav-icon"></i>
         <span>Study Materials</span>
       </a>
-      <a href="#pendingSubmissionsSection" class="athena-nav-link">
+      <a href="#tabSubmissions" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabSubmissions', this);return false;">
         <i data-i="award" class="nav-icon"></i>
         <span>Grade Submissions</span>
       </a>
-      <a href="#analyticsSection" class="athena-nav-link">
+      <a href="#tabAnalytics" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabAnalytics', this);return false;">
         <i data-i="alert" class="nav-icon"></i>
         <span>Analytics &amp; Risk</span>
       </a>
@@ -594,7 +594,7 @@
   </div>
 </div>
 
-<script src="ui.js?v=20261105.6"></script>
-<script src="app.js?v=20261105.6"></script>
+<script src="ui.js?v=20261105.7"></script>
+<script src="app.js?v=20261105.7"></script>
 </body>
 </html>
