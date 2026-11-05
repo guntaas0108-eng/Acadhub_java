@@ -46,7 +46,6 @@
       title: 'Lab Assignment 4 - Advanced Relational Queries & Triggers',
       material_type: 'Assignment',
       content: 'Implement automated audit logging triggers for fee payment transactions and GPA calculation stored procedures. Submit PDF report and SQL source files.',
-      due_date: '2026-11-28',
       max_marks: 25,
       upload_date: '2026-11-05',
       file_name: 'UCS310_Lab4_Trigger_Specification.pdf',
@@ -2447,7 +2446,6 @@
             <span class="mat-course">${esc(m.course_code)} · ${esc(m.course_name || '')}</span>
             <div style="display:flex;gap:6px;align-items:center;">
               <span class="badge ${typeClass}">${esc(m.material_type || 'Notes')}</span>
-              ${m.due_date ? `<span class="chip warn" style="font-size:11px;padding:2px 6px;">Due: ${esc(m.due_date)}</span>` : ''}
               ${m.max_marks ? `<span class="chip ok" style="font-size:11px;padding:2px 6px;">${esc(m.max_marks)} pts</span>` : ''}
             </div>
           </div>
