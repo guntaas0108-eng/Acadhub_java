@@ -468,6 +468,11 @@
         courses: [
           { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, attendance_pct: 84.0, total_classes: 25, attended: 21, marks: 42, max_marks: 50, grade: 'A' },
           { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, attendance_pct: 87.5, total_classes: 24, attended: 21, marks: 45, max_marks: 50, grade: 'A+' }
+        ],
+        marks: [
+          { courseName: 'Database Management Systems', assessmentType: 'Mid Term', marksObtained: 42, totalMarks: 50, percentage: 84.0 },
+          { courseName: 'Database Management Systems', assessmentType: 'End Term', marksObtained: 78, totalMarks: 100, percentage: 78.0 },
+          { courseName: 'Operating Systems', assessmentType: 'Mid Term', marksObtained: 38, totalMarks: 50, percentage: 76.0 }
         ]
       };
     }
@@ -2186,6 +2191,78 @@
           </tr>
         `).join('');
       }
+    }
+
+    // Academic Marks Analytics Vertical Bar Chart (Screenshot 2 style)
+    const marksChartWrap = $('marksChartWrap');
+    if (marksChartWrap) {
+      const marksList = d.marks || [];
+      let marksData = [];
+      if (marksList.length) {
+        marksData = marksList.map(m => {
+          const rawCourse = m.courseName || m.course_name || 'Course';
+          const assess = m.assessmentType || m.assessment_type || 'Exam';
+          let shortCode = rawCourse;
+          if (rawCourse.toLowerCase().includes('database')) shortCode = 'DBMS';
+          else if (rawCourse.toLowerCase().includes('operating')) shortCode = 'OS';
+          else if (rawCourse.toLowerCase().includes('network')) shortCode = 'CN';
+          else if (rawCourse.length > 8) shortCode = rawCourse.split(' ').map(w => w[0]).join('').toUpperCase();
+
+          const shortAssess = assess.toLowerCase().includes('mid') ? 'Mid' : (assess.toLowerCase().includes('end') ? 'End' : assess.slice(0, 4));
+          const label = `${shortCode} (${shortAssess})`;
+
+          const scored = m.marksObtained != null ? Number(m.marksObtained) : (m.marks_obtained != null ? Number(m.marks_obtained) : 42);
+          const total = m.totalMarks != null ? Number(m.totalMarks) : (m.total_marks != null ? Number(m.total_marks) : 50);
+          const pct = m.percentage != null ? Number(m.percentage) : (total > 0 ? (scored / total) * 100 : 75);
+
+          return {
+            fullName: rawCourse,
+            assess: assess,
+            label: label,
+            scored: scored,
+            total: total,
+            pct: Math.min(100, Math.max(0, Math.round(pct)))
+          };
+        });
+      } else if (courses.length) {
+        marksData = courses.map(c => {
+          const scored = c.marks != null ? Number(c.marks) : 42;
+          const total = c.max_marks ? Number(c.max_marks) : 50;
+          const pct = Math.round((scored / total) * 100);
+          return {
+            fullName: c.course_name || c.course_code,
+            assess: 'Exam',
+            label: c.course_code,
+            scored: scored,
+            total: total,
+            pct: pct
+          };
+        });
+      } else {
+        marksData = [
+          { fullName: 'Database Management Systems', assess: 'Mid Term', label: 'DBMS (Mid)', scored: 42, total: 50, pct: 84 },
+          { fullName: 'Database Management Systems', assess: 'End Term', label: 'DBMS (End)', scored: 78, total: 100, pct: 78 },
+          { fullName: 'Operating Systems', assess: 'Mid Term', label: 'OS (Mid)', scored: 38, total: 50, pct: 76 }
+        ];
+      }
+
+      marksChartWrap.innerHTML = `
+        <div class="athena-gridline" style="bottom: 85%;"><span class="athena-grid-label">100</span></div>
+        <div class="athena-gridline" style="bottom: 65%;"><span class="athena-grid-label">75</span></div>
+        <div class="athena-gridline" style="bottom: 45%;"><span class="athena-grid-label">50</span></div>
+        <div class="athena-gridline" style="bottom: 25%;"><span class="athena-grid-label">25</span></div>
+        <div class="athena-gridline" style="bottom: 5%;"><span class="athena-grid-label">0</span></div>
+      ` + marksData.map(md => {
+        const barHeight = Math.max(8, Math.round((md.pct / 100) * 82));
+        return `
+          <div class="athena-bar-col">
+            <div class="athena-bar-rect" style="height: ${barHeight}%;">
+              <span class="athena-bar-tooltip">${esc(md.fullName)} (${esc(md.assess)}): ${md.scored} / ${md.total} (${md.pct}%)</span>
+            </div>
+            <span class="athena-bar-label">${esc(md.label)}</span>
+          </div>
+        `;
+      }).join('');
     }
 
     // Academic Marks & Grades
