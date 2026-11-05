@@ -6,7 +6,7 @@
 <title>AcadHub · Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261106.2">
+<link rel="stylesheet" href="style.css?v=20261106.3">
 <style>
   .modern-dropzone {
     position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
@@ -89,10 +89,6 @@
         <i data-i="activity" class="nav-icon"></i>
         <span>Activity</span>
       </a>
-      <a href="#ttSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('timetable', this);return false;">
-        <i data-i="cal" class="nav-icon"></i>
-        <span>Timetable</span>
-      </a>
       <a href="#gradesSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('grades', this);return false;">
         <i data-i="award" class="nav-icon"></i>
         <span>Academic Grades</span>
@@ -134,7 +130,7 @@
         <button class="athena-icon-btn" id="themeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
           <i data-i="moon"></i><i data-i="sun"></i>
         </button>
-        <button class="athena-icon-btn" type="button" title="Announcements & Notifications" onclick="document.getElementById('ttSection')?.scrollIntoView({behavior:'smooth'})">
+        <button class="athena-icon-btn" type="button" title="Announcements & Notifications" onclick="document.getElementById('notifDrawer')?.scrollIntoView({behavior:'smooth'})">
           <i data-i="bell"></i>
           <span class="notif-badge-dot"></span>
         </button>
@@ -155,9 +151,9 @@
             <p>Here's your academic overview for today.</p>
           </div>
           <div class="athena-action-pills">
-            <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Services &amp; Tools</button>
-            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('ttSection')">Timetable</button>
+            <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Modules &amp; Files</button>
             <button type="button" class="athena-action-pill" onclick="window.scrollToSection('submissionsSection')">Submissions</button>
+            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('gradesSection')">Academic Grades</button>
           </div>
         </div>
 
@@ -281,7 +277,7 @@
 
   </main>
 
-  <!-- Column 3: Right Notifications & Timetable Drawer (Screenshot 2) -->
+  <!-- Column 3: Right Notifications Drawer -->
   <aside class="athena-aside" id="notifDrawer">
 
     <!-- Search Input Bar -->
@@ -342,56 +338,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Timetable Box with Mini Week Strip (Screenshot 2) -->
-    <div class="athena-timetable-box" id="ttSection">
-      <div style="font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between;">
-        <span>Timetable Schedule</span>
-        <span class="muted" style="font-size:12px;">November</span>
-      </div>
-
-      <!-- Mini Week Strip: M T W T F S S (9 10 11 12 13 14 15) -->
-      <div class="athena-week-strip" id="weekStripDays">
-        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Mon')">
-          <span class="athena-day-char">M</span>
-          <span class="athena-day-num">9</span>
-        </div>
-        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Tue')">
-          <span class="athena-day-char">T</span>
-          <span class="athena-day-num">10</span>
-        </div>
-        <div class="athena-day-col active" onclick="window.selectTimetableDay(this, 'Wed')">
-          <span class="athena-day-char">W</span>
-          <span class="athena-day-num">11</span>
-        </div>
-        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Thu')">
-          <span class="athena-day-char">T</span>
-          <span class="athena-day-num">12</span>
-        </div>
-        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Fri')">
-          <span class="athena-day-char">F</span>
-          <span class="athena-day-num">13</span>
-        </div>
-        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Sat')">
-          <span class="athena-day-char">S</span>
-          <span class="athena-day-num">14</span>
-        </div>
-        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Sun')">
-          <span class="athena-day-char">S</span>
-          <span class="athena-day-num">15</span>
-        </div>
-      </div>
-
-      <!-- Selected Day Schedule Message -->
-      <div class="athena-tt-status" id="timetableStatusBox">
-        No classes scheduled for this day!
-      </div>
-
-      <a href="#studyMaterialsSection" class="athena-view-tt-link">
-        <span>View Full Timetable</span>
-        <span>→</span>
-      </a>
     </div>
 
   </aside>
@@ -500,7 +446,7 @@
   </div>
 </div>
 
-<script src="ui.js?v=20261106.2"></script>
-<script src="app.js?v=20261106.2"></script>
+<script src="ui.js?v=20261106.3"></script>
+<script src="app.js?v=20261106.3"></script>
 </body>
 </html>
