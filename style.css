@@ -1101,18 +1101,13 @@ body[data-busy] .table-wrap.is-empty .empty { display: none; }
 /* Interior Layouts */
 .athena-dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr;
   gap: 24px;
   padding: 24px 32px 60px;
   max-width: 1540px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-}
-@media (max-width: 1200px) {
-  .athena-dashboard-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .athena-interior {

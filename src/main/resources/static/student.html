@@ -6,7 +6,7 @@
 <title>AcadHub · Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261106.6">
+<link rel="stylesheet" href="style.css?v=20261106.7">
 <style>
   .modern-dropzone {
     position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
@@ -130,7 +130,7 @@
         <button class="athena-icon-btn" id="themeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
           <i data-i="moon"></i><i data-i="sun"></i>
         </button>
-        <button class="athena-icon-btn" type="button" title="Announcements & Notifications" onclick="document.getElementById('notifDrawer')?.scrollIntoView({behavior:'smooth'})">
+        <button class="athena-icon-btn" type="button" title="Notifications">
           <i data-i="bell"></i>
           <span class="notif-badge-dot"></span>
         </button>
@@ -247,70 +247,7 @@
 
   </main>
 
-  <!-- Column 3: Right Notifications Drawer -->
-  <aside class="athena-aside" id="notifDrawer">
 
-    <!-- Search Input Bar -->
-    <div class="athena-search-bar">
-      <i data-i="search" style="color:var(--muted)"></i>
-      <input type="text" placeholder="Search pages, modules, services..." aria-label="Search pages and modules">
-      <i data-i="book" style="color:var(--muted);cursor:pointer;" title="Bookmark"></i>
-    </div>
-
-    <!-- Notifications Box (Screenshot 2) -->
-    <div class="athena-notif-box">
-      <div class="athena-notif-head">
-        <div class="athena-notif-title-group">
-          <span>Notifications</span>
-          <span class="athena-notif-badge" id="notifBadgeCount">8</span>
-        </div>
-        <button type="button" class="athena-mark-read" onclick="window.markAllNotificationsRead&&window.markAllNotificationsRead()">Mark all read</button>
-      </div>
-
-      <div class="athena-notif-list" id="notifListContainer">
-        <!-- Notification 1 -->
-        <div class="athena-notif-item">
-          <div class="athena-notif-icon warn"><i data-i="cal"></i></div>
-          <div class="athena-notif-body">
-            <div class="athena-notif-name">Lecture Cancelled</div>
-            <div class="athena-notif-text">The lecture for CS101 tomorrow is cancelled due to illness. Please check the learning portal for reading materials.</div>
-            <div class="athena-notif-meta">Dr. Alan Turing · 2 hours ago</div>
-          </div>
-        </div>
-
-        <!-- Notification 2 -->
-        <div class="athena-notif-item">
-          <div class="athena-notif-icon warn"><i data-i="book"></i></div>
-          <div class="athena-notif-body">
-            <div class="athena-notif-name">New Assignment Uploaded</div>
-            <div class="athena-notif-text">Assignment 2: Genetic Algorithms has been uploaded. This is a crucial part of your continuous evaluation.</div>
-            <div class="athena-notif-meta">Dr. Dijkstra · 1 day ago</div>
-          </div>
-        </div>
-
-        <!-- Notification 3 -->
-        <div class="athena-notif-item">
-          <div class="athena-notif-icon danger"><i data-i="warn"></i></div>
-          <div class="athena-notif-body">
-            <div class="athena-notif-name">Library Overdue Notice</div>
-            <div class="athena-notif-text">You have a book overdue: "Clean Code". Please return it to the Brotherton Library to avoid daily penalty fines.</div>
-            <div class="athena-notif-meta">Library Services · 2 days ago</div>
-          </div>
-        </div>
-
-        <!-- Notification 4 -->
-        <div class="athena-notif-item">
-          <div class="athena-notif-icon info"><i data-i="clip"></i></div>
-          <div class="athena-notif-body">
-            <div class="athena-notif-name">Week 5 Slides Available</div>
-            <div class="athena-notif-text">The slides for Week 5 have been uploaded to module resources. It covers the new topics on Distributed Transactions.</div>
-            <div class="athena-notif-meta">Academic Services · 3 days ago</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </aside>
     </div> <!-- closes athena-dashboard-grid -->
   </div> <!-- closes athena-main-wrap -->
 </div> <!-- closes athena-shell -->
@@ -416,7 +353,7 @@
   </div>
 </div>
 
-<script src="ui.js?v=20261106.6"></script>
-<script src="app.js?v=20261106.6"></script>
+<script src="ui.js?v=20261106.7"></script>
+<script src="app.js?v=20261106.7"></script>
 </body>
 </html>
