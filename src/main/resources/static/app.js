@@ -378,18 +378,28 @@
 
     if (url.includes('/api/admin/dashboard')) {
       return {
-        kpis: { total_students: 128, total_faculty: 24, total_courses: 18, total_enrollments: 342 },
-        departments: [
-          { department: 'Computer Science', count: 72 },
-          { department: 'Information Technology', count: 56 }
+        summary: { total_students: 9, total_faculty: 4, total_courses: 5, total_enrollments: 17 },
+        stats: { total_students: 9, total_faculty: 4, total_courses: 5, total_enrollments: 17 },
+        enrollmentGraph: [
+          { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, semester: 6, enrolled_students: 8, faculty_names: 'Dr. Rumneek Kaur' },
+          { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, semester: 6, enrolled_students: 5, faculty_names: 'Dr. Rumneek Kaur' },
+          { course_code: 'UCS503', course_name: 'Software Engineering', credits: 3, semester: 6, enrolled_students: 4, faculty_names: 'Unassigned' }
+        ],
+        accountabilityMatrix: [
+          { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, semester: 6, enrolled_count: 8, faculty_names: 'Dr. Rumneek Kaur', enrolled_students_list: 'Kriti Sharma (Roll: 102403111); Lavdeep (Roll: 1024030107); Aarav Patel (Roll: 1024030101)' },
+          { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, semester: 6, enrolled_count: 5, faculty_names: 'Dr. Rumneek Kaur', enrolled_students_list: 'Kriti Sharma (Roll: 102403111); Priya Singh (Roll: 1024030102)' },
+          { course_code: 'UCS503', course_name: 'Software Engineering', credits: 3, semester: 6, enrolled_count: 4, faculty_names: 'Unassigned', enrolled_students_list: 'Kriti Sharma (Roll: 102403111); Rohan Verma (Roll: 1024030103)' }
+        ],
+        facultyAccountability: [
+          { faculty_id: 1, faculty_name: 'Dr. Rumneek Kaur', username: 'rumneek24', designation: 'Associate Professor', department: 'CSE', courses_taught: 'UCS310, UCS520', total_students_mentored: 8 }
         ],
         atRisk: [
-          { roll_no: 1024030105, student_name: 'Rahul Sharma', course_code: 'UCS310', total_classes: 25, attended_classes: 16, percentage: 64.0 },
-          { roll_no: 1024030109, student_name: 'Simran Kaur', course_code: 'UCS520', total_classes: 24, attended_classes: 15, percentage: 62.5 }
+          { roll_no: 1024030105, name: 'Rahul Sharma', student_name: 'Rahul Sharma', course_code: 'UCS310', attendance_pct: 64.0, avg_marks: 52.0 }
         ],
-        audit: [
-          { log_id: 1, action: 'User Created', username: 'doaa30', target: 'student102', timestamp: '2026-11-04 14:22:00' },
-          { log_id: 2, action: 'Course Enrolled', username: 'doaa30', target: 'UCS310', timestamp: '2026-11-04 15:10:00' }
+        users: [
+          { user_id: 1, username: 'kriti16', name: 'Kriti Sharma', role: 'Student', phone: '9876543210' },
+          { user_id: 2, username: 'rumneek24', name: 'Dr. Rumneek Kaur', role: 'Faculty', phone: '9876543211' },
+          { user_id: 3, username: 'doaa30', name: 'Dean of Academic Affairs', role: 'Admin', phone: '9876543212' }
         ]
       };
     }
@@ -926,30 +936,146 @@
   }
 
   async function refreshAdmin() {
-    const d = await apiGet('/api/admin/dashboard');
-    if (d && d.kpis) {
-      if ($('kpiStudents')) $('kpiStudents').textContent = d.kpis.total_students || 0;
-      if ($('kpiFaculty')) $('kpiFaculty').textContent = d.kpis.total_faculty || 0;
-      if ($('kpiCourses')) $('kpiCourses').textContent = d.kpis.total_courses || 0;
-      if ($('kpiEnrollments')) $('kpiEnrollments').textContent = d.kpis.total_enrollments || 0;
+    const data = await apiGet('/api/admin/dashboard');
+    if (!data) return;
+
+    // Support both direct Map and List<Map>
+    const summary = (Array.isArray(data.summary) ? data.summary[0] : data.summary) ||
+                    (Array.isArray(data.stats) ? data.stats[0] : data.stats) ||
+                    data.kpis || {};
+
+    const students = Number(summary.total_students ?? summary.totalStudents ?? 0);
+    const faculty = Number(summary.total_faculty ?? summary.totalFaculty ?? 0);
+    const courses = Number(summary.total_courses ?? summary.totalCourses ?? 0);
+    const enrollments = Number(summary.total_enrollments ?? summary.totalEnrollments ?? 0);
+
+    if ($('totalStudents')) $('totalStudents').textContent = students;
+    if ($('totalFaculty')) $('totalFaculty').textContent = faculty;
+    if ($('totalCourses')) $('totalCourses').textContent = courses;
+    if ($('totalEnrollments')) $('totalEnrollments').textContent = enrollments;
+
+    // 1. Live Course Enrollment Distribution Graph
+    const graphBars = $('enrollmentGraphBars');
+    if (graphBars) {
+      const list = data.enrollmentGraph || [];
+      const maxCount = Math.max(...list.map(c => Number(c.enrolled_students || 0)), 1);
+      const totalActive = list.reduce((a, b) => a + Number(b.enrolled_students || 0), 0);
+      if ($('graphTotalBadge')) $('graphTotalBadge').textContent = `Total Active: ${totalActive}`;
+
+      if (!list.length) {
+        graphBars.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">No course enrollments recorded yet.</p>';
+      } else {
+        graphBars.innerHTML = list.map(c => {
+          const count = Number(c.enrolled_students || 0);
+          const pct = Math.max(8, Math.round((count / maxCount) * 100));
+          return `
+            <div class="graph-bar-row">
+              <div class="graph-course-info">
+                <span class="graph-course-code">${esc(c.course_code)}</span>
+                <span class="graph-course-faculty">Instructor: ${esc(c.faculty_names || 'Unassigned')}</span>
+              </div>
+              <div class="graph-track" title="${count} enrolled in ${esc(c.course_name)}">
+                <div class="graph-fill" style="width: ${pct}%;"></div>
+              </div>
+              <div class="graph-val">${count} ${count === 1 ? 'student' : 'students'}</div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
-    if (d && d.atRisk && $('atRiskBody')) {
-      $('atRiskBody').innerHTML = d.atRisk.map(s => `
-        <tr>
-          <td><b>${esc(s.student_name)}</b> <span class="muted">(Roll: ${esc(s.roll_no)})</span></td>
-          <td><span class="badge notes">${esc(s.course_code)}</span></td>
-          <td><span class="chip danger">${esc(s.percentage)}%</span></td>
-          <td class="muted">${esc(s.attended_classes)} / ${esc(s.total_classes)}</td>
-        </tr>
-      `).join('');
+    // 2. Academic Accountability & Connectivity Matrix (Course <-> Faculty <-> Students)
+    const accBody = $('accountabilityBody');
+    if (accBody) {
+      const matrix = data.accountabilityMatrix || [];
+      if (!matrix.length) {
+        accBody.innerHTML = '';
+      } else {
+        accBody.innerHTML = matrix.map(m => {
+          const rawStudents = m.enrolled_students_list || '';
+          const students = rawStudents.split(';').map(s => s.trim()).filter(Boolean);
+          const isAssigned = m.faculty_names && m.faculty_names !== 'Unassigned';
+          return `
+            <tr>
+              <td>
+                <b class="graph-course-code" style="font-size:14px;">${esc(m.course_code)}</b>
+                <div style="font-weight:600;font-size:13px;color:var(--text);margin-top:2px;">${esc(m.course_name)}</div>
+                <div class="muted" style="font-size:11.5px;margin-top:2px;">Semester ${esc(m.semester || 6)} · ${esc(m.credits || 4)} credits</div>
+              </td>
+              <td>
+                <span class="chip ${isAssigned ? 'ok' : 'warn'}">
+                  <i data-i="users"></i>${esc(m.faculty_names || 'Unassigned')}
+                </span>
+              </td>
+              <td>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--teal);">${esc(m.enrolled_count || 0)}</span>
+              </td>
+              <td>
+                <div class="student-tags-wrap">
+                  ${students.length && rawStudents !== 'No students enrolled' ? students.map(st => `
+                    <span class="stu-tag"><i data-i="cap"></i>${esc(st)}</span>
+                  `).join('') : '<span class="muted" style="font-size:12px;">No students enrolled yet</span>'}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
 
+    // 3. Faculty Workload & Accountability Grid
+    const facWorkload = $('facultyWorkloadList');
+    if (facWorkload) {
+      const facList = data.facultyAccountability || [];
+      if (!facList.length) {
+        facWorkload.innerHTML = '<p class="muted" style="grid-column:1/-1;text-align:center;padding:16px;">No faculty members registered.</p>';
+      } else {
+        facWorkload.innerHTML = facList.map(f => `
+          <div class="fac-card">
+            <div class="fac-top">
+              <div class="fac-avatar">${esc((f.faculty_name || 'P').charAt(0))}</div>
+              <div>
+                <div style="font-weight:700;font-size:14.5px;color:var(--text);">${esc(f.faculty_name)}</div>
+                <div class="muted" style="font-size:12px;">${esc(f.designation || 'Faculty')} · ${esc(f.department || 'CSE')} (@${esc(f.username)})</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;font-size:13px;display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);">
+              <span class="muted">Courses Assigned:</span>
+              <strong class="graph-course-code">${esc(f.courses_taught || 'None')}</strong>
+            </div>
+            <div style="margin-top:6px;font-size:13px;display:flex;justify-content:space-between;">
+              <span class="muted">Students Mentored:</span>
+              <strong style="color:var(--teal);font-family:'JetBrains Mono',monospace;">${esc(f.total_students_mentored || 0)} enrolled</strong>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 4. At-Risk Table
+    const riskBody = $('riskBody') || $('atRiskBody');
+    if (riskBody) {
+      const atRisk = data.atRisk || [];
+      if (!atRisk.length) {
+        riskBody.innerHTML = '';
+      } else {
+        riskBody.innerHTML = atRisk.map(r => `
+          <tr class="risk-row">
+            <td><b>${esc(r.name || r.student_name || r.roll_no)}</b> <span class="muted">(Roll: ${esc(r.roll_no)})</span></td>
+            <td>${esc(r.course_code || r.course)}</td>
+            <td>${Number(r.attendance_pct || r.percentage || 0).toFixed(1)}%</td>
+            <td>${Number(r.avg_marks || 0).toFixed(1)} / 100</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // 5. Options & User Directory
     const opts = await apiGet('/api/admin/options');
     if (opts) {
       if (opts.courses) {
         const cOpts = opts.courses.map(c => `<option value="${esc(c.course_code)}">${esc(c.course_code)} - ${esc(c.course_name)}</option>`).join('');
-        ['aCourse', 'eCourse'].forEach(id => { if ($(id)) $(id).innerHTML = cOpts; });
+        ['aCourse', 'eCourse', 'uCourse'].forEach(id => { if ($(id)) $(id).innerHTML = cOpts; });
       }
       if (opts.students && $('eStudent')) {
         $('eStudent').innerHTML = opts.students.map(s => `<option value="${esc(s.roll_no)}">${esc(s.name)} (Roll: ${esc(s.roll_no)})</option>`).join('');
@@ -957,12 +1083,13 @@
       if (opts.faculty && $('aFaculty')) {
         $('aFaculty').innerHTML = opts.faculty.map(f => `<option value="${esc(f.faculty_id)}">${esc(f.name)}</option>`).join('');
       }
-      if (opts.users && $('userListBody')) {
-        $('userListBody').innerHTML = opts.users.map(u => `
+      const userListEl = $('userListBody') || $('usersBody');
+      if (opts.users && userListEl) {
+        userListEl.innerHTML = opts.users.map(u => `
           <tr>
             <td>@${esc(u.username)}</td>
             <td><b>${esc(u.name)}</b></td>
-            <td><span class="chip ${u.role === 'Admin' ? 'ok' : (u.role === 'Faculty' ? 'sky' : 'teal')}">${esc(u.role)}</span></td>
+            <td><span class="chip ${u.role === 'Admin' ? 'warn' : (u.role === 'Faculty' ? 'sky' : 'ok')}">${esc(u.role)}</span></td>
             <td>
               <button class="btn ghost" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.deleteUser(${u.user_id}, '${esc(u.username)}')"><i data-i="trash"></i></button>
             </td>
@@ -970,6 +1097,8 @@
         `).join('');
       }
     }
+
+    if (window.UI && window.UI.icons) window.UI.icons();
   }
 
   // ============================================================
