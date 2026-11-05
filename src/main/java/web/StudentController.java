@@ -78,6 +78,23 @@ public class StudentController {
               + "LEFT JOIN USERS u ON f.user_id = u.user_id "
               + "WHERE e.roll_no = ? ORDER BY c.course_code", rollNo);
 
+            var attList = reportDao.getAttendance(rollNo);
+            int sumAttended = 0;
+            int sumTotal = 0;
+            for (var a : attList) {
+                sumAttended += a.presentCount();
+                sumTotal += a.totalClasses();
+            }
+            double overallPct = sumTotal > 0 ? Math.round(((double) sumAttended / sumTotal) * 1000.0) / 10.0 : 0.0;
+
+            var announcements = Rows.query(
+                "SELECT announcement_id, title, content, author, category, posted_at FROM announcements WHERE is_active = 1 ORDER BY announcement_id DESC LIMIT 6");
+
+            var timetables = Rows.query(
+                "SELECT t.timetable_id, t.course_code, t.course_name, t.day_of_week, t.start_time, t.end_time, t.room, t.faculty_name "
+              + "FROM timetables t JOIN enrollment e ON t.course_code = e.course_code "
+              + "WHERE e.roll_no = ? ORDER BY t.day_of_week, t.start_time", rollNo);
+
             return ResponseEntity.ok(Map.of(
                 "details", Map.of(
                     "name", user.getName(),
@@ -88,7 +105,14 @@ public class StudentController {
                 ),
                 "enrolledCourses", enrolledCourses,
                 "marks", reportDao.getMarks(rollNo),
-                "attendance", reportDao.getAttendance(rollNo)
+                "attendance", attList,
+                "overallAttendance", Map.of(
+                    "attended", sumAttended,
+                    "total", sumTotal,
+                    "percentage", overallPct
+                ),
+                "announcements", announcements,
+                "timetables", timetables
             ));
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,7 +132,7 @@ public class StudentController {
             int rollNo = Integer.parseInt(student.getRollNo());
 
             String sql = "SELECT sm.material_id, sm.course_code, c.course_name, sm.title, sm.material_type, "
-                       + "sm.content, sm.upload_date, sm.file_name, sm.file_path, sm.file_size, u.name AS faculty_name "
+                       + "sm.content, sm.upload_date, sm.file_name, sm.file_path, sm.file_size, sm.due_date, sm.max_marks, u.name AS faculty_name "
                        + "FROM study_material sm "
                        + "JOIN course c ON sm.course_code = c.course_code "
                        + "JOIN faculty f ON sm.faculty_id = f.faculty_id "
@@ -185,6 +209,13 @@ public class StudentController {
                 blank(submissionText) ? (fileName != null ? "File attached: " + fileName : "Assignment submission") : submissionText.trim(),
                 storedPath, fileName, fileSize);
 
+            // Audit Trail
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    user.getUserId(), user.getUsername(), "SUBMIT_ASSIGNMENT",
+                    "Student " + rollNo + " submitted assignment '" + title.trim() + "' for course " + courseCode.trim().toUpperCase());
+            } catch (Exception ignored) {}
+
             return ResponseEntity.ok(Map.of(
                 "status", "saved",
                 "submissionId", subId,
@@ -215,7 +246,8 @@ public class StudentController {
 
             var list = Rows.query(
                 "SELECT ss.submission_id, ss.material_id, ss.course_code, c.course_name, ss.title, "
-              + "ss.submission_text, ss.file_url, ss.file_name, ss.file_size, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
+              + "ss.submission_text, ss.file_url, ss.file_name, ss.file_size, ss.submitted_at, ss.status, ss.feedback, "
+              + "ss.marks_awarded, sm.title AS material_title, sm.due_date, sm.max_marks "
               + "FROM student_submission ss "
               + "JOIN course c ON ss.course_code = c.course_code "
               + "LEFT JOIN study_material sm ON ss.material_id = sm.material_id "

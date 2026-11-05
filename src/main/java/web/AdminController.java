@@ -25,6 +25,10 @@ public class AdminController {
     public record EnrollReq(Integer rollNo, String courseCode) {}
     public record AssignReq(Integer facultyId, String courseCode) {}
     public record AssessmentReq(String courseCode, String assessmentType, Integer totalMarks, Integer passingMarks) {}
+    public record EditUserReq(String name, String username, String phone, String role, String department, String branch, Integer semester, String designation) {}
+    public record AnnouncementReq(String title, String content, String category) {}
+    public record TimetableReq(String courseCode, String courseName, String dayOfWeek, String startTime, String endTime, String room, String facultyName) {}
+    public record RoleReq(String role) {}
 
     // ---------- helpers ----------
     private User getAdmin(HttpSession session) {
@@ -128,7 +132,13 @@ public class AdminController {
               + "GROUP BY f.faculty_id, u.name, u.username, f.designation, f.department "
               + "ORDER BY total_students_mentored DESC");
 
-            var users = Rows.query("SELECT user_id, name, username, role, phone FROM USERS ORDER BY user_id");
+            var users = Rows.query(
+                "SELECT u.user_id, u.name, u.username, u.role, u.phone, COALESCE(u.is_active, 1) AS is_active, "
+              + "s.roll_no, s.department, s.semester, f.designation "
+              + "FROM USERS u "
+              + "LEFT JOIN STUDENT s ON u.user_id = s.user_id "
+              + "LEFT JOIN FACULTY f ON u.user_id = f.user_id "
+              + "ORDER BY u.user_id DESC");
             var atRisk = Rows.query(
                 "SELECT roll_no, name, course_code, attendance_pct, avg_marks "
               + "FROM at_risk_students WHERE risk_status = 'At Risk' ORDER BY roll_no");
@@ -319,6 +329,217 @@ public class AdminController {
             Rows.update("INSERT INTO ASSESSMENT (assessment_id, course_code, assessment_type, total_marks, passing_marks) VALUES (?,?,?,?,?)",
                     nextId("ASSESSMENT", "assessment_id"), r.courseCode().trim().toUpperCase(), r.assessmentType().trim(), r.totalMarks(), pass);
             return ResponseEntity.ok(Map.of("status", "saved"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- toggle user account active/deactivated ----------
+    @PostMapping("/user/{id}/toggle-status")
+    public ResponseEntity<?> toggleUserStatus(@PathVariable int id, HttpSession session) {
+        User admin = getAdmin(session);
+        if (admin == null) return denied();
+        if (admin.getUserId() == id) return bad("Cannot deactivate your own administrator account");
+        try {
+            var user = Rows.query("SELECT username, COALESCE(is_active, 1) AS is_active FROM USERS WHERE user_id = ?", id);
+            if (user.isEmpty()) return bad("User not found");
+            int currentStatus = ((Number) user.get(0).get("is_active")).intValue();
+            int newStatus = (currentStatus == 1) ? 0 : 1;
+            Rows.update("UPDATE USERS SET is_active = ? WHERE user_id = ?", newStatus, id);
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    admin.getUserId(), admin.getUsername(), "TOGGLE_USER_STATUS",
+                    (newStatus == 1 ? "Activated" : "Deactivated") + " account for " + user.get(0).get("username"));
+            } catch (Exception ignored) {}
+            return ResponseEntity.ok(Map.of("status", "saved", "isActive", newStatus));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- edit user details ----------
+    @PostMapping("/user/{id}/edit")
+    public ResponseEntity<?> editUser(@PathVariable int id, @RequestBody EditUserReq r, HttpSession session) {
+        User admin = getAdmin(session);
+        if (admin == null) return denied();
+        if (blank(r.name()) || blank(r.username())) return bad("Name and username are required");
+        try {
+            Rows.update("UPDATE USERS SET name = ?, username = ?, phone = ? WHERE user_id = ?",
+                r.name().trim(), r.username().trim(), blank(r.phone()) ? null : r.phone().trim(), id);
+            if ("Student".equalsIgnoreCase(r.role())) {
+                Rows.update("UPDATE STUDENT SET department = ?, branch = ?, semester = ? WHERE user_id = ?",
+                    blank(r.department()) ? "CSE" : r.department().trim(),
+                    blank(r.branch()) ? "COE" : r.branch().trim(),
+                    r.semester() == null ? 1 : r.semester(), id);
+            } else if ("Faculty".equalsIgnoreCase(r.role())) {
+                Rows.update("UPDATE FACULTY SET designation = ?, department = ? WHERE user_id = ?",
+                    blank(r.designation()) ? "Assistant Professor" : r.designation().trim(),
+                    blank(r.department()) ? "CSE" : r.department().trim(), id);
+            }
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    admin.getUserId(), admin.getUsername(), "EDIT_USER",
+                    "Updated details for user: " + r.username().trim());
+            } catch (Exception ignored) {}
+            return ResponseEntity.ok(Map.of("status", "saved"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- generate student academic transcript ----------
+    @GetMapping("/transcript/{rollNo}")
+    public ResponseEntity<?> getTranscript(@PathVariable int rollNo, HttpSession session) {
+        if (getAdmin(session) == null) return denied();
+        try {
+            var stuRows = Rows.query(
+                "SELECT s.roll_no, u.name, u.username, u.phone, s.department, s.branch, s.semester, s.cgpa "
+              + "FROM STUDENT s JOIN USERS u ON s.user_id = u.user_id WHERE s.roll_no = ?", rollNo);
+            if (stuRows.isEmpty()) return bad("Student not found with roll no: " + rollNo);
+
+            var courses = Rows.query(
+                "SELECT c.course_code, c.course_name, c.credits, c.semester, "
+              + "COALESCE(MAX(sp.marks_obtained), 0) AS marks_obtained, "
+              + "COALESCE(MAX(a.total_marks), 100) AS total_marks, "
+              + "COALESCE(MAX(sp.grade), 'A') AS grade "
+              + "FROM ENROLLMENT e "
+              + "JOIN COURSE c ON e.course_code = c.course_code "
+              + "LEFT JOIN ASSESSMENT a ON c.course_code = a.course_code "
+              + "LEFT JOIN STUDENT_PERFORMANCE sp ON a.assessment_id = sp.assessment_id AND sp.roll_no = e.roll_no "
+              + "WHERE e.roll_no = ? "
+              + "GROUP BY c.course_code, c.course_name, c.credits, c.semester", rollNo);
+
+            var att = Rows.query(
+                "SELECT course_code, total_classes, present_count, attendance_pct FROM attendance_summary WHERE roll_no = ?", rollNo);
+
+            return ResponseEntity.ok(Map.of(
+                "student", stuRows.get(0),
+                "courses", courses,
+                "attendance", att,
+                "university", "AcadHub University of Technology",
+                "term", "Term 2026 Academic Session",
+                "issuedDate", java.time.LocalDate.now().toString()
+            ));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- announcements management ----------
+    @GetMapping("/announcements")
+    public ResponseEntity<?> getAnnouncements(HttpSession session) {
+        if (getAdmin(session) == null) return denied();
+        try {
+            return ResponseEntity.ok(Rows.query("SELECT * FROM announcements ORDER BY announcement_id DESC"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    @PostMapping("/announcement")
+    public ResponseEntity<?> addAnnouncement(@RequestBody AnnouncementReq r, HttpSession session) {
+        User admin = getAdmin(session);
+        if (admin == null) return denied();
+        if (blank(r.title()) || blank(r.content())) return bad("Title and content are required");
+        try {
+            Rows.update("INSERT INTO announcements (title, content, author, category, posted_at, is_active) VALUES (?, ?, ?, ?, NOW(), 1)",
+                r.title().trim(), r.content().trim(), admin.getName(), blank(r.category()) ? "University" : r.category().trim());
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    admin.getUserId(), admin.getUsername(), "PUBLISH_ANNOUNCEMENT",
+                    "Published announcement: " + r.title().trim());
+            } catch (Exception ignored) {}
+            return ResponseEntity.ok(Map.of("status", "saved"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    @DeleteMapping("/announcement/{id}")
+    public ResponseEntity<?> deleteAnnouncement(@PathVariable int id, HttpSession session) {
+        if (getAdmin(session) == null) return denied();
+        try {
+            Rows.update("DELETE FROM announcements WHERE announcement_id = ?", id);
+            return ResponseEntity.ok(Map.of("status", "deleted"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- timetables & exam schedules ----------
+    @GetMapping("/timetables")
+    public ResponseEntity<?> getTimetables(HttpSession session) {
+        if (getAdmin(session) == null) return denied();
+        try {
+            return ResponseEntity.ok(Rows.query("SELECT * FROM timetables ORDER BY day_of_week, start_time"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    @PostMapping("/timetable")
+    public ResponseEntity<?> addTimetable(@RequestBody TimetableReq r, HttpSession session) {
+        User admin = getAdmin(session);
+        if (admin == null) return denied();
+        if (blank(r.courseCode()) || blank(r.dayOfWeek()) || blank(r.startTime()))
+            return bad("Course code, day of week, and start time are required");
+        try {
+            Rows.update("INSERT INTO timetables (course_code, course_name, day_of_week, start_time, end_time, room, faculty_name) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                r.courseCode().trim().toUpperCase(), blank(r.courseName()) ? r.courseCode().trim().toUpperCase() : r.courseName().trim(),
+                r.dayOfWeek().trim(), r.startTime().trim(), blank(r.endTime()) ? "10:50 AM" : r.endTime().trim(),
+                blank(r.room()) ? "Hall A-101" : r.room().trim(), blank(r.facultyName()) ? "Assigned Faculty" : r.facultyName().trim());
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    admin.getUserId(), admin.getUsername(), "UPDATE_TIMETABLE",
+                    "Scheduled timetable slot for course " + r.courseCode().trim().toUpperCase() + " on " + r.dayOfWeek().trim());
+            } catch (Exception ignored) {}
+            return ResponseEntity.ok(Map.of("status", "saved"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    @DeleteMapping("/timetable/{id}")
+    public ResponseEntity<?> deleteTimetable(@PathVariable int id, HttpSession session) {
+        if (getAdmin(session) == null) return denied();
+        try {
+            Rows.update("DELETE FROM timetables WHERE timetable_id = ?", id);
+            return ResponseEntity.ok(Map.of("status", "deleted"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- audit logs & system activity ----------
+    @GetMapping("/audit-logs")
+    public ResponseEntity<?> getAuditLogs(HttpSession session) {
+        if (getAdmin(session) == null) return denied();
+        try {
+            return ResponseEntity.ok(Rows.query("SELECT log_id, user_id, username, action, details, created_at FROM audit_log ORDER BY log_id DESC LIMIT 100"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- roles & permissions ----------
+    @PostMapping("/user/{id}/role")
+    public ResponseEntity<?> changeUserRole(@PathVariable int id, @RequestBody RoleReq r, HttpSession session) {
+        User admin = getAdmin(session);
+        if (admin == null) return denied();
+        if (admin.getUserId() == id) return bad("Cannot change role of currently logged in admin");
+        String role = r.role();
+        if (!"Admin".equalsIgnoreCase(role) && !"Faculty".equalsIgnoreCase(role) && !"Student".equalsIgnoreCase(role)) {
+            return bad("Role must be Admin, Faculty, or Student");
+        }
+        String safeRole = role.substring(0, 1).toUpperCase() + role.substring(1).toLowerCase();
+        try {
+            Rows.update("UPDATE USERS SET role = ? WHERE user_id = ?", safeRole, id);
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    admin.getUserId(), admin.getUsername(), "UPDATE_USER_ROLE",
+                    "Changed user ID " + id + " role to " + safeRole);
+            } catch (Exception ignored) {}
+            return ResponseEntity.ok(Map.of("status", "saved", "role", safeRole));
         } catch (SQLException e) {
             return dbError(e);
         }

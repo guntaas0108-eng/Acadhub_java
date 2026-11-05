@@ -57,6 +57,7 @@ for %%F in (
     "sql\14_study_material_submissions.sql"
     "sql\15_accountability_seed.sql"
     "sql\16_file_upload_support.sql"
+    "sql\17_advanced_academic_workflow.sql"
 ) do (
     echo [*] Executing %%F ...
     "%MYSQL_EXE%" -h 127.0.0.1 -P %MYSQL_PORT% -u root %PW_ARG% < "%%F"

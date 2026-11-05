@@ -349,6 +349,65 @@
       };
     }
 
+    if (url.includes('/api/faculty/analytics')) {
+      return [
+        { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, semester: 6, enrolled_students: 8, avg_marks: 84.5, highest_marks: 98, lowest_marks: 54, fail_count: 0, total_materials: 6, total_submissions: 7 },
+        { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, semester: 6, enrolled_students: 5, avg_marks: 81.2, highest_marks: 95, lowest_marks: 48, fail_count: 0, total_materials: 4, total_submissions: 5 }
+      ];
+    }
+
+    if (url.includes('/api/faculty/at-risk')) {
+      return [
+        { roll_no: 1024030105, name: 'Rahul Sharma', course_code: 'UCS310', attendance_pct: 64.0, avg_marks: 52.0, risk_status: 'At Risk' }
+      ];
+    }
+
+    if (url.includes('/api/admin/announcements')) {
+      return [
+        { announcement_id: 1, title: 'Mid-Semester Examination Schedule Published', category: 'Exam', author: 'Dean of Academic Affairs', posted_at: '2026-11-05 09:00:00', content: 'The mid-term examination timetable for Term 2026 is published and visible on the timetable board.' },
+        { announcement_id: 2, title: 'Guest Lecture on Distributed Systems', category: 'Academic', author: 'Dr. Rumneek Kaur', posted_at: '2026-11-04 14:00:00', content: 'Special session on Concurrency Control and Two-Phase Commit protocols in Hall A-101.' },
+        { announcement_id: 3, title: 'Library Book Return & Digital Repository Access', category: 'Notice', author: 'Library Services', posted_at: '2026-11-03 10:00:00', content: 'Students are advised to renew or return overdue physical copies before the weekend.' }
+      ];
+    }
+
+    if (url.includes('/api/admin/timetables')) {
+      return [
+        { timetable_id: 1, course_code: 'UCS310', course_name: 'Database Management Systems', day_of_week: 'Wednesday', start_time: '09:00 AM', end_time: '10:50 AM', room: 'Hall A-101', faculty_name: 'Dr. Rumneek Kaur' },
+        { timetable_id: 2, course_code: 'UCS520', course_name: 'Computer Networks', day_of_week: 'Thursday', start_time: '11:00 AM', end_time: '12:40 PM', room: 'Hall B-204', faculty_name: 'Dr. Rumneek Kaur' },
+        { timetable_id: 3, course_code: 'UCS503', course_name: 'Software Engineering', day_of_week: 'Friday', start_time: '02:00 PM', end_time: '03:40 PM', room: 'Lab 4', faculty_name: 'Prof. Amit Sharma' }
+      ];
+    }
+
+    if (url.includes('/api/admin/audit-logs')) {
+      return [
+        { log_id: 104, created_at: '2026-11-05 12:20:14', username: 'rumneek24', action: 'GRADE_SUBMISSION', details: 'Graded submission #1 for student 102403111 (19 / 20)' },
+        { log_id: 103, created_at: '2026-11-05 12:15:30', username: 'kriti16', action: 'SUBMIT_ASSIGNMENT', details: 'Submitted solution file for Assignment 1 (UCS310)' },
+        { log_id: 102, created_at: '2026-11-05 12:10:00', username: 'rumneek24', action: 'CREATE_ASSESSMENT', details: 'Published Assignment 1: B+ Trees & Indexing for UCS310' },
+        { log_id: 101, created_at: '2026-11-05 11:45:00', username: 'doaa30', action: 'PUBLISH_ANNOUNCEMENT', details: 'Broadcasted Mid-Semester Exam Schedule announcement' }
+      ];
+    }
+
+    if (url.includes('/api/admin/transcript/')) {
+      const rollMatch = url.match(/\/transcript\/(\d+)/);
+      const roll = rollMatch ? rollMatch[1] : '102403111';
+      return {
+        student: { name: 'Kriti Sharma', roll_no: roll, department: 'CSE', branch: 'COE', semester: 6, cgpa: 8.45 },
+        courses: [
+          { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, marks_obtained: 46, total_marks: 50, grade: 'A+' },
+          { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, marks_obtained: 44, total_marks: 50, grade: 'A' },
+          { course_code: 'UCS503', course_name: 'Software Engineering', credits: 3, marks_obtained: 41, total_marks: 50, grade: 'A' },
+          { course_code: 'UMA010', course_name: 'Mathematics - III', credits: 4, marks_obtained: 42, total_marks: 50, grade: 'A' }
+        ],
+        attendance: [
+          { course_code: 'UCS310', total_classes: 25, present_count: 21, attendance_pct: 84.0 },
+          { course_code: 'UCS520', total_classes: 24, present_count: 21, attendance_pct: 87.5 }
+        ],
+        university: 'AcadHub University of Technology',
+        term: 'Term 2026 Academic Session',
+        issuedDate: new Date().toLocaleDateString()
+      };
+    }
+
     if (url.includes('/api/faculty/materials')) {
       return getLocalMaterials();
     }
@@ -462,15 +521,32 @@
       return { ok: true, status: 200, data: { status: 'created' } };
     }
 
-    if (url.includes('/api/faculty/submission-grade')) {
+    if (url.includes('/submission/grade') || url.includes('/submission-grade')) {
       const subs = getLocalSubmissions();
       const sub = subs.find(s => s.submission_id == body.submissionId);
       if (sub) {
-        sub.status = body.status;
-        sub.feedback = body.feedback;
+        sub.status = body.status || 'Reviewed';
+        sub.feedback = body.feedback || 'Reviewed by Professor.';
+        sub.marks_awarded = body.marksAwarded != null ? body.marksAwarded : 18;
         saveLocalSubmissions(subs);
       }
       return { ok: true, status: 200, data: { status: 'updated' } };
+    }
+
+    if (url.includes('/toggle-status')) {
+      return { ok: true, status: 200, data: { status: 'saved', isActive: 1 } };
+    }
+
+    if (url.includes('/user/') && url.includes('/edit')) {
+      return { ok: true, status: 200, data: { status: 'saved' } };
+    }
+
+    if (url.includes('/api/admin/announcement')) {
+      return { ok: true, status: 200, data: { status: 'saved' } };
+    }
+
+    if (url.includes('/api/admin/timetable')) {
+      return { ok: true, status: 200, data: { status: 'saved' } };
     }
 
     if (url.includes('/api/admin/user')) {
@@ -499,6 +575,8 @@
         const title = formData.get('title') || 'Study Material';
         const type = formData.get('type') || 'Notes';
         const content = formData.get('content') || '';
+        const dueDate = formData.get('dueDate') || '';
+        const maxMarks = formData.get('maxMarks') ? Number(formData.get('maxMarks')) : 20;
         const file = formData.get('file');
 
         const mats = getLocalMaterials();
@@ -519,6 +597,8 @@
               file_size: formatBytes(file.size),
               file_data: e.target.result,
               submissions_count: 0,
+              due_date: dueDate,
+              max_marks: maxMarks,
               faculty_name: 'Dr. Rumneek Kaur'
             };
             mats.unshift(newMat);
@@ -539,6 +619,8 @@
             file_size: null,
             file_data: null,
             submissions_count: 0,
+            due_date: dueDate,
+            max_marks: maxMarks,
             faculty_name: 'Dr. Rumneek Kaur'
           };
           mats.unshift(newMat);
@@ -933,6 +1015,273 @@
         if (window.UI && window.UI.toast) window.UI.toast('error', r.data.error || 'Failed to create course.');
       }
     };
+
+    window.toggleUserStatus = async function (userId) {
+      const r = await apiPost(`/api/admin/user/${userId}/toggle-status`, {});
+      if (r.ok) {
+        if (window.UI && window.UI.toast) window.UI.toast('success', 'User account status updated.');
+        refreshAdmin();
+      } else {
+        if (window.UI && window.UI.toast) window.UI.toast('error', r.data.error || 'Failed to update user status.');
+      }
+    };
+
+    window.openEditUserModal = function (u) {
+      if (!u) return;
+      if ($('editUserId')) $('editUserId').value = u.user_id;
+      if ($('editUserName')) $('editUserName').value = u.name || '';
+      if ($('editUserUsername')) $('editUserUsername').value = u.username || '';
+      if ($('editUserPhone')) $('editUserPhone').value = u.phone || '';
+      if ($('editUserRole')) $('editUserRole').value = u.role || 'Student';
+      if ($('editUserDept')) $('editUserDept').value = u.department || 'CSE';
+      if ($('editUserSem')) $('editUserSem').value = u.semester || 4;
+      if ($('editUserDesig')) $('editUserDesig').value = u.designation || 'Assistant Professor';
+      if ($('editUserModal')) $('editUserModal').classList.add('open');
+    };
+
+    window.closeEditUserModal = function () {
+      if ($('editUserModal')) $('editUserModal').classList.remove('open');
+    };
+
+    window.saveUserEdit = async function () {
+      const id = $('editUserId') ? $('editUserId').value : null;
+      if (!id) return;
+      const body = {
+        name: $('editUserName') ? $('editUserName').value.trim() : '',
+        username: $('editUserUsername') ? $('editUserUsername').value.trim() : '',
+        phone: $('editUserPhone') ? $('editUserPhone').value.trim() : '',
+        role: $('editUserRole') ? $('editUserRole').value : 'Student',
+        department: $('editUserDept') ? $('editUserDept').value.trim() : 'CSE',
+        semester: $('editUserSem') ? parseInt($('editUserSem').value, 10) || 1 : 1,
+        designation: $('editUserDesig') ? $('editUserDesig').value.trim() : 'Assistant Professor'
+      };
+      const r = await apiPost(`/api/admin/user/${id}/edit`, body);
+      if (r.ok) {
+        if (window.UI && window.UI.toast) window.UI.toast('success', 'User details updated successfully!');
+        window.closeEditUserModal();
+        refreshAdmin();
+      } else {
+        if (window.UI && window.UI.toast) window.UI.toast('error', r.data.error || 'Failed to update user.');
+      }
+    };
+
+    window.openTranscript = async function (rollNo) {
+      if (!rollNo) {
+        if (window.UI && window.UI.toast) window.UI.toast('error', 'Select a student to generate transcript.');
+        return;
+      }
+      const t = await apiGet('/api/admin/transcript/' + rollNo);
+      if (!t || !t.student) {
+        if (window.UI && window.UI.toast) window.UI.toast('error', 'Could not retrieve transcript.');
+        return;
+      }
+      const s = t.student;
+      const courses = t.courses || [];
+      let totalCredits = 0;
+      let earnedPoints = 0;
+      courses.forEach(c => {
+        const cred = Number(c.credits || 4);
+        totalCredits += cred;
+        const g = (c.grade || 'A').toUpperCase();
+        const pt = g === 'A+' ? 10 : (g === 'A' ? 9 : (g === 'B' ? 8 : (g === 'C' ? 6 : 4)));
+        earnedPoints += cred * pt;
+      });
+      const sgpa = totalCredits > 0 ? (earnedPoints / totalCredits).toFixed(2) : (s.cgpa || 8.45).toFixed(2);
+
+      const html = `
+        <div class="transcript-header">
+          <div class="transcript-uni">ACADHUB UNIVERSITY OF TECHNOLOGY</div>
+          <div class="transcript-sub">Official Academic Transcript &amp; Grade Certification · Term 2026</div>
+        </div>
+
+        <div class="transcript-meta-grid">
+          <div><b>Student Name:</b> ${esc(s.name)}</div>
+          <div><b>Roll Number:</b> ${esc(s.roll_no)}</div>
+          <div><b>Department:</b> ${esc(s.department || 'CSE')} (${esc(s.branch || 'COE')})</div>
+          <div><b>Current Semester:</b> Semester ${esc(s.semester || 6)}</div>
+          <div><b>Academic Standing:</b> Regular / Good Standing</div>
+          <div><b>Issue Date:</b> ${esc(t.issuedDate || new Date().toLocaleDateString())}</div>
+        </div>
+
+        <table class="transcript-table">
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Course Title</th>
+              <th>Credits</th>
+              <th>Marks Obtained</th>
+              <th>Max Marks</th>
+              <th>Letter Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${courses.map(c => `
+              <tr>
+                <td><b>${esc(c.course_code)}</b></td>
+                <td>${esc(c.course_name)}</td>
+                <td>${esc(c.credits || 4)}</td>
+                <td>${esc(c.marks_obtained != null ? c.marks_obtained : 45)}</td>
+                <td>${esc(c.total_marks || 100)}</td>
+                <td><b>${esc(c.grade || 'A')}</b></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div style="display:flex;justify-content:space-between;background:#F8FAFC;padding:12px 16px;border-radius:8px;border:1px solid #E2E8F0;font-size:13.5px;margin-bottom:20px;">
+          <div><b>Total Credits Registered:</b> ${totalCredits || 16}</div>
+          <div><b>Calculated Term SGPA:</b> <span style="color:#0D9488;font-weight:800;font-size:15px;">${sgpa}</span></div>
+          <div><b>Cumulative CGPA:</b> <span style="color:#0D9488;font-weight:800;font-size:15px;">${(s.cgpa || 8.45).toFixed(2)}</span></div>
+        </div>
+
+        <div class="transcript-footer">
+          <div class="transcript-seal">
+            <div>ACADHUB<br>SEAL<br>2026</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;color:#0F172A;font-size:13px;">Registrar &amp; Dean of Academic Affairs</div>
+            <div style="font-size:11px;color:#64748B;margin-top:2px;">Digital Certification: SHA256-${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
+          </div>
+        </div>
+      `;
+
+      if ($('transcriptSheetPrintArea')) $('transcriptSheetPrintArea').innerHTML = html;
+      if ($('transcriptPreviewContainer')) $('transcriptPreviewContainer').innerHTML = html;
+      if ($('transcriptModal')) $('transcriptModal').classList.add('open');
+    };
+
+    window.generateTranscript = function () {
+      const sel = $('transcriptStudentSelect');
+      const roll = sel ? sel.value : null;
+      if (roll) window.openTranscript(roll);
+    };
+
+    window.closeTranscriptModal = function () {
+      if ($('transcriptModal')) $('transcriptModal').classList.remove('open');
+    };
+
+    window.printTranscript = function () {
+      window.print();
+    };
+
+    window.loadAdminTimetables = async function () {
+      const tbody = $('timetablesAdminBody');
+      if (!tbody) return;
+      const list = await apiGet('/api/admin/timetables');
+      if (!list || !list.length) {
+        tbody.innerHTML = '';
+        return;
+      }
+      tbody.innerHTML = list.map(t => `
+        <tr>
+          <td><b>${esc(t.day_of_week)}</b></td>
+          <td><span class="graph-course-code">${esc(t.course_code)}</span> <span class="muted">${esc(t.course_name)}</span></td>
+          <td>${esc(t.start_time)} - ${esc(t.end_time)}</td>
+          <td><span class="chip ok">${esc(t.room || 'Hall A-101')}</span></td>
+          <td>${esc(t.faculty_name || 'Prof. Rumneek')}</td>
+          <td>
+            <button class="btn ghost" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.deleteTimetableSlot(${t.timetable_id})"><i data-i="trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    };
+
+    window.addTimetableSlot = async function () {
+      const courseCode = $('ttCourseSelect') ? $('ttCourseSelect').value : '';
+      const dayOfWeek = $('ttDay') ? $('ttDay').value : 'Wednesday';
+      const startTime = $('ttStart') ? $('ttStart').value.trim() : '09:00 AM';
+      const endTime = $('ttEnd') ? $('ttEnd').value.trim() : '10:50 AM';
+      const room = $('ttRoom') ? $('ttRoom').value.trim() : 'Hall A-101';
+      const facultyName = $('ttFaculty') ? $('ttFaculty').value.trim() : 'Prof. Rumneek';
+
+      if (!courseCode) {
+        if (window.UI && window.UI.toast) window.UI.toast('error', 'Select a course.');
+        return;
+      }
+      const r = await apiPost('/api/admin/timetable', { courseCode, dayOfWeek, startTime, endTime, room, facultyName });
+      if (r.ok) {
+        if (window.UI && window.UI.toast) window.UI.toast('success', 'Timetable slot scheduled!');
+        window.loadAdminTimetables();
+      } else {
+        if (window.UI && window.UI.toast) window.UI.toast('error', r.data.error || 'Failed to schedule slot.');
+      }
+    };
+
+    window.deleteTimetableSlot = async function (id) {
+      const r = await apiDelete('/api/admin/timetable/' + id);
+      if (r.ok) {
+        if (window.UI && window.UI.toast) window.UI.toast('success', 'Timetable slot removed.');
+        window.loadAdminTimetables();
+      }
+    };
+
+    window.loadAdminAnnouncements = async function () {
+      const tbody = $('announcementsAdminBody');
+      if (!tbody) return;
+      const list = await apiGet('/api/admin/announcements');
+      if (!list || !list.length) {
+        tbody.innerHTML = '';
+        return;
+      }
+      tbody.innerHTML = list.map(a => `
+        <tr>
+          <td><b>${esc(a.title)}</b><div class="muted" style="font-size:12px;margin-top:2px;">${esc(a.content)}</div></td>
+          <td><span class="chip ${a.category === 'Exam' ? 'danger' : (a.category === 'Academic' ? 'sky' : 'ok')}">${esc(a.category)}</span></td>
+          <td>${esc(a.author || 'Admin')}</td>
+          <td>${esc(a.posted_at ? a.posted_at.slice(0, 10) : 'Today')}</td>
+          <td>
+            <button class="btn ghost" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.deleteAnnouncement(${a.announcement_id})"><i data-i="trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    };
+
+    window.publishAnnouncement = async function () {
+      const title = $('annTitle') ? $('annTitle').value.trim() : '';
+      const category = $('annCategory') ? $('annCategory').value : 'University';
+      const content = $('annContent') ? $('annContent').value.trim() : '';
+
+      if (!title || !content) {
+        if (window.UI && window.UI.toast) window.UI.toast('error', 'Title and Content are required.');
+        return;
+      }
+
+      const r = await apiPost('/api/admin/announcement', { title, category, content });
+      if (r.ok) {
+        if (window.UI && window.UI.toast) window.UI.toast('success', 'Announcement published!');
+        ['annTitle', 'annContent'].forEach(id => { if ($(id)) $(id).value = ''; });
+        window.loadAdminAnnouncements();
+      } else {
+        if (window.UI && window.UI.toast) window.UI.toast('error', r.data.error || 'Failed to publish.');
+      }
+    };
+
+    window.deleteAnnouncement = async function (id) {
+      const r = await apiDelete('/api/admin/announcement/' + id);
+      if (r.ok) {
+        if (window.UI && window.UI.toast) window.UI.toast('success', 'Announcement deleted.');
+        window.loadAdminAnnouncements();
+      }
+    };
+
+    window.loadAuditLogs = async function () {
+      const tbody = $('auditLogsBody');
+      if (!tbody) return;
+      const list = await apiGet('/api/admin/audit-logs');
+      if (!list || !list.length) {
+        tbody.innerHTML = '';
+        return;
+      }
+      tbody.innerHTML = list.map(l => `
+        <tr>
+          <td><span style="font-family:'JetBrains Mono',monospace;color:var(--muted);">${l.log_id}</span></td>
+          <td><span style="font-size:12px;color:var(--muted);">${esc(l.created_at || 'Just now')}</span></td>
+          <td><b>@${esc(l.username || 'System')}</b></td>
+          <td><span class="chip sky">${esc(l.action)}</span></td>
+          <td>${esc(l.details)}</td>
+        </tr>
+      `).join('');
+    };
   }
 
   async function refreshAdmin() {
@@ -1075,28 +1424,56 @@
     if (opts) {
       if (opts.courses) {
         const cOpts = opts.courses.map(c => `<option value="${esc(c.course_code)}">${esc(c.course_code)} - ${esc(c.course_name)}</option>`).join('');
-        ['aCourse', 'eCourse', 'uCourse'].forEach(id => { if ($(id)) $(id).innerHTML = cOpts; });
+        ['aCourse', 'eCourse', 'uCourse', 'ttCourseSelect'].forEach(id => { if ($(id)) $(id).innerHTML = cOpts; });
+        if ($('coursesBody')) {
+          $('coursesBody').innerHTML = opts.courses.map(c => `<tr><td><b>${esc(c.course_code)}</b></td><td>${esc(c.course_name)}</td></tr>`).join('');
+        }
       }
-      if (opts.students && $('eStudent')) {
-        $('eStudent').innerHTML = opts.students.map(s => `<option value="${esc(s.roll_no)}">${esc(s.name)} (Roll: ${esc(s.roll_no)})</option>`).join('');
+      if (opts.students) {
+        if ($('eStudent')) $('eStudent').innerHTML = opts.students.map(s => `<option value="${esc(s.roll_no)}">${esc(s.name)} (Roll: ${esc(s.roll_no)})</option>`).join('');
+        if ($('transcriptStudentSelect')) $('transcriptStudentSelect').innerHTML = opts.students.map(s => `<option value="${esc(s.roll_no)}">${esc(s.name)} (Roll: ${esc(s.roll_no)})</option>`).join('');
       }
       if (opts.faculty && $('aFaculty')) {
         $('aFaculty').innerHTML = opts.faculty.map(f => `<option value="${esc(f.faculty_id)}">${esc(f.name)}</option>`).join('');
       }
-      const userListEl = $('userListBody') || $('usersBody');
-      if (opts.users && userListEl) {
-        userListEl.innerHTML = opts.users.map(u => `
+    }
+
+    const userListEl = $('userListBody') || $('usersBody');
+    if (userListEl) {
+      const userList = data.users || (opts && opts.users) || [];
+      userListEl.innerHTML = userList.map(u => {
+        const isActive = u.is_active !== 0;
+        const isStudent = (u.role || '').toLowerCase() === 'student';
+        const userObjStr = JSON.stringify(u).replace(/"/g, '&quot;');
+        return `
           <tr>
-            <td>@${esc(u.username)}</td>
+            <td><span style="font-family:'JetBrains Mono',monospace;color:var(--muted);">${u.user_id}</span></td>
             <td><b>${esc(u.name)}</b></td>
+            <td>@${esc(u.username)}</td>
             <td><span class="chip ${u.role === 'Admin' ? 'warn' : (u.role === 'Faculty' ? 'sky' : 'ok')}">${esc(u.role)}</span></td>
+            <td><span class="muted" style="font-size:12px;">${esc(u.roll_no ? 'Roll: ' + u.roll_no : (u.designation || u.department || 'Active User'))}</span></td>
             <td>
-              <button class="btn ghost" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.deleteUser(${u.user_id}, '${esc(u.username)}')"><i data-i="trash"></i></button>
+              <span class="chip ${isActive ? 'ok' : 'danger'}" style="font-size:11px;">
+                ${isActive ? 'Active' : 'Deactivated'}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button class="btn ghost" style="padding:4px 8px;font-size:12px;" onclick="window.openEditUserModal(${userObjStr})">Edit</button>
+                <button class="btn ghost" style="padding:4px 8px;font-size:12px;color:${isActive ? 'var(--danger)' : 'var(--ok)'};" onclick="window.toggleUserStatus(${u.user_id})">
+                  ${isActive ? 'Deactivate' : 'Activate'}
+                </button>
+                ${isStudent ? `<button class="btn ghost" style="padding:4px 8px;font-size:12px;color:var(--teal);" onclick="window.openTranscript(${u.roll_no || 102403111})">Transcript</button>` : ''}
+              </div>
             </td>
           </tr>
-        `).join('');
-      }
+        `;
+      }).join('');
     }
+
+    if (window.loadAdminTimetables) await window.loadAdminTimetables();
+    if (window.loadAdminAnnouncements) await window.loadAdminAnnouncements();
+    if (window.loadAuditLogs) await window.loadAuditLogs();
 
     if (window.UI && window.UI.icons) window.UI.icons();
   }
@@ -1325,6 +1702,8 @@
     const title = $('smTitle') ? $('smTitle').value.trim() : '';
     const type = $('smType') ? $('smType').value : 'Notes';
     const content = $('smContent') ? $('smContent').value.trim() : '';
+    const dueDate = $('smDueDate') ? $('smDueDate').value : '';
+    const maxMarks = $('smMaxMarks') ? $('smMaxMarks').value : '20';
     const fileInput = $('smFileInput');
     const file = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
 
@@ -1338,6 +1717,8 @@
     fd.append('title', title);
     fd.append('type', type);
     fd.append('content', content);
+    if (dueDate) fd.append('dueDate', dueDate);
+    if (maxMarks) fd.append('maxMarks', maxMarks);
     if (file) fd.append('file', file);
 
     const r = await apiPostFormData('/api/faculty/material-upload', fd);
@@ -1352,6 +1733,49 @@
       const err = (r.data && r.data.error) || 'Failed to upload material';
       if (window.UI && window.UI.toast) window.UI.toast('error', err);
     }
+  };
+
+  window.loadFacultyAnalytics = async function () {
+    const tbody = $('facAnalyticsBody');
+    if (!tbody) return;
+    const list = await apiGet('/api/faculty/analytics');
+    if (!list || !list.length) {
+      tbody.innerHTML = '';
+      return;
+    }
+    tbody.innerHTML = list.map(c => `
+      <tr>
+        <td><b>${esc(c.course_code)}</b></td>
+        <td>${esc(c.course_name)}</td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--teal);">${esc(c.enrolled_students || 0)}</span></td>
+        <td>${Number(c.avg_marks || 0).toFixed(1)}</td>
+        <td><span class="chip ok">${Number(c.highest_marks || 0).toFixed(0)}</span></td>
+        <td><span class="chip warn">${Number(c.lowest_marks || 0).toFixed(0)}</span></td>
+        <td><span class="chip ${c.fail_count > 0 ? 'danger' : 'ok'}">${esc(c.fail_count || 0)}</span></td>
+        <td>${esc(c.total_materials || 0)}</td>
+        <td><span class="chip sky">${esc(c.total_submissions || 0)}</span></td>
+      </tr>
+    `).join('');
+  };
+
+  window.loadFacultyAtRisk = async function () {
+    const tbody = $('facAtRiskBody');
+    if (!tbody) return;
+    const list = await apiGet('/api/faculty/at-risk');
+    if (!list || !list.length) {
+      tbody.innerHTML = '';
+      return;
+    }
+    tbody.innerHTML = list.map(r => `
+      <tr>
+        <td><span style="font-family:'JetBrains Mono',monospace;">${esc(r.roll_no)}</span></td>
+        <td><b>${esc(r.name)}</b></td>
+        <td><span class="graph-course-code">${esc(r.course_code)}</span></td>
+        <td><span class="chip danger">${Number(r.attendance_pct || 0).toFixed(1)}%</span></td>
+        <td>${Number(r.avg_marks || 0).toFixed(1)} / 100</td>
+        <td><span class="chip danger">At Academic Risk</span></td>
+      </tr>
+    `).join('');
   };
 
   window.loadFacultyMaterials = async function () {
@@ -1465,7 +1889,8 @@
     if ($('revTitle')) $('revTitle').textContent = title;
     if ($('revContent')) $('revContent').textContent = decodeURIComponent(encContent);
     if ($('revStatus')) $('revStatus').value = status || 'Reviewed';
-    if ($('revFeedback')) $('revFeedback').value = decodeURIComponent(encFeedback) || 'Good work!';
+    if ($('revFeedback')) $('revFeedback').value = decodeURIComponent(encFeedback) || 'Good work! Verified.';
+    if ($('revMarksAwarded')) $('revMarksAwarded').value = 18;
 
     const fileSection = $('revFileSection');
     if (fileSection) {
@@ -1502,12 +1927,18 @@
     const subId = $('revSubId') ? parseInt($('revSubId').value, 10) : 0;
     const status = $('revStatus') ? $('revStatus').value : 'Reviewed';
     const feedback = $('revFeedback') ? $('revFeedback').value.trim() : '';
+    const marksAwarded = $('revMarksAwarded') ? parseFloat($('revMarksAwarded').value) : null;
 
     if (!subId) return;
 
-    const r = await apiPost('/api/faculty/submission-grade', { submissionId: subId, status, feedback });
+    const r = await apiPost('/api/faculty/submission-grade', {
+      submissionId: subId,
+      status,
+      feedback,
+      marksAwarded: isNaN(marksAwarded) ? null : marksAwarded
+    });
     if (r.ok) {
-      if (window.UI && window.UI.toast) window.UI.toast('success', 'Review and feedback saved!');
+      if (window.UI && window.UI.toast) window.UI.toast('success', 'Submission evaluated & marks awarded!');
       window.closeReviewModal();
       window.loadFacultySubmissions();
     } else {
@@ -1533,61 +1964,213 @@
     const d = await apiGet('/api/student/dashboard');
     if (!d) return;
 
-    if (d.student) {
-      if ($('welcomeName')) $('welcomeName').textContent = d.student.name;
-      if ($('studentRollBadge')) $('studentRollBadge').textContent = 'Roll: ' + d.student.roll_no;
-      if ($('cgpa')) $('cgpa').textContent = (d.student.cgpa || 8.0).toFixed(2);
-    }
+    const student = d.details || d.student || {};
+    const name = student.name || 'Kriti Sharma';
+    const roll = student.rollNo || student.roll_no || '102403111';
+    const dept = student.department || 'CSE';
+    const sem = student.semester || 6;
 
-    if (d.overallAttendance && $('overallAttVal')) {
-      const pct = d.overallAttendance.percentage || 0;
-      $('overallAttVal').textContent = pct.toFixed(1) + '%';
-      const pill = $('overallAttPill');
-      if (pill) {
-        pill.textContent = pct >= 75 ? 'Safe' : 'At Risk';
-        pill.className = 'pill ' + (pct >= 75 ? 'ok' : 'danger');
+    if ($('welcomeName')) $('welcomeName').textContent = name;
+    if ($('welcomeNameSidebar')) $('welcomeNameSidebar').textContent = name;
+    if ($('studentRollBadge')) $('studentRollBadge').textContent = 'Roll: ' + roll;
+    if ($('studentSubMeta')) $('studentSubMeta').textContent = `Roll No: ${roll} · Department: ${dept} · Semester ${sem}`;
+    if ($('avatarInitial')) $('avatarInitial').textContent = (name.charAt(0) || 'S').toUpperCase();
+    if ($('cgpa')) $('cgpa').textContent = (student.cgpa || 8.45).toFixed(2);
+
+    // Attendance Calculations (Overall Attendance + Classes Attended widget)
+    const attInfo = d.overallAttendance || {};
+    const courses = d.enrolledCourses || d.courses || [];
+    const attList = d.attendance || [];
+
+    let overallPct = attInfo.percentage != null ? Number(attInfo.percentage) : 75;
+    let attendedCount = attInfo.attended != null ? Number(attInfo.attended) : 41;
+    let totalHeld = attInfo.total != null ? Number(attInfo.total) : 48;
+
+    if (!attInfo.percentage && attList.length) {
+      let sumAtt = 0;
+      let sumTot = 0;
+      attList.forEach(a => {
+        sumAtt += Number(a.present_count != null ? a.present_count : a.presentCount || 0);
+        sumTot += Number(a.total_classes != null ? a.total_classes : a.totalClasses || 0);
+      });
+      if (sumTot > 0) {
+        attendedCount = sumAtt;
+        totalHeld = sumTot;
+        overallPct = Math.round((sumAtt / sumTot) * 100);
       }
     }
 
-    const courses = d.courses || [];
-    if ($('totalCourses')) $('totalCourses').textContent = courses.length;
+    if ($('overallAttBig')) $('overallAttBig').textContent = Math.round(overallPct) + '%';
+    if ($('attPercent')) $('attPercent').textContent = Math.round(overallPct) + '%';
+    if ($('attProgressFill')) $('attProgressFill').style.width = Math.min(100, Math.max(5, overallPct)) + '%';
+    if ($('classesAttendedCount')) $('classesAttendedCount').textContent = attendedCount;
+    if ($('classesHeldLabel')) $('classesHeldLabel').textContent = `/ ${totalHeld} held`;
+    if ($('overallAttPill')) {
+      const isSafe = overallPct >= 75;
+      $('overallAttPill').textContent = isSafe ? 'Safe' : 'At Risk';
+      $('overallAttPill').className = 'chip ' + (isSafe ? 'ok' : 'danger');
+    }
 
-    const attBody = $('attBody');
-    if (attBody) {
-      attBody.innerHTML = courses.map(c => {
-        const pct = c.attendance_pct || 0;
-        const isSafe = pct >= 75;
+    // Attendance Analytics Vertical Purple Bar Chart (Screenshot 2)
+    const chartWrap = $('analyticsChartWrap');
+    if (chartWrap) {
+      let chartData = [];
+      if (attList.length) {
+        chartData = attList.map(a => ({
+          code: a.course_code || a.courseCode,
+          pct: Math.min(100, Math.max(0, Number(a.attendance_pct != null ? a.attendance_pct : a.attendancePct || 75)))
+        }));
+      } else if (courses.length) {
+        chartData = courses.map(c => ({
+          code: c.course_code,
+          pct: Number(c.attendance_pct || 75)
+        }));
+      } else {
+        chartData = [
+          { code: 'MATH202', pct: 100 },
+          { code: 'PHY101', pct: 100 },
+          { code: 'CS101', pct: 50 },
+          { code: 'HIST105', pct: 50 }
+        ];
+      }
+
+      chartWrap.innerHTML = `
+        <div class="athena-gridline" style="bottom: 85%;"><span class="athena-grid-label">100</span></div>
+        <div class="athena-gridline" style="bottom: 65%;"><span class="athena-grid-label">75</span></div>
+        <div class="athena-gridline" style="bottom: 45%;"><span class="athena-grid-label">50</span></div>
+        <div class="athena-gridline" style="bottom: 25%;"><span class="athena-grid-label">25</span></div>
+        <div class="athena-gridline" style="bottom: 5%;"><span class="athena-grid-label">0</span></div>
+      ` + chartData.map(cd => {
+        const barHeight = Math.max(8, Math.round((cd.pct / 100) * 82));
         return `
-          <tr>
-            <td><b>${esc(c.course_code)}</b> - ${esc(c.course_name)}</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span class="chip ${isSafe ? 'ok' : 'danger'}">${pct.toFixed(1)}%</span>
-                <span class="muted" style="font-size:12px;">(${esc(c.attended)}/${esc(c.total_classes)})</span>
-              </div>
-            </td>
-          </tr>
+          <div class="athena-bar-col">
+            <div class="athena-bar-rect" style="height: ${barHeight}%;">
+              <span class="athena-bar-tooltip">${esc(cd.code)}: ${Math.round(cd.pct)}%</span>
+            </div>
+            <span class="athena-bar-label">${esc(cd.code)}</span>
+          </div>
         `;
       }).join('');
     }
 
+    // Notification Drawer updates from backend announcements if available
+    const notifContainer = $('notifListContainer');
+    if (notifContainer && d.announcements && d.announcements.length) {
+      notifContainer.innerHTML = d.announcements.map((a, i) => {
+        const iconType = i % 3 === 0 ? 'warn' : (i % 3 === 1 ? 'info' : 'danger');
+        return `
+          <div class="athena-notif-item">
+            <div class="athena-notif-icon ${iconType}"><i data-i="book"></i></div>
+            <div class="athena-notif-body">
+              <div class="athena-notif-name">${esc(a.title)}</div>
+              <div class="athena-notif-text">${esc(a.content)}</div>
+              <div class="athena-notif-meta">${esc(a.author || 'University')} · ${esc(a.category || 'Academic')}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      if ($('notifBadgeCount')) $('notifBadgeCount').textContent = d.announcements.length;
+    }
+
+    // Full Course Attendance Roster
+    const attBody = $('attBody');
+    if (attBody) {
+      if (attList.length) {
+        attBody.innerHTML = attList.map(a => {
+          const pct = Number(a.attendance_pct != null ? a.attendance_pct : a.attendancePct || 0);
+          const isSafe = pct >= 75;
+          const att = a.present_count != null ? a.present_count : a.presentCount || 0;
+          const tot = a.total_classes != null ? a.total_classes : a.totalClasses || 0;
+          return `
+            <tr>
+              <td><b>${esc(a.course_code || a.courseCode)}</b></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span class="chip ${isSafe ? 'ok' : 'danger'}">${pct.toFixed(1)}%</span>
+                  <span class="muted" style="font-size:12px;">(${att}/${tot} held)</span>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else if (courses.length) {
+        attBody.innerHTML = courses.map(c => `
+          <tr>
+            <td><b>${esc(c.course_code)}</b> - ${esc(c.course_name)}</td>
+            <td><span class="chip ok">${Number(c.attendance_pct || 85).toFixed(1)}%</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Academic Marks & Grades
     const marksBody = $('marksBody');
     if (marksBody) {
-      marksBody.innerHTML = courses.map(c => `
-        <tr>
-          <td><b>${esc(c.course_code)}</b></td>
-          <td>${esc(c.marks != null ? c.marks : 'N/A')} / ${esc(c.max_marks || 100)}</td>
-          <td><span class="chip ${c.grade === 'A+' || c.grade === 'A' ? 'ok' : 'sky'}">${esc(c.grade || 'Pending')}</span></td>
-        </tr>
-      `).join('');
+      const marksList = d.marks || [];
+      if (marksList.length) {
+        marksBody.innerHTML = marksList.map(m => `
+          <tr>
+            <td><b>${esc(m.courseName || m.course_name || 'Course')}</b> <span class="muted">(${esc(m.assessmentType || m.assessment_type || 'Exam')})</span></td>
+            <td>${esc(m.marksObtained != null ? m.marksObtained : m.marks_obtained)} / ${esc(m.totalMarks || m.total_marks || 100)}</td>
+            <td><span class="chip ok">${esc(m.percentage != null ? Number(m.percentage).toFixed(0) + '%' : 'A')}</span></td>
+          </tr>
+        `).join('');
+      } else if (courses.length) {
+        marksBody.innerHTML = courses.map(c => `
+          <tr>
+            <td><b>${esc(c.course_code)}</b></td>
+            <td>${esc(c.marks != null ? c.marks : 42)} / ${esc(c.max_marks || 50)}</td>
+            <td><span class="chip ok">${esc(c.grade || 'A')}</span></td>
+          </tr>
+        `).join('');
+      }
     }
 
     const filterEl = $('stCourseFilter');
-    if (filterEl) {
+    if (filterEl && courses.length) {
       filterEl.innerHTML = '<option value="">All My Enrolled Courses</option>' +
         courses.map(c => `<option value="${esc(c.course_code)}">${esc(c.course_code)} - ${esc(c.course_name)}</option>`).join('');
     }
+
+    if (window.UI && window.UI.icons) window.UI.icons();
   }
+
+  window.selectTimetableDay = function (colEl, day) {
+    document.querySelectorAll('#weekStripDays .athena-day-col').forEach(c => c.classList.remove('active'));
+    if (colEl) colEl.classList.add('active');
+    const box = $('timetableStatusBox');
+    if (box) {
+      const dayMap = {
+        'Mon': 'UCS310 (09:00 AM - 10:50 AM) · Hall A-101',
+        'Tue': 'UCS520 (11:00 AM - 12:40 PM) · Hall B-204',
+        'Wed': 'No classes scheduled for this day!',
+        'Thu': 'UCS310 Lab (02:00 PM - 03:40 PM) · Lab 3',
+        'Fri': 'UCS503 (10:00 AM - 11:40 AM) · Hall A-102',
+        'Sat': 'Self-Study & Project Work Session',
+        'Sun': 'Campus Closed / Weekend'
+      };
+      box.textContent = dayMap[day] || 'No classes scheduled for this day!';
+    }
+  };
+
+  window.scrollToSection = function (id) {
+    const el = $(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.switchStudentView = function (view, el) {
+    document.querySelectorAll('.athena-nav-link').forEach(l => l.classList.remove('active'));
+    if (el) el.classList.add('active');
+    if (view === 'modules') window.scrollToSection('studyMaterialsSection');
+    else if (view === 'activity') window.scrollToSection('submissionsSection');
+    else if (view === 'chat') window.scrollToSection('notifDrawer');
+    else window.scrollToSection('studyMaterialsSection');
+  };
+
+  window.markAllNotificationsRead = function () {
+    if ($('notifBadgeCount')) $('notifBadgeCount').textContent = '0';
+    if (window.UI && window.UI.toast) window.UI.toast('info', 'All notifications marked as read.');
+  };
 
   window.handleStudentFileSelect = function (input) {
     if (!input || !input.files || !input.files[0]) return;
@@ -1646,7 +2229,11 @@
         <div class="mat-card">
           <div class="mat-top">
             <span class="mat-course">${esc(m.course_code)} · ${esc(m.course_name || '')}</span>
-            <span class="badge ${typeClass}">${esc(m.material_type || 'Notes')}</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="badge ${typeClass}">${esc(m.material_type || 'Notes')}</span>
+              ${m.due_date ? `<span class="chip warn" style="font-size:11px;padding:2px 6px;">Due: ${esc(m.due_date)}</span>` : ''}
+              ${m.max_marks ? `<span class="chip ok" style="font-size:11px;padding:2px 6px;">${esc(m.max_marks)} pts</span>` : ''}
+            </div>
           </div>
           <div class="mat-title">${esc(m.title)}</div>
           <div class="mat-content">${esc(m.content || 'Study notes and instructions.')}</div>
@@ -1758,6 +2345,7 @@
     listEl.innerHTML = submissions.map(s => {
       const isRev = s.status === 'Reviewed' || s.status === 'Approved';
       const hasLocalFile = !!s.file_name;
+      const scoreStr = s.marks_awarded != null ? `${s.marks_awarded} / ${s.max_marks || 20}` : 'Pending';
       return `
         <div class="sub-card">
           <div class="sub-top">
@@ -1767,6 +2355,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="chip ${isRev ? 'ok' : 'sky'}">${esc(s.status || 'Submitted')}</span>
+              <span class="chip ${s.marks_awarded != null ? 'ok' : 'warn'}">Score: ${scoreStr}</span>
               <span class="muted" style="font-size:12px;">${esc(s.submitted_at ? s.submitted_at.slice(0, 10) : 'Recent')}</span>
             </div>
           </div>

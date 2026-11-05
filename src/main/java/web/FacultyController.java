@@ -37,8 +37,8 @@ public class FacultyController {
     public record EnrollReq(Integer rollNo, String course) {}
     public record AssessReq(String course, String assessmentType, Integer totalMarks, Integer passingMarks) {}
 
-    public record MaterialReq(String course, String title, String type, String content) {}
-    public record GradeSubmissionReq(int submissionId, String status, String feedback) {}
+    public record MaterialReq(String course, String title, String type, String content, String dueDate, Integer maxMarks) {}
+    public record GradeSubmissionReq(int submissionId, String status, String feedback, Double marksAwarded) {}
 
     // ---------- helpers ----------
     private User getFaculty(HttpSession session) {
@@ -314,6 +314,14 @@ public class FacultyController {
                             r.status(), existing.get(0).get("attendance_id"));
                 }
             }
+
+            // Audit Trail on Attendance save/edit
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    user.getUserId(), user.getUsername(), "MARK_ATTENDANCE",
+                    "Saved attendance for " + req.course().trim().toUpperCase() + " on " + date + " (" + req.records().size() + " students)");
+            } catch (Exception ignored) {}
+
             return ResponseEntity.ok(Map.of("status", "saved"));
 
         } catch (SQLException e) {
@@ -337,7 +345,7 @@ public class FacultyController {
             int facultyId = ((Number) fac.get(0).get("faculty_id")).intValue();
 
             String sql = "SELECT sm.material_id, sm.course_code, sm.title, sm.material_type, sm.content, sm.upload_date, "
-                       + "sm.file_name, sm.file_path, sm.file_size, c.course_name, "
+                       + "sm.file_name, sm.file_path, sm.file_size, sm.due_date, sm.max_marks, c.course_name, "
                        + "(SELECT COUNT(*) FROM student_submission ss WHERE ss.material_id = sm.material_id) AS submissions_count "
                        + "FROM study_material sm JOIN course c ON sm.course_code = c.course_code ";
 
@@ -361,6 +369,8 @@ public class FacultyController {
             @RequestParam("title") String title,
             @RequestParam(value = "type", defaultValue = "Notes") String type,
             @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "dueDate", required = false) String dueDate,
+            @RequestParam(value = "maxMarks", required = false) Integer maxMarks,
             @RequestParam(value = "file", required = false) MultipartFile file,
             HttpSession session) {
         User user = getFaculty(session);
@@ -370,7 +380,7 @@ public class FacultyController {
             return bad("Course and title are required");
 
         String safeType = blank(type) ? "Notes" : type.trim();
-        if (!List.of("Notes", "Slides", "Tutorials", "Reference").contains(safeType)) {
+        if (!List.of("Notes", "Slides", "Tutorials", "Reference", "Assignment", "Quiz").contains(safeType)) {
             safeType = "Notes";
         }
 
@@ -397,17 +407,34 @@ public class FacultyController {
                 }
             }
 
+            java.sql.Date sqlDueDate = null;
+            if (dueDate != null && !dueDate.isBlank()) {
+                try {
+                    sqlDueDate = java.sql.Date.valueOf(dueDate.trim());
+                } catch (Exception ignored) {}
+            }
+            int safeMaxMarks = (maxMarks != null && maxMarks > 0) ? maxMarks : 100;
+
             int materialId = nextId("study_material", "material_id");
             Rows.update(
-                "INSERT INTO study_material (material_id, course_code, faculty_id, title, material_type, content, upload_date, file_name, file_path, file_size) "
-              + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO study_material (material_id, course_code, faculty_id, title, material_type, content, upload_date, file_name, file_path, file_size, due_date, max_marks) "
+              + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 materialId, course.trim().toUpperCase(), facultyId, title.trim(), safeType,
                 blank(content) ? "" : content.trim(), java.sql.Date.valueOf(LocalDate.now()),
-                fileName, filePath, fileSize);
+                fileName, filePath, fileSize, sqlDueDate, safeMaxMarks);
+
+            // Audit Trail
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    user.getUserId(), user.getUsername(), "UPLOAD_MATERIAL",
+                    "Uploaded " + safeType + " '" + title.trim() + "' for course " + course.trim().toUpperCase());
+            } catch (Exception ignored) {}
 
             return ResponseEntity.ok(Map.of(
                 "status", "saved",
                 "materialId", materialId,
+                "dueDate", sqlDueDate == null ? "" : sqlDueDate.toString(),
+                "maxMarks", safeMaxMarks,
                 "fileName", fileName == null ? "" : fileName,
                 "fileSize", fileSize == null ? "" : fileSize
             ));
@@ -419,7 +446,7 @@ public class FacultyController {
     // ---------- upload study material (Legacy JSON fallback) ----------
     @PostMapping("/material")
     public ResponseEntity<?> addMaterial(@RequestBody MaterialReq r, HttpSession session) {
-        return uploadMaterialWithFile(r.course(), r.title(), r.type(), r.content(), null, session);
+        return uploadMaterialWithFile(r.course(), r.title(), r.type(), r.content(), r.dueDate(), r.maxMarks(), null, session);
     }
 
     // ---------- delete a study material ----------
@@ -448,7 +475,8 @@ public class FacultyController {
 
         try {
             String sql = "SELECT ss.submission_id, ss.material_id, ss.course_code, ss.roll_no, u.name AS student_name, "
-                       + "ss.title, ss.submission_text, ss.file_url, ss.file_name, ss.file_size, ss.submitted_at, ss.status, ss.feedback, sm.title AS material_title "
+                       + "ss.title, ss.submission_text, ss.file_url, ss.file_name, ss.file_size, ss.submitted_at, ss.status, ss.feedback, "
+                       + "ss.marks_awarded, sm.title AS material_title, sm.due_date, sm.max_marks "
                        + "FROM student_submission ss "
                        + "JOIN student s ON ss.roll_no = s.roll_no "
                        + "JOIN users u ON s.user_id = u.user_id "
@@ -470,24 +498,79 @@ public class FacultyController {
     }
 
     // ---------- grade / give feedback on student submission ----------
-    @PostMapping("/submission/grade")
+    @PostMapping({"/submission/grade", "/submission-grade"})
     public ResponseEntity<?> gradeSubmission(@RequestBody GradeSubmissionReq r, HttpSession session) {
         User user = getFaculty(session);
         if (user == null) return notLoggedIn();
 
         try {
-            var sub = Rows.query("SELECT course_code FROM student_submission WHERE submission_id = ?", r.submissionId());
+            var sub = Rows.query("SELECT course_code, roll_no FROM student_submission WHERE submission_id = ?", r.submissionId());
             if (sub.isEmpty()) return bad("Submission not found");
 
             String course = (String) sub.get(0).get("course_code");
             if (!teaches(user.getUserId(), course)) return bad("You do not teach " + course);
 
             String status = blank(r.status()) ? "Reviewed" : r.status().trim();
+            Double marks = r.marksAwarded();
             Rows.update(
-                "UPDATE student_submission SET status = ?, feedback = ? WHERE submission_id = ?",
-                status, blank(r.feedback()) ? null : r.feedback().trim(), r.submissionId());
+                "UPDATE student_submission SET status = ?, feedback = ?, marks_awarded = ? WHERE submission_id = ?",
+                status, blank(r.feedback()) ? null : r.feedback().trim(), marks, r.submissionId());
+
+            // Audit Trail
+            try {
+                Rows.update("INSERT INTO audit_log (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+                    user.getUserId(), user.getUsername(), "GRADE_SUBMISSION",
+                    "Graded submission #" + r.submissionId() + " (Marks: " + (marks != null ? marks : "N/A") + ", Status: " + status + ")");
+            } catch (Exception ignored) {}
 
             return ResponseEntity.ok(Map.of("status", "saved"));
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- class performance analytics for faculty courses ----------
+    @GetMapping("/analytics")
+    public ResponseEntity<?> getAnalytics(HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+        try {
+            var courses = Rows.query(
+                "SELECT c.course_code, c.course_name, c.credits, c.semester, "
+              + "COUNT(DISTINCT e.roll_no) AS enrolled_students, "
+              + "COALESCE(ca.avg_marks, 0) AS avg_marks, "
+              + "COALESCE(ca.highest_marks, 0) AS highest_marks, "
+              + "COALESCE(ca.lowest_marks, 0) AS lowest_marks, "
+              + "COALESCE(ca.fail_count, 0) AS fail_count, "
+              + "(SELECT COUNT(*) FROM study_material sm WHERE sm.course_code = c.course_code) AS total_materials, "
+              + "(SELECT COUNT(*) FROM student_submission ss WHERE ss.course_code = c.course_code) AS total_submissions "
+              + "FROM FACULTY f JOIN FACULTY_COURSE fc ON f.faculty_id = fc.faculty_id "
+              + "JOIN COURSE c ON fc.course_code = c.course_code "
+              + "LEFT JOIN course_analytics ca ON c.course_code = ca.course_code "
+              + "LEFT JOIN ENROLLMENT e ON c.course_code = e.course_code "
+              + "WHERE f.user_id = ? "
+              + "GROUP BY c.course_code, c.course_name, c.credits, c.semester, ca.avg_marks, ca.highest_marks, ca.lowest_marks, ca.fail_count",
+                user.getUserId());
+            return ResponseEntity.ok(courses);
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
+    // ---------- identify students at academic risk in faculty's courses ----------
+    @GetMapping("/at-risk")
+    public ResponseEntity<?> getAtRisk(HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+        try {
+            var atRisk = Rows.query(
+                "SELECT ar.roll_no, ar.name, ar.course_code, ar.attendance_pct, ar.avg_marks, ar.risk_status "
+              + "FROM at_risk_students ar "
+              + "JOIN faculty_course fc ON ar.course_code = fc.course_code "
+              + "JOIN faculty f ON fc.faculty_id = f.faculty_id "
+              + "WHERE f.user_id = ? AND ar.risk_status = 'At Risk' "
+              + "ORDER BY ar.attendance_pct ASC", user.getUserId());
+            return ResponseEntity.ok(atRisk);
         } catch (SQLException e) {
             return dbError(e);
         }

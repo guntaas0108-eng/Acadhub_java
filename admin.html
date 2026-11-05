@@ -122,7 +122,12 @@
         <button type="button" data-tab="tabUsers" class="active">Add user</button>
         <button type="button" data-tab="tabCourses">Add course</button>
         <button type="button" data-tab="tabEnroll">Enroll / Assign</button>
-        <button type="button" data-tab="tabLists">Directory</button>
+        <button type="button" data-tab="tabLists">Directory &amp; Accounts</button>
+        <button type="button" data-tab="tabTranscripts">Student Transcripts</button>
+        <button type="button" data-tab="tabTimetables">Timetables &amp; Exams</button>
+        <button type="button" data-tab="tabAnnouncements">Announcements</button>
+        <button type="button" data-tab="tabAudit">Audit Logs</button>
+        <button type="button" data-tab="tabWorkflow">Connected Flow</button>
       </div>
 
       <!-- Add User Panel -->
@@ -214,20 +219,273 @@
       <!-- Directory Panel -->
       <div class="tab-panel" data-group="admin" id="tabLists">
         <div class="bento" style="gap:16px">
-          <div class="span-6">
-            <h2 style="margin-bottom:10px">Users</h2>
+          <div class="span-12">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div>
+                <h2 style="margin-bottom:4px;"><i data-i="users"></i>User Accounts &amp; Permissions</h2>
+                <p class="muted" style="font-size:13px;">Manage student and faculty accounts, edit details, or toggle active status.</p>
+              </div>
+              <button class="btn" type="button" onclick="window.refreshAdmin&&window.refreshAdmin()"><i data-i="search"></i>Refresh Directory</button>
+            </div>
             <div class="table-wrap" data-empty-title="No users yet" data-empty-text="Add a student or faculty member to get started.">
-              <table><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody id="usersBody"></tbody></table>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Details</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersBody"></tbody>
+              </table>
             </div>
           </div>
-          <div class="span-6">
-            <h2 style="margin-bottom:10px">Courses</h2>
+
+          <div class="span-12" style="margin-top:10px;">
+            <h2 style="margin-bottom:10px"><i data-i="book"></i>Active Academic Courses</h2>
             <div class="table-wrap" data-empty-title="No courses yet" data-empty-text="Create a course from the Add course tab.">
               <table><thead><tr><th>Code</th><th>Name</th></tr></thead><tbody id="coursesBody"></tbody></table>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Student Transcripts Tab (Screenshot 4) -->
+      <div class="tab-panel" data-group="admin" id="tabTranscripts">
+        <div style="margin-bottom:18px;">
+          <h2><i data-i="award"></i>Generate Official Student Academic Transcripts</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Printable official academic records including course credits, SGPA, CGPA, and university certification.</p>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:flex-end; max-width:600px;">
+          <div class="field sel fixed">
+            <select id="transcriptStudentSelect"></select>
+            <label for="transcriptStudentSelect">Select Enrolled Student</label>
+          </div>
+          <button class="btn primary magnetic spin" type="button" onclick="window.generateTranscript&&window.generateTranscript()">
+            <i data-i="printer"></i>Generate Transcript
+          </button>
+        </div>
+        <div id="transcriptPreviewContainer" style="margin-top:24px;"></div>
+      </div>
+
+      <!-- Timetables & Examination Schedules Tab (Screenshot 4) -->
+      <div class="tab-panel" data-group="admin" id="tabTimetables">
+        <div style="margin-bottom:18px;">
+          <h2><i data-i="cal"></i>Timetables &amp; Examination Schedules</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Manage lecture slots, classrooms, and examination schedules across all university departments.</p>
+        </div>
+
+        <div class="form-grid" style="margin-bottom:20px;">
+          <div class="field sel fixed"><select id="ttCourseSelect"></select><label for="ttCourseSelect">Course</label></div>
+          <div class="field sel fixed">
+            <select id="ttDay">
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday" selected>Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+            </select>
+            <label for="ttDay">Day of Week</label>
+          </div>
+          <div class="field"><input id="ttStart" placeholder=" " value="09:00 AM"><label for="ttStart">Start Time</label></div>
+          <div class="field"><input id="ttEnd" placeholder=" " value="10:50 AM"><label for="ttEnd">End Time</label></div>
+          <div class="field"><input id="ttRoom" placeholder=" " value="Hall A-101"><label for="ttRoom">Room / Lecture Hall</label></div>
+          <div class="field"><input id="ttFaculty" placeholder=" " value="Prof. Rumneek"><label for="ttFaculty">Faculty Instructor</label></div>
+        </div>
+        <div class="form-actions" style="margin-bottom:24px;">
+          <button class="btn primary magnetic spin" type="button" onclick="window.addTimetableSlot&&window.addTimetableSlot()"><i data-i="plus"></i>Schedule Lecture Slot</button>
+        </div>
+
+        <div class="table-wrap" data-empty-title="No timetable scheduled" data-empty-text="Add lecture slots above to build the university timetable.">
+          <table>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Course</th>
+                <th>Time Window</th>
+                <th>Hall / Room</th>
+                <th>Instructor</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="timetablesAdminBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- University Announcements Tab (Screenshot 4) -->
+      <div class="tab-panel" data-group="admin" id="tabAnnouncements">
+        <div style="margin-bottom:18px;">
+          <h2><i data-i="clip"></i>Publish University-Wide Announcements</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Broadcast notifications directly to all faculty desks and student workspaces.</p>
+        </div>
+
+        <div class="form-grid" style="margin-bottom:20px;">
+          <div class="field" style="grid-column:1/-1;">
+            <input id="annTitle" placeholder=" " required>
+            <label for="annTitle">Announcement Title (e.g. Mid-Semester Examination Schedule Published)</label>
+          </div>
+          <div class="field sel fixed">
+            <select id="annCategory">
+              <option value="University" selected>University-wide</option>
+              <option value="Exam">Examination Schedule</option>
+              <option value="Academic">Academic Notice</option>
+              <option value="Urgent">Urgent Alert</option>
+            </select>
+            <label for="annCategory">Category</label>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <textarea id="annContent" rows="3" placeholder="Enter full announcement details..."></textarea>
+            <label for="annContent">Announcement Details</label>
+          </div>
+        </div>
+        <div class="form-actions" style="margin-bottom:24px;">
+          <button class="btn primary magnetic spin" type="button" onclick="window.publishAnnouncement&&window.publishAnnouncement()"><i data-i="upload"></i>Publish Broadcast Announcement</button>
+        </div>
+
+        <div class="table-wrap" data-empty-title="No announcements" data-empty-text="Publish announcements above to broadcast across the campus.">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Posted Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="announcementsAdminBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Audit Logs & System Activity Tab (Screenshot 4) -->
+      <div class="tab-panel" data-group="admin" id="tabAudit">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+          <div>
+            <h2><i data-i="shield"></i>Audit Logs &amp; System Activity</h2>
+            <p class="muted" style="font-size:13px;margin-top:4px;">Immutable audit trail of user logins, attendance submissions, and grade updates.</p>
+          </div>
+          <button class="btn" type="button" onclick="window.loadAuditLogs&&window.loadAuditLogs()"><i data-i="search"></i>Refresh Logs</button>
+        </div>
+        <div class="table-wrap" data-empty-title="No audit logs yet" data-empty-text="System activity logs will stream in real-time.">
+          <table>
+            <thead>
+              <tr>
+                <th>Log ID</th>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Connected Workflow Tab (Screenshot 5) -->
+      <div class="tab-panel" data-group="admin" id="tabWorkflow">
+        <div class="workflow-stepper-box" style="margin-top:0;">
+          <div class="workflow-title-row">
+            <div class="workflow-title">
+              <i data-i="award" style="color:var(--teal)"></i>
+              <span>One connected academic workflow</span>
+            </div>
+            <span class="chip ok">0 Errors · Complete Loop</span>
+          </div>
+          <div class="workflow-steps-vertical">
+            <div class="workflow-step-card step-teal">
+              <div class="workflow-step-icon"><i data-i="user"></i></div>
+              <div class="workflow-step-name">Faculty creates Assignment 1</div>
+              <div class="workflow-step-meta">Course: UCS310 · Due date · Maximum marks: 20</div>
+            </div>
+            <div class="workflow-down-arrow">↓</div>
+            <div class="workflow-step-card step-cyan">
+              <div class="workflow-step-icon"><i data-i="db"></i></div>
+              <div class="workflow-step-name">Spring Boot saves it in MySQL</div>
+              <div class="workflow-step-meta">Assignment details + course mapping + file metadata</div>
+            </div>
+            <div class="workflow-down-arrow">↓</div>
+            <div class="workflow-step-card step-cyan">
+              <div class="workflow-step-icon"><i data-i="book"></i></div>
+              <div class="workflow-step-name">Enrolled students see it</div>
+              <div class="workflow-step-meta">Only students enrolled in UCS310</div>
+            </div>
+            <div class="workflow-down-arrow">↓</div>
+            <div class="workflow-step-card step-purple">
+              <div class="workflow-step-icon"><i data-i="upload"></i></div>
+              <div class="workflow-step-name">Student uploads PDF / DOCX / ZIP</div>
+              <div class="workflow-step-meta">Submission stored against student and assignment IDs</div>
+            </div>
+            <div class="workflow-down-arrow">↓</div>
+            <div class="workflow-step-card step-teal">
+              <div class="workflow-step-icon"><i data-i="check"></i></div>
+              <div class="workflow-step-name">Faculty evaluates submission</div>
+              <div class="workflow-step-meta">Marks + feedback + Reviewed status</div>
+            </div>
+            <div class="workflow-down-arrow">↓</div>
+            <div class="workflow-step-card step-purple">
+              <div class="workflow-step-icon"><i data-i="award"></i></div>
+              <div class="workflow-step-name">Student sees updated result</div>
+              <div class="workflow-step-meta">Marks, feedback and assessment performance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3><i data-i="user"></i>Edit User Account</h3>
+      <button class="modal-close" onclick="window.closeEditUserModal()">&times;</button>
+    </div>
+    <input type="hidden" id="editUserId">
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field" style="grid-column:1/-1;"><input id="editUserName" placeholder=" " required><label for="editUserName">Full Name</label></div>
+      <div class="field"><input id="editUserUsername" placeholder=" " required><label for="editUserUsername">Username</label></div>
+      <div class="field"><input id="editUserPhone" placeholder=" "><label for="editUserPhone">Phone Number</label></div>
+      <div class="field sel fixed">
+        <select id="editUserRole">
+          <option value="Student">Student</option>
+          <option value="Faculty">Faculty</option>
+          <option value="Admin">Admin</option>
+        </select>
+        <label for="editUserRole">Role</label>
+      </div>
+      <div class="field"><input id="editUserDept" placeholder=" " value="CSE"><label for="editUserDept">Department</label></div>
+      <div class="field" id="editSemGroup"><input id="editUserSem" type="number" min="1" max="8" placeholder=" " value="4"><label for="editUserSem">Semester</label></div>
+      <div class="field" id="editDesigGroup"><input id="editUserDesig" placeholder=" " value="Assistant Professor"><label for="editUserDesig">Designation</label></div>
+    </div>
+    <div class="form-actions" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn" type="button" onclick="window.closeEditUserModal()">Cancel</button>
+      <button class="btn primary magnetic spin" type="button" onclick="window.saveUserEdit&&window.saveUserEdit()"><i data-i="check"></i>Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transcript Modal -->
+<div class="modal-overlay" id="transcriptModal">
+  <div class="modal-box" style="max-width:820px;padding:24px;">
+    <div class="modal-head no-print">
+      <h3><i data-i="award"></i>Official Academic Transcript</h3>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" type="button" onclick="window.printTranscript()"><i data-i="printer"></i>Print Transcript</button>
+        <button class="modal-close" onclick="window.closeTranscriptModal()">&times;</button>
+      </div>
+    </div>
+    <div id="transcriptSheetPrintArea" class="transcript-modal-body"></div>
+  </div>
+</div>
     </section>
   </div>
 </main>
