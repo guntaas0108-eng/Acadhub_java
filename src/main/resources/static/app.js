@@ -463,11 +463,14 @@
 
     if (url.includes('/api/student/dashboard')) {
       return {
-        student: { name: 'Kriti Sharma', roll_no: 102403111, cgpa: 8.45 },
-        overallAttendance: { total_classes: 48, attended: 41, percentage: 85.4 },
+        student: { name: 'Kriti', roll_no: '1024030111', cgpa: 8.45 },
+        overallAttendance: { total_classes: 4, attended: 3, percentage: 75.0 },
+        attendance: [
+          { courseCode: 'UCS310', totalClasses: 4, presentCount: 3, attendancePct: 75.0 }
+        ],
         courses: [
-          { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, attendance_pct: 84.0, total_classes: 25, attended: 21, marks: 42, max_marks: 50, grade: 'A' },
-          { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, attendance_pct: 87.5, total_classes: 24, attended: 21, marks: 45, max_marks: 50, grade: 'A+' }
+          { course_code: 'UCS310', course_name: 'Database Management Systems', credits: 4, attendance_pct: 75.0, total_classes: 4, attended: 3, marks: 42, max_marks: 50, grade: 'A' },
+          { course_code: 'UCS520', course_name: 'Computer Networks', credits: 4, attendance_pct: 80.0, total_classes: 5, attended: 4, marks: 45, max_marks: 50, grade: 'A+' }
         ],
         marks: [
           { courseName: 'Database Management Systems', assessmentType: 'Mid Term', marksObtained: 42, totalMarks: 50, percentage: 84.0 },
@@ -2067,80 +2070,144 @@
     if ($('avatarInitial')) $('avatarInitial').textContent = (name.charAt(0) || 'S').toUpperCase();
     if ($('cgpa')) $('cgpa').textContent = (student.cgpa || 8.45).toFixed(2);
 
-    // Attendance Calculations (Overall Attendance + Classes Attended widget)
-    const attInfo = d.overallAttendance || {};
+    // Courses & Attendance / Marks Data
     const courses = d.enrolledCourses || d.courses || [];
     const attList = d.attendance || [];
+    const attInfo = d.overallAttendance || {};
 
-    let overallPct = attInfo.percentage != null ? Number(attInfo.percentage) : 75;
-    let attendedCount = attInfo.attended != null ? Number(attInfo.attended) : 41;
-    let totalHeld = attInfo.total != null ? Number(attInfo.total) : 48;
+    // 1. Marks by assessment (Donut + Progress Bars matching Screenshot)
+    const marksDonut = $('marksDonut');
+    const marksDonutVal = $('marksDonutVal');
+    const marksCaption = $('marksCaption');
+    const marksBarsList = $('marksBarsList');
 
-    if (!attInfo.percentage && attList.length) {
-      let sumAtt = 0;
-      let sumTot = 0;
-      attList.forEach(a => {
-        sumAtt += Number(a.present_count != null ? a.present_count : a.presentCount || 0);
-        sumTot += Number(a.total_classes != null ? a.total_classes : a.totalClasses || 0);
-      });
-      if (sumTot > 0) {
-        attendedCount = sumAtt;
-        totalHeld = sumTot;
-        overallPct = Math.round((sumAtt / sumTot) * 100);
-      }
-    }
+    const marksList = d.marks || [];
+    if (marksBarsList) {
+      if (marksList.length) {
+        let sumPct = 0;
+        marksBarsList.innerHTML = marksList.map(m => {
+          const rawCourse = m.courseName || m.course_name || 'Course';
+          const assess = m.assessmentType || m.assessment_type || 'Exam';
+          const scored = m.marksObtained != null ? Number(m.marksObtained) : (m.marks_obtained != null ? Number(m.marks_obtained) : 42);
+          const total = m.totalMarks != null ? Number(m.totalMarks) : (m.total_marks != null ? Number(m.total_marks) : 50);
+          const pct = m.percentage != null ? Number(m.percentage) : (total > 0 ? (scored / total) * 100 : 75);
+          const roundPct = Math.round(pct);
+          sumPct += roundPct;
+          const tone = roundPct >= 75 ? 'good' : (roundPct >= 60 ? 'warn' : 'bad');
+          const displayLabel = `${rawCourse} (${assess})`;
 
-    if ($('overallAttBig')) $('overallAttBig').textContent = Math.round(overallPct) + '%';
-    if ($('attPercent')) $('attPercent').textContent = Math.round(overallPct) + '%';
-    if ($('attProgressFill')) $('attProgressFill').style.width = Math.min(100, Math.max(5, overallPct)) + '%';
-    if ($('classesAttendedCount')) $('classesAttendedCount').textContent = attendedCount;
-    if ($('classesHeldLabel')) $('classesHeldLabel').textContent = `/ ${totalHeld} held`;
-    if ($('overallAttPill')) {
-      const isSafe = overallPct >= 75;
-      $('overallAttPill').textContent = isSafe ? 'Safe' : 'At Risk';
-      $('overallAttPill').className = 'chip ' + (isSafe ? 'ok' : 'danger');
-    }
-
-    // Attendance Analytics Vertical Purple Bar Chart (Screenshot 2)
-    const chartWrap = $('analyticsChartWrap');
-    if (chartWrap) {
-      let chartData = [];
-      if (attList.length) {
-        chartData = attList.map(a => ({
-          code: a.course_code || a.courseCode,
-          pct: Math.min(100, Math.max(0, Number(a.attendance_pct != null ? a.attendance_pct : a.attendancePct || 75)))
-        }));
-      } else if (courses.length) {
-        chartData = courses.map(c => ({
-          code: c.course_code,
-          pct: Number(c.attendance_pct || 75)
-        }));
-      } else {
-        chartData = [
-          { code: 'MATH202', pct: 100 },
-          { code: 'PHY101', pct: 100 },
-          { code: 'CS101', pct: 50 },
-          { code: 'HIST105', pct: 50 }
-        ];
-      }
-
-      chartWrap.innerHTML = `
-        <div class="athena-gridline" style="bottom: 85%;"><span class="athena-grid-label">100</span></div>
-        <div class="athena-gridline" style="bottom: 65%;"><span class="athena-grid-label">75</span></div>
-        <div class="athena-gridline" style="bottom: 45%;"><span class="athena-grid-label">50</span></div>
-        <div class="athena-gridline" style="bottom: 25%;"><span class="athena-grid-label">25</span></div>
-        <div class="athena-gridline" style="bottom: 5%;"><span class="athena-grid-label">0</span></div>
-      ` + chartData.map(cd => {
-        const barHeight = Math.max(8, Math.round((cd.pct / 100) * 82));
-        return `
-          <div class="athena-bar-col">
-            <div class="athena-bar-rect" style="height: ${barHeight}%;">
-              <span class="athena-bar-tooltip">${esc(cd.code)}: ${Math.round(cd.pct)}%</span>
+          return `
+            <div class="bar-row">
+              <span class="bar-label" title="${esc(displayLabel)}">${esc(displayLabel)}</span>
+              <div class="bar-track"><div class="bar-fill ${tone}" style="width: ${roundPct}%;"></div></div>
+              <span class="bar-value">${roundPct}%</span>
             </div>
-            <span class="athena-bar-label">${esc(cd.code)}</span>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+
+        const avgPct = Math.round(sumPct / marksList.length);
+        if (marksDonut) {
+          marksDonut.style.setProperty('--pct', avgPct);
+          marksDonut.className = 'donut ' + (avgPct >= 75 ? 'good' : (avgPct >= 60 ? 'warn' : 'bad'));
+        }
+        if (marksDonutVal) marksDonutVal.textContent = avgPct + '%';
+        if (marksCaption) marksCaption.textContent = `Average across ${marksList.length} assessment(s)`;
+      } else if (courses.length) {
+        let sumPct = 0;
+        marksBarsList.innerHTML = courses.map(c => {
+          const scored = c.marks != null ? Number(c.marks) : 42;
+          const total = c.max_marks ? Number(c.max_marks) : 50;
+          const pct = Math.round((scored / total) * 100);
+          sumPct += pct;
+          const tone = pct >= 75 ? 'good' : (pct >= 60 ? 'warn' : 'bad');
+          const displayLabel = `${c.course_code} - ${c.course_name || 'Course'}`;
+          return `
+            <div class="bar-row">
+              <span class="bar-label" title="${esc(displayLabel)}">${esc(displayLabel)}</span>
+              <div class="bar-track"><div class="bar-fill ${tone}" style="width: ${pct}%;"></div></div>
+              <span class="bar-value">${pct}%</span>
+            </div>
+          `;
+        }).join('');
+
+        const avgPct = Math.round(sumPct / courses.length);
+        if (marksDonut) {
+          marksDonut.style.setProperty('--pct', avgPct);
+          marksDonut.className = 'donut ' + (avgPct >= 75 ? 'good' : 'warn');
+        }
+        if (marksDonutVal) marksDonutVal.textContent = avgPct + '%';
+        if (marksCaption) marksCaption.textContent = `Average across ${courses.length} course(s)`;
+      } else {
+        if (marksDonut) marksDonut.style.setProperty('--pct', 79);
+        if (marksDonutVal) marksDonutVal.textContent = '79%';
+        if (marksCaption) marksCaption.textContent = 'Average across 3 assessment(s)';
+      }
+    }
+
+    // 2. Attendance (Donut + Progress Bars matching Screenshot)
+    const attDonut = $('attDonut');
+    const attDonutVal = $('attDonutVal');
+    const attCaption = $('attCaption');
+    const attBarsList = $('attBarsList');
+
+    let sumAtt = 0;
+    let sumTot = 0;
+
+    if (attBarsList) {
+      if (attList.length) {
+        attBarsList.innerHTML = attList.map(a => {
+          const pCount = a.presentCount != null ? Number(a.presentCount) : (a.present_count != null ? Number(a.present_count) : 3);
+          const tCount = a.totalClasses != null ? Number(a.totalClasses) : (a.total_classes != null ? Number(a.total_classes) : 4);
+          sumAtt += pCount;
+          sumTot += tCount;
+          const pct = a.attendancePct != null ? Number(a.attendancePct) : (a.attendance_pct != null ? Number(a.attendance_pct) : (tCount > 0 ? (pCount / tCount) * 100 : 75));
+          const roundPct = Math.round(pct);
+          const tone = roundPct >= 75 ? 'good' : (roundPct >= 60 ? 'warn' : 'bad');
+          const code = a.courseCode || a.course_code || 'UCS310';
+
+          return `
+            <div class="bar-row">
+              <span class="bar-label" title="${esc(code)}">${esc(code)}</span>
+              <div class="bar-track"><div class="bar-fill ${tone}" style="width: ${roundPct}%;"></div></div>
+              <span class="bar-value">${roundPct}%</span>
+            </div>
+          `;
+        }).join('');
+
+        const overallPct = sumTot > 0 ? Math.round((sumAtt / sumTot) * 100) : (attInfo.percentage != null ? Math.round(attInfo.percentage) : 75);
+        if (attDonut) {
+          attDonut.style.setProperty('--pct', overallPct);
+          attDonut.className = 'donut ' + (overallPct >= 75 ? 'good' : (overallPct >= 60 ? 'warn' : 'bad'));
+        }
+        if (attDonutVal) attDonutVal.textContent = overallPct + '%';
+        if (attCaption) attCaption.textContent = `${sumAtt} of ${sumTot} classes attended`;
+      } else if (courses.length) {
+        attBarsList.innerHTML = courses.map(c => {
+          const pct = Math.round(Number(c.attendance_pct || 75));
+          const tone = pct >= 75 ? 'good' : 'warn';
+          return `
+            <div class="bar-row">
+              <span class="bar-label" title="${esc(c.course_code)}">${esc(c.course_code)}</span>
+              <div class="bar-track"><div class="bar-fill ${tone}" style="width: ${pct}%;"></div></div>
+              <span class="bar-value">${pct}%</span>
+            </div>
+          `;
+        }).join('');
+
+        const overallPct = attInfo.percentage != null ? Math.round(attInfo.percentage) : 75;
+        if (attDonut) {
+          attDonut.style.setProperty('--pct', overallPct);
+          attDonut.className = 'donut ' + (overallPct >= 75 ? 'good' : 'warn');
+        }
+        if (attDonutVal) attDonutVal.textContent = overallPct + '%';
+        const attended = attInfo.attended != null ? attInfo.attended : 3;
+        const total = attInfo.total != null ? attInfo.total : 4;
+        if (attCaption) attCaption.textContent = `${attended} of ${total} classes attended`;
+      } else {
+        if (attDonut) attDonut.style.setProperty('--pct', 75);
+        if (attDonutVal) attDonutVal.textContent = '75%';
+        if (attCaption) attCaption.textContent = '3 of 4 classes attended';
+      }
     }
 
     // Notification Drawer updates from backend announcements if available
