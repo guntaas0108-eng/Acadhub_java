@@ -6,7 +6,7 @@
 <title>AcadHub · Athena Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261105.1">
+<link rel="stylesheet" href="style.css?v=20261105.4">
 <style>
   .modern-dropzone {
     position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
@@ -60,32 +60,20 @@
 </head>
 <body data-page="student">
 
-<!-- App Header -->
-<header class="app-header">
-  <div class="hdr-in">
-    <a class="brand" href="student.html"><span class="logo">A</span>AcadHub</a>
-    <nav class="nav">
-      <a class="active" href="student.html">Athena Dashboard</a>
-      <a href="#studyMaterialsSection">Materials &amp; Tasks</a>
-      <a href="#submissionsSection">My Submissions</a>
-      <a href="#workflowSection">Connected Flow</a>
-    </nav>
-    <div class="hdr-right">
-      <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
-      <a class="btn ghost" href="index.html" onclick="if(window.logout){window.logout();return false}" aria-label="Sign out"><i data-i="logout"></i></a>
-    </div>
-  </div>
-</header>
+<!-- Athena Modern Layout Shell -->
+<div class="athena-shell">
 
-<!-- Athena 3-Column Modern Dark Layout (Screenshot 2) -->
-<div class="athena-container">
+  <!-- Mobile Backdrop Overlay -->
+  <div class="athena-sidebar-overlay" id="sidebarOverlay" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()"></div>
 
-  <!-- Column 1: Left Navigation Sidebar -->
-  <aside class="athena-sidebar">
+  <!-- Persistent Left Slidebar / Navigation -->
+  <aside class="athena-sidebar" id="athenaSidebar">
     <a href="student.html" class="athena-brand">
       <div class="logo-icon"><i data-i="book"></i></div>
-      <span>Athena</span>
+      <div>
+        <span class="brand-title">Athena</span>
+        <span class="brand-sub">Student Desk</span>
+      </div>
     </a>
 
     <nav class="athena-nav-list">
@@ -101,40 +89,77 @@
         <i data-i="clip" class="nav-icon"></i>
         <span>Activity</span>
       </a>
-      <a href="#notifDrawer" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('chat', this)">
-        <i data-i="comment" class="nav-icon"></i>
-        <span>Chat Box</span>
+      <a href="#ttSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('timetable', this)">
+        <i data-i="cal" class="nav-icon"></i>
+        <span>Timetable</span>
       </a>
-      <a href="#settings" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('settings', this)">
-        <i data-i="gear" class="nav-icon"></i>
-        <span>Settings</span>
+      <a href="#workflowSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('flow', this)">
+        <i data-i="award" class="nav-icon"></i>
+        <span>Connected Flow</span>
       </a>
     </nav>
 
+    <!-- User Profile Chip at bottom of slidebar -->
     <div class="athena-user-chip">
       <div class="athena-user-avatar" id="avatarInitial">ST</div>
-      <div style="min-width:0;flex:1;">
-        <div style="font-size:13.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="welcomeNameSidebar">Student</div>
-        <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="studentRollBadge">Roll: --</div>
+      <div class="athena-user-meta">
+        <div class="athena-user-name" id="welcomeNameSidebar">Student</div>
+        <div class="athena-user-sub" id="studentRollBadge">Roll: --</div>
       </div>
+      <button class="athena-logout-btn" type="button" onclick="if(window.logout){window.logout();return false}" title="Sign Out">
+        <i data-i="logout"></i>
+      </button>
     </div>
   </aside>
 
-  <!-- Column 2: Center Main Content Area -->
-  <main class="athena-main">
+  <!-- Main Viewport Area -->
+  <div class="athena-main-wrap">
 
-    <!-- Top Header Row -->
-    <div class="athena-header-row">
-      <div class="athena-greeting">
-        <h1>Welcome Back! 👋</h1>
-        <p>Here's your academic overview for today.</p>
+    <!-- Athena Top Bar -->
+    <header class="athena-topbar">
+      <!-- Mobile hamburger toggle -->
+      <button class="athena-sidebar-toggle" id="sidebarToggle" type="button" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()" aria-label="Toggle Navigation">
+        <i data-i="menu"></i>
+      </button>
+
+      <!-- Athena Search Bar -->
+      <div class="athena-topbar-search" data-open-palette>
+        <i data-i="search" style="color:var(--muted)"></i>
+        <input type="text" placeholder="Search pages, modules, services..." readonly>
+        <kbd>Ctrl K</kbd>
       </div>
-      <div class="athena-action-pills">
-        <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Services &amp; Tools</button>
-        <button type="button" class="athena-action-pill" onclick="window.scrollToSection('ttSection')">Timetable</button>
-        <button type="button" class="athena-action-pill" onclick="window.scrollToSection('workflowSection')">Learning</button>
+
+      <!-- Top Right Controls -->
+      <div class="athena-topbar-actions">
+        <button class="athena-icon-btn" id="themeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
+          <i data-i="moon"></i><i data-i="sun"></i>
+        </button>
+        <button class="athena-icon-btn" type="button" title="Announcements & Notifications" onclick="document.getElementById('ttSection')?.scrollIntoView({behavior:'smooth'})">
+          <i data-i="bell"></i>
+          <span class="notif-badge-dot"></span>
+        </button>
+        <div class="athena-top-avatar" id="topAvatarInitial">S</div>
       </div>
-    </div>
+    </header>
+
+    <!-- Athena 2-Column Dashboard Interior Grid -->
+    <div class="athena-dashboard-grid" id="overview">
+
+      <!-- Left Column: Main Academic Content -->
+      <main class="athena-main">
+
+        <!-- Top Header Row -->
+        <div class="athena-header-row">
+          <div class="athena-greeting">
+            <h1>Welcome Back! 👋</h1>
+            <p>Here's your academic overview for today.</p>
+          </div>
+          <div class="athena-action-pills">
+            <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Services &amp; Tools</button>
+            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('ttSection')">Timetable</button>
+            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('workflowSection')">Learning</button>
+          </div>
+        </div>
 
     <!-- Attendance Overview Row (Screenshot 2: Overall Attendance 75% + Classes Attended) -->
     <div class="athena-stats-row">
@@ -430,7 +455,9 @@
     </div>
 
   </aside>
-</div>
+    </div> <!-- closes athena-dashboard-grid -->
+  </div> <!-- closes athena-main-wrap -->
+</div> <!-- closes athena-shell -->
 
 <!-- Submit Work Modal for Students -->
 <div class="modal-overlay" id="submitWorkModal">

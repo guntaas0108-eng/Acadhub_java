@@ -6,7 +6,7 @@
 <title>AcadHub · Faculty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261103.2">
+<link rel="stylesheet" href="style.css?v=20261105.4">
 <style>
   /* Guaranteed Scoped Layout for Publish Study Material */
   .publish-box {
@@ -108,28 +108,110 @@
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
 <body data-page="faculty">
-<header class="app-header"><div class="hdr-in">
-  <a class="brand" href="faculty.html"><span class="logo">A</span>AcadHub</a>
-  <nav class="nav"><a class="active" href="faculty.html">Faculty Portal</a></nav>
-  <div class="hdr-right">
-    <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
-    <a class="btn ghost" href="index.html" onclick="if(window.logout){window.logout();return false}" aria-label="Sign out"><i data-i="logout"></i></a>
-  </div>
-</div></header>
 
-<main class="container">
-  <div class="page-head">
-    <div>
-      <p class="eyebrow" data-clock></p>
-      <h1><span data-greeting>Hello</span>, <span id="welcomeName">Professor</span></h1>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" type="button" onclick="window.refreshFaculty&&window.refreshFaculty()"><i data-i="clip"></i>Refresh Dashboard</button>
-    </div>
-  </div>
+<!-- Athena Modern Layout Shell -->
+<div class="athena-shell">
 
-  <div class="bento">
+  <!-- Mobile Backdrop Overlay -->
+  <div class="athena-sidebar-overlay" id="sidebarOverlay" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()"></div>
+
+  <!-- Persistent Left Slidebar / Navigation -->
+  <aside class="athena-sidebar" id="athenaSidebar">
+    <a href="faculty.html" class="athena-brand">
+      <div class="logo-icon"><i data-i="book"></i></div>
+      <div>
+        <span class="brand-title">Athena</span>
+        <span class="brand-sub">Faculty Desk</span>
+      </div>
+    </a>
+
+    <nav class="athena-nav-list">
+      <a href="#facOverview" class="athena-nav-link active">
+        <i data-i="home" class="nav-icon"></i>
+        <span>Home</span>
+      </a>
+      <a href="#assignedCoursesCard" class="athena-nav-link">
+        <i data-i="users" class="nav-icon"></i>
+        <span>My Courses &amp; Roster</span>
+      </a>
+      <a href="#takeAttendanceCard" class="athena-nav-link">
+        <i data-i="cal" class="nav-icon"></i>
+        <span>Mark Attendance</span>
+      </a>
+      <a href="#createAssignmentSection" class="athena-nav-link">
+        <i data-i="clip" class="nav-icon"></i>
+        <span>Assignments &amp; Quizzes</span>
+      </a>
+      <a href="#publishMaterialSection" class="athena-nav-link">
+        <i data-i="upload" class="nav-icon"></i>
+        <span>Study Materials</span>
+      </a>
+      <a href="#pendingSubmissionsSection" class="athena-nav-link">
+        <i data-i="award" class="nav-icon"></i>
+        <span>Grade Submissions</span>
+      </a>
+      <a href="#analyticsSection" class="athena-nav-link">
+        <i data-i="alert" class="nav-icon"></i>
+        <span>Analytics &amp; Risk</span>
+      </a>
+    </nav>
+
+    <!-- User Profile Chip at bottom of slidebar -->
+    <div class="athena-user-chip">
+      <div class="athena-user-avatar" id="avatarInitial">FC</div>
+      <div class="athena-user-meta">
+        <div class="athena-user-name" id="welcomeNameSidebar">Professor</div>
+        <div class="athena-user-sub">Teaching Faculty</div>
+      </div>
+      <button class="athena-logout-btn" type="button" onclick="if(window.logout){window.logout();return false}" title="Sign Out">
+        <i data-i="logout"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Viewport Area -->
+  <div class="athena-main-wrap">
+
+    <!-- Athena Top Bar -->
+    <header class="athena-topbar">
+      <!-- Mobile hamburger toggle -->
+      <button class="athena-sidebar-toggle" id="sidebarToggle" type="button" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()" aria-label="Toggle Navigation">
+        <i data-i="menu"></i>
+      </button>
+
+      <!-- Athena Search Bar -->
+      <div class="athena-topbar-search" data-open-palette>
+        <i data-i="search" style="color:var(--muted)"></i>
+        <input type="text" placeholder="Search pages, modules, services..." readonly>
+        <kbd>Ctrl K</kbd>
+      </div>
+
+      <!-- Top Right Controls -->
+      <div class="athena-topbar-actions">
+        <button class="athena-icon-btn" id="themeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
+          <i data-i="moon"></i><i data-i="sun"></i>
+        </button>
+        <button class="athena-icon-btn" type="button" title="Notifications">
+          <i data-i="bell"></i>
+          <span class="notif-badge-dot"></span>
+        </button>
+        <div class="athena-top-avatar">F</div>
+      </div>
+    </header>
+
+    <!-- Scrollable Interior Content -->
+    <div class="athena-interior" id="facOverview">
+      <div class="page-head" style="margin-bottom:0;">
+        <div>
+          <p class="eyebrow" data-clock></p>
+          <h1><span data-greeting>Hello</span>, <span id="welcomeName">Professor</span></h1>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" type="button" onclick="window.refreshFaculty&&window.refreshFaculty()"><i data-i="clip"></i>Refresh Dashboard</button>
+        </div>
+      </div>
+
+      <div class="bento">
     <section class="card span-12">
       <div class="seg" data-group="fac" role="tablist">
         <button type="button" data-tab="tabAtt" class="active">Attendance</button>
@@ -438,8 +520,10 @@
         </div>
       </div>
     </section>
-  </div>
-</main>
+  </div> <!-- closes .bento -->
+</div> <!-- closes .athena-interior -->
+</div> <!-- closes .athena-main-wrap -->
+</div> <!-- closes .athena-shell -->
 
 <!-- Grade / Review Submission Modal -->
 <div class="modal-overlay" id="reviewModal">

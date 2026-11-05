@@ -6,32 +6,118 @@
 <title>AcadHub · Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261103.2">
+<link rel="stylesheet" href="style.css?v=20261105.4">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
 <body data-page="admin">
-<header class="app-header"><div class="hdr-in">
-  <a class="brand" href="admin.html"><span class="logo">A</span>AcadHub</a>
-  <nav class="nav"><a class="active" href="admin.html">Admin Portal</a></nav>
-  <div class="hdr-right">
-    <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
-    <a class="btn ghost" href="index.html" onclick="if(window.logout){window.logout();return false}" aria-label="Sign out"><i data-i="logout"></i></a>
-  </div>
-</div></header>
 
-<main class="container">
-  <div class="page-head">
-    <div>
-      <p class="eyebrow" data-clock></p>
-      <h1><span data-greeting>Hello</span>, <span id="welcomeName">Admin</span></h1>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" type="button" onclick="window.refreshAdmin&&window.refreshAdmin()"><i data-i="clip"></i>Refresh Data</button>
-    </div>
-  </div>
+<!-- Athena Modern Layout Shell -->
+<div class="athena-shell">
 
-  <div class="bento">
+  <!-- Mobile Backdrop Overlay -->
+  <div class="athena-sidebar-overlay" id="sidebarOverlay" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()"></div>
+
+  <!-- Persistent Left Slidebar / Navigation -->
+  <aside class="athena-sidebar" id="athenaSidebar">
+    <a href="admin.html" class="athena-brand">
+      <div class="logo-icon"><i data-i="shield"></i></div>
+      <div>
+        <span class="brand-title">Athena</span>
+        <span class="brand-sub">Admin Console</span>
+      </div>
+    </a>
+
+    <nav class="athena-nav-list">
+      <a href="#dashboardSection" class="athena-nav-link active">
+        <i data-i="home" class="nav-icon"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#usersSection" class="athena-nav-link">
+        <i data-i="users" class="nav-icon"></i>
+        <span>User Accounts</span>
+      </a>
+      <a href="#accountabilityMatrixSection" class="athena-nav-link">
+        <i data-i="book" class="nav-icon"></i>
+        <span>Courses &amp; Rosters</span>
+      </a>
+      <a href="#riskTable" class="athena-nav-link">
+        <i data-i="alert" class="nav-icon"></i>
+        <span>At-Risk Guard</span>
+      </a>
+      <a href="#transcriptsSection" class="athena-nav-link">
+        <i data-i="award" class="nav-icon"></i>
+        <span>Transcripts</span>
+      </a>
+      <a href="#timetablesSection" class="athena-nav-link">
+        <i data-i="cal" class="nav-icon"></i>
+        <span>Timetables</span>
+      </a>
+      <a href="#announcementsSection" class="athena-nav-link">
+        <i data-i="trend" class="nav-icon"></i>
+        <span>Announcements</span>
+      </a>
+      <a href="#auditLogsSection" class="athena-nav-link">
+        <i data-i="clip" class="nav-icon"></i>
+        <span>Audit Logs</span>
+      </a>
+    </nav>
+
+    <!-- User Profile Chip at bottom of slidebar -->
+    <div class="athena-user-chip">
+      <div class="athena-user-avatar" id="avatarInitial">AD</div>
+      <div class="athena-user-meta">
+        <div class="athena-user-name" id="welcomeNameSidebar">Admin</div>
+        <div class="athena-user-sub">System Administrator</div>
+      </div>
+      <button class="athena-logout-btn" type="button" onclick="if(window.logout){window.logout();return false}" title="Sign Out">
+        <i data-i="logout"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Viewport Area -->
+  <div class="athena-main-wrap">
+
+    <!-- Athena Top Bar -->
+    <header class="athena-topbar">
+      <!-- Mobile hamburger toggle -->
+      <button class="athena-sidebar-toggle" id="sidebarToggle" type="button" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()" aria-label="Toggle Navigation">
+        <i data-i="menu"></i>
+      </button>
+
+      <!-- Athena Search Bar -->
+      <div class="athena-topbar-search" data-open-palette>
+        <i data-i="search" style="color:var(--muted)"></i>
+        <input type="text" placeholder="Search pages, modules, services..." readonly>
+        <kbd>Ctrl K</kbd>
+      </div>
+
+      <!-- Top Right Controls -->
+      <div class="athena-topbar-actions">
+        <button class="athena-icon-btn" id="themeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
+          <i data-i="moon"></i><i data-i="sun"></i>
+        </button>
+        <button class="athena-icon-btn" type="button" title="System Status: Connected">
+          <i data-i="shield"></i>
+          <span class="notif-badge-dot"></span>
+        </button>
+        <div class="athena-top-avatar">A</div>
+      </div>
+    </header>
+
+    <!-- Scrollable Interior Content -->
+    <div class="athena-interior" id="dashboardSection">
+      <div class="page-head" style="margin-bottom:0;">
+        <div>
+          <p class="eyebrow" data-clock></p>
+          <h1><span data-greeting>Hello</span>, <span id="welcomeName">Admin</span></h1>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" type="button" onclick="window.refreshAdmin&&window.refreshAdmin()"><i data-i="clip"></i>Refresh Data</button>
+        </div>
+      </div>
+
+      <div class="bento">
     <!-- Stat Cards (4 columns for complete overview) -->
     <article class="card stat lift span-3">
       <div class="stat-top"><span class="stat-icon"><i data-i="cap"></i></span><span class="pill"><i data-i="trend"></i>Students</span></div>
@@ -439,8 +525,10 @@
         </div>
       </div>
     </section>
-  </div>
-</main>
+  </div> <!-- closes .bento -->
+</div> <!-- closes .athena-interior -->
+</div> <!-- closes .athena-main-wrap -->
+</div> <!-- closes .athena-shell -->
 
 <!-- Edit User Modal -->
 <div class="modal-overlay" id="editUserModal">
@@ -486,9 +574,6 @@
     <div id="transcriptSheetPrintArea" class="transcript-modal-body"></div>
   </div>
 </div>
-    </section>
-  </div>
-</main>
 
 <script src="ui.js"></script>
 <script src="app.js"></script>

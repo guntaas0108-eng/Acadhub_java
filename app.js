@@ -824,22 +824,62 @@
     const live = await checkBackendLive();
     if (!live) {
       const u = handleOfflineGet('/api/me');
-      const el = $('welcomeName');
-      if (el) el.textContent = u.name;
+      if (u) {
+        if ($('welcomeName')) $('welcomeName').textContent = u.name;
+        if ($('welcomeNameSidebar')) $('welcomeNameSidebar').textContent = u.name;
+        if ($('avatarInitial')) $('avatarInitial').textContent = (u.name.charAt(0) || 'U').toUpperCase();
+        if ($('topAvatarInitial')) $('topAvatarInitial').textContent = (u.name.charAt(0) || 'U').toUpperCase();
+      }
       return u;
     }
     try {
       const res = await fetch('/api/me');
       if (res.ok) {
         const u = await res.json();
-        const el = $('welcomeName');
-        if (el) el.textContent = u.name;
+        if ($('welcomeName')) $('welcomeName').textContent = u.name;
+        if ($('welcomeNameSidebar')) $('welcomeNameSidebar').textContent = u.name;
+        if ($('avatarInitial')) $('avatarInitial').textContent = (u.name.charAt(0) || 'U').toUpperCase();
+        if ($('topAvatarInitial')) $('topAvatarInitial').textContent = (u.name.charAt(0) || 'U').toUpperCase();
         try { localStorage.setItem('acadhub_session', JSON.stringify(u)); } catch (e) {}
         return u;
       }
     } catch (e) {}
+    try {
+      const cached = JSON.parse(localStorage.getItem('acadhub_session') || '{}');
+      if (cached && cached.name) {
+        if ($('welcomeName')) $('welcomeName').textContent = cached.name;
+        if ($('welcomeNameSidebar')) $('welcomeNameSidebar').textContent = cached.name;
+        if ($('avatarInitial')) $('avatarInitial').textContent = (cached.name.charAt(0) || 'U').toUpperCase();
+        if ($('topAvatarInitial')) $('topAvatarInitial').textContent = (cached.name.charAt(0) || 'U').toUpperCase();
+        return cached;
+      }
+    } catch (e) {}
     return null;
   }
+
+  // Athena Sidebar Mobile Toggle & Active Link Tracking
+  window.toggleMobileSidebar = function () {
+    const sb = document.getElementById('athenaSidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    if (!sb) return;
+    const open = sb.classList.toggle('open');
+    if (ov) ov.classList.toggle('active', open);
+  };
+
+  // Close mobile sidebar on navigation link click and highlight active item
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('.athena-nav-link');
+    if (link) {
+      document.querySelectorAll('.athena-nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      const sb = document.getElementById('athenaSidebar');
+      const ov = document.getElementById('sidebarOverlay');
+      if (sb && sb.classList.contains('open')) {
+        sb.classList.remove('open');
+        if (ov) ov.classList.remove('active');
+      }
+    }
+  });
 
   // ============================================================
   //   1. LOGIN PAGE (index.html)
