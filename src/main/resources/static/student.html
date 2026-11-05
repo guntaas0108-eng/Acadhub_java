@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AcadHub · Student</title>
+<title>AcadHub · Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261103.2">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261105.7">
 <style>
   .modern-dropzone {
     position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
@@ -59,85 +59,186 @@
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
 </head>
 <body data-page="student">
-<header class="app-header"><div class="hdr-in">
-  <a class="brand" href="student.html"><span class="logo">A</span>AcadHub</a>
-  <nav class="nav"><a class="active" href="student.html">Student Workspace</a></nav>
-  <div class="hdr-right">
-    <button class="kbd-btn" data-open-palette type="button"><i data-i="search"></i><span>Search</span><kbd>Ctrl K</kbd></button>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme"><i data-i="moon"></i><i data-i="sun"></i></button>
-    <a class="btn ghost" href="index.html" onclick="if(window.logout){window.logout();return false}" aria-label="Sign out"><i data-i="logout"></i></a>
-  </div>
-</div></header>
 
-<main class="container">
-  <div class="page-head">
-    <div>
-      <p class="eyebrow" data-clock></p>
-      <h1><span data-greeting>Hello</span>, <span id="welcomeName">Student</span></h1>
-      <p class="muted" style="margin-top:4px;" id="studentSubMeta">Roll No: -- · Department: --</p>
+<!-- Athena Modern Layout Shell -->
+<div class="athena-shell">
+
+  <!-- Mobile Backdrop Overlay -->
+  <div class="athena-sidebar-overlay" id="sidebarOverlay" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()"></div>
+
+  <!-- Persistent Left Slidebar / Navigation -->
+  <aside class="athena-sidebar" id="athenaSidebar">
+    <a href="student.html" class="athena-brand">
+      <div class="logo-icon">A</div>
+      <div>
+        <span class="brand-title">AcadHub</span>
+        <span class="brand-sub">Student Portal</span>
+      </div>
+    </a>
+
+    <nav class="athena-nav-list">
+      <a href="#overview" class="athena-nav-link active" onclick="window.switchStudentView&&window.switchStudentView('home', this);return false;">
+        <i data-i="home" class="nav-icon"></i>
+        <span>Home</span>
+      </a>
+      <a href="#studyMaterialsSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('modules', this);return false;">
+        <i data-i="book" class="nav-icon"></i>
+        <span>Modules</span>
+      </a>
+      <a href="#submissionsSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('activity', this);return false;">
+        <i data-i="activity" class="nav-icon"></i>
+        <span>Activity</span>
+      </a>
+      <a href="#ttSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('timetable', this);return false;">
+        <i data-i="cal" class="nav-icon"></i>
+        <span>Timetable</span>
+      </a>
+      <a href="#gradesSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('grades', this);return false;">
+        <i data-i="award" class="nav-icon"></i>
+        <span>Academic Grades</span>
+      </a>
+    </nav>
+
+    <!-- User Profile Chip at bottom of slidebar -->
+    <div class="athena-user-chip">
+      <div class="athena-user-avatar" id="avatarInitial">ST</div>
+      <div class="athena-user-meta">
+        <div class="athena-user-name" id="welcomeNameSidebar">Student</div>
+        <div class="athena-user-sub" id="studentRollBadge">Roll: --</div>
+      </div>
+      <button class="athena-logout-btn" type="button" onclick="if(window.logout){window.logout();return false}" title="Sign Out">
+        <i data-i="logout"></i>
+      </button>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" type="button" onclick="window.refreshStudent&&window.refreshStudent()"><i data-i="clip"></i>Refresh</button>
-      <button class="btn no-print" type="button" onclick="print()"><i data-i="printer"></i>Download report</button>
+  </aside>
+
+  <!-- Main Viewport Area -->
+  <div class="athena-main-wrap">
+
+    <!-- Athena Top Bar -->
+    <header class="athena-topbar">
+      <!-- Mobile hamburger toggle -->
+      <button class="athena-sidebar-toggle" id="sidebarToggle" type="button" onclick="window.toggleMobileSidebar&&window.toggleMobileSidebar()" aria-label="Toggle Navigation">
+        <i data-i="menu"></i>
+      </button>
+
+      <!-- Athena Search Bar -->
+      <div class="athena-topbar-search" data-open-palette>
+        <i data-i="search" style="color:var(--muted)"></i>
+        <input type="text" placeholder="Search pages, modules, services..." readonly>
+        <kbd>Ctrl K</kbd>
+      </div>
+
+      <!-- Top Right Controls -->
+      <div class="athena-topbar-actions">
+        <button class="athena-icon-btn" id="themeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
+          <i data-i="moon"></i><i data-i="sun"></i>
+        </button>
+        <button class="athena-icon-btn" type="button" title="Announcements & Notifications" onclick="document.getElementById('ttSection')?.scrollIntoView({behavior:'smooth'})">
+          <i data-i="bell"></i>
+          <span class="notif-badge-dot"></span>
+        </button>
+        <div class="athena-top-avatar" id="topAvatarInitial">S</div>
+      </div>
+    </header>
+
+    <!-- Athena 2-Column Dashboard Interior Grid -->
+    <div class="athena-dashboard-grid" id="overview">
+
+      <!-- Left Column: Main Academic Content -->
+      <main class="athena-main">
+
+        <!-- Top Header Row -->
+        <div class="athena-header-row">
+          <div class="athena-greeting">
+            <h1>Welcome Back! 👋</h1>
+            <p>Here's your academic overview for today.</p>
+          </div>
+          <div class="athena-action-pills">
+            <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Services &amp; Tools</button>
+            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('ttSection')">Timetable</button>
+            <button type="button" class="athena-action-pill" onclick="window.scrollToSection('submissionsSection')">Submissions</button>
+          </div>
+        </div>
+
+    <!-- Attendance Overview Row (Screenshot 2: Overall Attendance 75% + Classes Attended) -->
+    <div class="athena-stats-row">
+      <!-- Overall Attendance Card with Progress Bar & Trend Arrow -->
+      <div class="athena-stat-widget">
+        <div class="athena-stat-label">OVERALL ATTENDANCE</div>
+        <div class="athena-stat-val-group">
+          <span class="athena-big-num" id="overallAttBig">75%</span>
+          <div class="athena-progress-bar-wrap">
+            <div class="athena-progress-bar-fill" id="attProgressFill" style="width: 75%;"></div>
+          </div>
+          <span class="athena-trend-arrow">↗</span>
+        </div>
+      </div>
+
+      <!-- Classes Attended Card -->
+      <div class="athena-stat-widget">
+        <div class="athena-stat-label">CLASSES ATTENDED</div>
+        <div class="athena-stat-val-group">
+          <span class="athena-big-num" id="classesAttendedCount">41</span>
+          <span class="muted" style="font-size:16px;font-weight:600;" id="classesHeldLabel">/ 48 held</span>
+          <span class="chip ok" style="margin-left:auto;font-size:11px;" id="overallAttPill">Safe</span>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="bento">
-    <!-- Overall Attendance Ring -->
-    <section class="card span-5">
-      <div class="card-head"><h2><i data-i="cal"></i>Overall attendance</h2></div>
-      <div class="ring-card">
-        <div class="ring-wrap">
-          <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52"/></svg>
-          <div class="ring-center"><span class="ring-val" id="attPercent">0%</span><span class="ring-sub">attendance</span></div>
+    <!-- Attendance Analytics Vertical Bar Chart (Purple/Violet Theme - Screenshot 2) -->
+    <div class="athena-chart-card">
+      <div class="athena-chart-head">
+        <div class="athena-chart-title">Attendance Analytics</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">75% Minimum Guard Active</div>
+      </div>
+
+      <div class="athena-chart-wrap" id="analyticsChartWrap">
+        <!-- Horizontal Dotted Gridlines -->
+        <div class="athena-gridline" style="bottom: 85%;"><span class="athena-grid-label">100</span></div>
+        <div class="athena-gridline" style="bottom: 65%;"><span class="athena-grid-label">75</span></div>
+        <div class="athena-gridline" style="bottom: 45%;"><span class="athena-grid-label">50</span></div>
+        <div class="athena-gridline" style="bottom: 25%;"><span class="athena-grid-label">25</span></div>
+        <div class="athena-gridline" style="bottom: 5%;"><span class="athena-grid-label">0</span></div>
+
+        <!-- Vertical Purple Bars dynamically rendered -->
+        <div class="athena-bar-col">
+          <div class="athena-bar-rect" style="height: 80%;">
+            <span class="athena-bar-tooltip">MATH202: 100%</span>
+          </div>
+          <span class="athena-bar-label">MATH202</span>
         </div>
-        <div>
-          <p class="muted" style="max-width:220px">Stay at <b style="color:var(--text)">75% or above</b> in every course to remain eligible for exams.</p>
-          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><span class="chip ok">75% and above</span><span class="chip danger">Below 75%</span></div>
+        <div class="athena-bar-col">
+          <div class="athena-bar-rect" style="height: 80%;">
+            <span class="athena-bar-tooltip">PHY101: 100%</span>
+          </div>
+          <span class="athena-bar-label">PHY101</span>
+        </div>
+        <div class="athena-bar-col">
+          <div class="athena-bar-rect" style="height: 40%;">
+            <span class="athena-bar-tooltip">CS101: 50%</span>
+          </div>
+          <span class="athena-bar-label">CS101</span>
+        </div>
+        <div class="athena-bar-col">
+          <div class="athena-bar-rect" style="height: 40%;">
+            <span class="athena-bar-tooltip">HIST105: 50%</span>
+          </div>
+          <span class="athena-bar-label">HIST105</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- GPA Stat -->
-    <article class="card stat lift span-3">
-      <div class="stat-top"><span class="stat-icon sky"><i data-i="award"></i></span><span class="pill">GPA</span></div>
-      <div><div class="stat-label">Current CGPA</div><div class="stat-value" id="cgpa">8.00</div></div>
-      <div data-spark="7.5,7.8,8.2,8.4,8.5,8.8"></div>
-    </article>
-
-    <!-- Enrolled Courses Stat -->
-    <article class="card stat lift span-4">
-      <div class="stat-top"><span class="stat-icon"><i data-i="book"></i></span><span class="pill">Courses</span></div>
-      <div><div class="stat-label">Enrolled courses</div><div class="stat-value" id="totalCourses">0</div></div>
-      <div data-spark="2,3,4,4,5,6"></div>
-    </article>
-
-    <!-- Attendance by Course Table -->
-    <section class="card span-6">
-      <div class="card-head"><h2><i data-i="clip"></i>Attendance by course</h2></div>
-      <div class="table-wrap" data-empty-title="No attendance yet" data-empty-text="Your attendance will appear once classes are marked.">
-        <table><thead><tr><th>Course</th><th>Attendance</th></tr></thead><tbody id="attBody"></tbody></table>
-      </div>
-    </section>
-
-    <!-- Marks and Grades Table -->
-    <section class="card span-6">
-      <div class="card-head"><h2><i data-i="award"></i>Marks and grades</h2></div>
-      <div class="table-wrap" data-empty-title="No marks published" data-empty-text="Grades will show here as faculty publish them.">
-        <table><thead><tr><th>Course</th><th>Marks</th><th>Grade</th></tr></thead><tbody id="marksBody"></tbody></table>
-      </div>
-    </section>
-
-    <!-- Enrolled Courses Study Material (Strict Course Isolation) -->
-    <section class="card span-12">
+    <!-- Enrolled Courses Study Material & Assignments -->
+    <section class="card" id="studyMaterialsSection">
       <div class="card-head" style="flex-wrap:wrap;">
         <div>
-          <h2><i data-i="book"></i>Course Study Materials</h2>
+          <h2><i data-i="book"></i>Course Study Materials &amp; Assignments</h2>
           <p class="muted" style="margin-top:4px;font-size:13px;">
-            🔒 Displaying study materials exclusively for courses you are enrolled in.
+            🔒 Displaying assignments, slides, and notes exclusively for courses you are enrolled in.
           </p>
         </div>
-        <div class="field sel fixed" style="width:220px;margin-bottom:0;">
+        <div class="field sel fixed" style="width:240px;margin-bottom:0;">
           <select id="stCourseFilter" onchange="window.filterStudentMaterials&&window.filterStudentMaterials(this.value)">
             <option value="">All My Enrolled Courses</option>
           </select>
@@ -148,18 +249,155 @@
     </section>
 
     <!-- My Submissions & Teacher Feedback -->
-    <section class="card span-12">
+    <section class="card" id="submissionsSection">
       <div class="card-head">
         <div>
-          <h2><i data-i="clip"></i>My Submissions & Teacher Feedback</h2>
-          <p class="muted" style="font-size:13px;margin-top:4px;">Solutions and work sent to faculty with their review status and grades.</p>
+          <h2><i data-i="clip"></i>My Submissions &amp; Teacher Feedback</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px;">Submissions with marks awarded and individual feedback.</p>
         </div>
         <button class="btn" type="button" onclick="window.loadStudentSubmissions&&window.loadStudentSubmissions()"><i data-i="search"></i>Refresh Status</button>
       </div>
       <div class="submissions-grid" id="studentSubmissionsList"></div>
     </section>
-  </div>
-</main>
+
+    <!-- Full Course Attendance & Grades Table Breakdown -->
+    <div id="gradesSection" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <!-- Attendance by Course Table -->
+      <section class="card">
+        <div class="card-head"><h2><i data-i="cal"></i>Course Attendance Roster</h2></div>
+        <div class="table-wrap" data-empty-title="No attendance yet" data-empty-text="Your attendance will appear once classes are marked.">
+          <table><thead><tr><th>Course</th><th>Attendance</th></tr></thead><tbody id="attBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- Marks and Grades Table -->
+      <section class="card">
+        <div class="card-head"><h2><i data-i="award"></i>Academic Marks &amp; Grades</h2></div>
+        <div class="table-wrap" data-empty-title="No marks published" data-empty-text="Grades will show here as faculty publish them.">
+          <table><thead><tr><th>Course</th><th>Marks</th><th>Grade</th></tr></thead><tbody id="marksBody"></tbody></table>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Column 3: Right Notifications & Timetable Drawer (Screenshot 2) -->
+  <aside class="athena-aside" id="notifDrawer">
+
+    <!-- Search Input Bar -->
+    <div class="athena-search-bar">
+      <i data-i="search" style="color:var(--muted)"></i>
+      <input type="text" placeholder="Search pages, modules, services..." aria-label="Search pages and modules">
+      <i data-i="book" style="color:var(--muted);cursor:pointer;" title="Bookmark"></i>
+    </div>
+
+    <!-- Notifications Box (Screenshot 2) -->
+    <div class="athena-notif-box">
+      <div class="athena-notif-head">
+        <div class="athena-notif-title-group">
+          <span>Notifications</span>
+          <span class="athena-notif-badge" id="notifBadgeCount">8</span>
+        </div>
+        <button type="button" class="athena-mark-read" onclick="window.markAllNotificationsRead&&window.markAllNotificationsRead()">Mark all read</button>
+      </div>
+
+      <div class="athena-notif-list" id="notifListContainer">
+        <!-- Notification 1 -->
+        <div class="athena-notif-item">
+          <div class="athena-notif-icon warn"><i data-i="cal"></i></div>
+          <div class="athena-notif-body">
+            <div class="athena-notif-name">Lecture Cancelled</div>
+            <div class="athena-notif-text">The lecture for CS101 tomorrow is cancelled due to illness. Please check the learning portal for reading materials.</div>
+            <div class="athena-notif-meta">Dr. Alan Turing · 2 hours ago</div>
+          </div>
+        </div>
+
+        <!-- Notification 2 -->
+        <div class="athena-notif-item">
+          <div class="athena-notif-icon warn"><i data-i="book"></i></div>
+          <div class="athena-notif-body">
+            <div class="athena-notif-name">New Assignment Uploaded</div>
+            <div class="athena-notif-text">Assignment 2: Genetic Algorithms has been uploaded. This is a crucial part of your continuous evaluation.</div>
+            <div class="athena-notif-meta">Dr. Dijkstra · 1 day ago</div>
+          </div>
+        </div>
+
+        <!-- Notification 3 -->
+        <div class="athena-notif-item">
+          <div class="athena-notif-icon danger"><i data-i="warn"></i></div>
+          <div class="athena-notif-body">
+            <div class="athena-notif-name">Library Overdue Notice</div>
+            <div class="athena-notif-text">You have a book overdue: "Clean Code". Please return it to the Brotherton Library to avoid daily penalty fines.</div>
+            <div class="athena-notif-meta">Library Services · 2 days ago</div>
+          </div>
+        </div>
+
+        <!-- Notification 4 -->
+        <div class="athena-notif-item">
+          <div class="athena-notif-icon info"><i data-i="clip"></i></div>
+          <div class="athena-notif-body">
+            <div class="athena-notif-name">Week 5 Slides Available</div>
+            <div class="athena-notif-text">The slides for Week 5 have been uploaded to module resources. It covers the new topics on Distributed Transactions.</div>
+            <div class="athena-notif-meta">Academic Services · 3 days ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timetable Box with Mini Week Strip (Screenshot 2) -->
+    <div class="athena-timetable-box" id="ttSection">
+      <div style="font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between;">
+        <span>Timetable Schedule</span>
+        <span class="muted" style="font-size:12px;">November</span>
+      </div>
+
+      <!-- Mini Week Strip: M T W T F S S (9 10 11 12 13 14 15) -->
+      <div class="athena-week-strip" id="weekStripDays">
+        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Mon')">
+          <span class="athena-day-char">M</span>
+          <span class="athena-day-num">9</span>
+        </div>
+        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Tue')">
+          <span class="athena-day-char">T</span>
+          <span class="athena-day-num">10</span>
+        </div>
+        <div class="athena-day-col active" onclick="window.selectTimetableDay(this, 'Wed')">
+          <span class="athena-day-char">W</span>
+          <span class="athena-day-num">11</span>
+        </div>
+        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Thu')">
+          <span class="athena-day-char">T</span>
+          <span class="athena-day-num">12</span>
+        </div>
+        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Fri')">
+          <span class="athena-day-char">F</span>
+          <span class="athena-day-num">13</span>
+        </div>
+        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Sat')">
+          <span class="athena-day-char">S</span>
+          <span class="athena-day-num">14</span>
+        </div>
+        <div class="athena-day-col" onclick="window.selectTimetableDay(this, 'Sun')">
+          <span class="athena-day-char">S</span>
+          <span class="athena-day-num">15</span>
+        </div>
+      </div>
+
+      <!-- Selected Day Schedule Message -->
+      <div class="athena-tt-status" id="timetableStatusBox">
+        No classes scheduled for this day!
+      </div>
+
+      <a href="#studyMaterialsSection" class="athena-view-tt-link">
+        <span>View Full Timetable</span>
+        <span>→</span>
+      </a>
+    </div>
+
+  </aside>
+    </div> <!-- closes athena-dashboard-grid -->
+  </div> <!-- closes athena-main-wrap -->
+</div> <!-- closes athena-shell -->
 
 <!-- Submit Work Modal for Students -->
 <div class="modal-overlay" id="submitWorkModal">
@@ -187,7 +425,7 @@
         <label for="subContent">Your Solutions / Answer Notes / Explanation (Optional if file attached)</label>
       </div>
 
-      <!-- Attach File from PC / Laptop -->
+      <!-- Attach File from PC / Laptop (Up to 50MB) -->
       <div class="upload-zone-wrap" style="margin-top:0;">
         <div class="upload-zone-label"><i data-i="clip"></i> Attach Solution File from PC / Laptop</div>
 
@@ -252,7 +490,7 @@
       <span class="muted" id="mvDate" style="margin-left:auto;font-size:12px;"></span>
     </div>
     <div id="mvTitle" style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:12px;line-height:1.3;"></div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Topic Overview & Instructions</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Topic Overview &amp; Instructions</div>
     <div class="sub-body" id="mvContent" style="max-height:220px;overflow-y:auto;margin-bottom:16px;"></div>
     <div id="mvFileSection" style="margin-bottom:18px;"></div>
     <div class="form-actions" style="justify-content:flex-end;">
@@ -262,7 +500,7 @@
   </div>
 </div>
 
-<script src="ui.js"></script>
-<script src="app.js"></script>
+<script src="ui.js?v=20261105.7"></script>
+<script src="app.js?v=20261105.7"></script>
 </body>
 </html>
