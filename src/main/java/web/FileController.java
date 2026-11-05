@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
@@ -45,7 +46,7 @@ public class FileController {
             var rows = Rows.query(
                 "SELECT material_id, course_code, title, file_name, file_path "
               + "FROM study_material WHERE material_id = ?", materialId);
-            if (rows.isEmpty()) return ResponseEntity.notFound().build();
+            if (rows.isEmpty()) return ResponseEntity.status(404).body(Map.of("error", "Study material not found"));
 
             var mat = rows.get(0);
             String course = (String) mat.get("course_code");
@@ -53,7 +54,7 @@ public class FileController {
             String originalName = (String) mat.get("file_name");
 
             if (storedPath == null || storedPath.isBlank()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "No physical file attached to this material"));
+                return ResponseEntity.badRequest().body(Map.of("error", "No physical file was uploaded for this study material"));
             }
 
             // Security: If student, verify enrollment in this course
@@ -70,7 +71,7 @@ public class FileController {
 
         } catch (SQLException | MalformedURLException e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Server error"));
+            return ResponseEntity.status(500).body(Map.of("error", "Server error while processing file request"));
         }
     }
 
@@ -88,7 +89,7 @@ public class FileController {
               + "FROM student_submission ss "
               + "JOIN student s ON ss.roll_no = s.roll_no "
               + "WHERE ss.submission_id = ?", submissionId);
-            if (rows.isEmpty()) return ResponseEntity.notFound().build();
+            if (rows.isEmpty()) return ResponseEntity.status(404).body(Map.of("error", "Submission not found"));
 
             var sub = rows.get(0);
             String course = (String) sub.get("course_code");
@@ -96,10 +97,7 @@ public class FileController {
             String originalName = (String) sub.get("file_name");
             int studentUserId = ((Number) sub.get("user_id")).intValue();
 
-            // Permissions:
-            // 1. The student who uploaded it
-            // 2. The faculty member teaching this course
-            // 3. Admin
+            // Permissions: Submitting Student, Faculty teaching course, or Admin
             boolean allowed = false;
             if ("Admin".equals(user.getRole())) {
                 allowed = true;
@@ -113,44 +111,59 @@ public class FileController {
             }
 
             if (!allowed) {
-                return ResponseEntity.status(403).body(Map.of("error", "Access denied to this student submission"));
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied: You do not have permission to view this submission"));
             }
 
             if (fileUrl == null || fileUrl.isBlank() || fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
-                // If it was an external link, redirect or return error
-                return ResponseEntity.badRequest().body(Map.of("error", "This submission is hosted externally at: " + fileUrl));
+                return ResponseEntity.badRequest().body(Map.of("error", "This submission is hosted externally: " + fileUrl));
             }
 
             return serveFile(fileUrl, originalName);
 
         } catch (SQLException | MalformedURLException e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Server error"));
+            return ResponseEntity.status(500).body(Map.of("error", "Server error while processing file request"));
         }
     }
 
-    private ResponseEntity<Resource> serveFile(String relativePath, String originalName) throws MalformedURLException {
+    private ResponseEntity<?> serveFile(String relativePath, String originalName) throws MalformedURLException {
         Path filePath = storageService.loadFile(relativePath);
-        if (filePath == null) return ResponseEntity.notFound().build();
+        if (filePath == null) {
+            return ResponseEntity.status(404).body(Map.of(
+                "error", "File record exists in the database, but the physical file is not found on this computer. (Upload a new file to create it locally)."
+            ));
+        }
 
         Resource resource = new UrlResource(filePath.toUri());
         if (!resource.exists() || !resource.isReadable()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(Map.of(
+                "error", "File could not be read from disk storage."
+            ));
         }
 
         String contentType = null;
         try {
             contentType = Files.probeContentType(filePath);
         } catch (Exception ignored) {}
-        if (contentType == null) contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        if (contentType == null || contentType.isBlank()) {
+            contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
 
         String safeFileName = (originalName != null && !originalName.isBlank())
-                ? originalName : filePath.getFileName().toString();
+                ? originalName.replace("\"", "").trim()
+                : filePath.getFileName().toString();
         String encodedName = URLEncoder.encode(safeFileName, StandardCharsets.UTF_8).replace("+", "%20");
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + safeFileName + "\"; filename*=UTF-8''" + encodedName)
                 .body(resource);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<?> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        return ResponseEntity.status(413).body(Map.of(
+            "error", "The uploaded file exceeds the maximum permitted size limit of 50MB."
+        ));
     }
 }

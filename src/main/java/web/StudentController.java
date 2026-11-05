@@ -176,11 +176,12 @@ public class StudentController {
                 }
             }
 
+            Integer safeMaterialId = (materialId != null && materialId > 0) ? materialId : null;
             int subId = nextId("student_submission", "submission_id");
             Rows.update(
                 "INSERT INTO student_submission (submission_id, material_id, course_code, roll_no, title, submission_text, file_url, file_name, file_size, submitted_at, status) "
               + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Submitted')",
-                subId, materialId, courseCode.trim().toUpperCase(), rollNo, title.trim(),
+                subId, safeMaterialId, courseCode.trim().toUpperCase(), rollNo, title.trim(),
                 blank(submissionText) ? (fileName != null ? "File attached: " + fileName : "Assignment submission") : submissionText.trim(),
                 storedPath, fileName, fileSize);
 

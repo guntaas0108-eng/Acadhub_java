@@ -4,11 +4,14 @@ target/
 # Local MySQL data
 mysql-data/
 
-# Uploaded files
+# Uploaded files (track sample reference documents in git)
 uploads/materials/*
 !uploads/materials/.gitkeep
+!uploads/materials/*.pdf
 uploads/submissions/*
 !uploads/submissions/.gitkeep
+!uploads/submissions/*.pdf
+!uploads/submissions/*.zip
 
 # OS / Temporary files
 *.log
