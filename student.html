@@ -6,7 +6,7 @@
 <title>AcadHub · Athena Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261105.4">
+<link rel="stylesheet" href="style.css?v=20261105.5">
 <style>
   .modern-dropzone {
     position: relative; border: 2px dashed rgba(20, 184, 166, 0.35); border-radius: 14px;
@@ -77,7 +77,7 @@
     </a>
 
     <nav class="athena-nav-list">
-      <a href="#overview" class="athena-nav-link active" onclick="window.switchStudentView&&window.switchStudentView('overview', this)">
+      <a href="#overview" class="athena-nav-link active" onclick="window.switchStudentView&&window.switchStudentView('home', this)">
         <i data-i="home" class="nav-icon"></i>
         <span>Home</span>
       </a>
@@ -86,16 +86,16 @@
         <span>Modules</span>
       </a>
       <a href="#submissionsSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('activity', this)">
-        <i data-i="clip" class="nav-icon"></i>
+        <i data-i="activity" class="nav-icon"></i>
         <span>Activity</span>
       </a>
-      <a href="#ttSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('timetable', this)">
-        <i data-i="cal" class="nav-icon"></i>
-        <span>Timetable</span>
+      <a href="#chatModal" class="athena-nav-link" onclick="window.openChatBox&&window.openChatBox();return false;">
+        <i data-i="chat" class="nav-icon"></i>
+        <span>Chat Box</span>
       </a>
-      <a href="#workflowSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('flow', this)">
-        <i data-i="award" class="nav-icon"></i>
-        <span>Connected Flow</span>
+      <a href="#settingsModal" class="athena-nav-link" onclick="window.openSettingsModal&&window.openSettingsModal();return false;">
+        <i data-i="settings" class="nav-icon"></i>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -560,7 +560,121 @@
   </div>
 </div>
 
-<script src="ui.js"></script>
-<script src="app.js"></script>
+<!-- Interactive AcadHub Chat Box Modal (Screenshot 2: "Chat Box") -->
+<div class="modal-overlay" id="chatBoxModal">
+  <div class="modal-box" style="max-width: 680px; padding: 24px;">
+    <div class="modal-head">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:34px; height:34px; border-radius:10px; background:rgba(91, 77, 255, 0.2); color:#5B4DFF; display:grid; place-items:center;">
+          <i data-i="chat"></i>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:17px;">AcadHub Chat Box &amp; Discussion</h3>
+          <p class="muted" style="margin:2px 0 0; font-size:12px;">Live peer discussion and faculty Q&amp;A channel</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="window.closeChatBox()">&times;</button>
+    </div>
+
+    <!-- Channel Pills -->
+    <div style="display:flex; gap:8px; margin: 14px 0; overflow-x:auto; padding-bottom:4px;">
+      <button type="button" class="chip ok" style="cursor:pointer;" onclick="window.selectChatChannel('announcements')">📢 Announcements</button>
+      <button type="button" class="chip" style="cursor:pointer;" onclick="window.selectChatChannel('qna')">💬 Course Q&amp;A</button>
+      <button type="button" class="chip" style="cursor:pointer;" onclick="window.selectChatChannel('faculty')">🎓 Faculty Desk</button>
+    </div>
+
+    <!-- Chat Messages Stream -->
+    <div id="chatMessagesStream" style="height: 280px; overflow-y: auto; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px;">
+      <div style="display:flex; gap:10px; align-items:flex-start;">
+        <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, #14B8A6, #38BDF8); color:#031417; display:grid; place-items:center; font-weight:800; font-size:12px; flex-shrink:0;">DR</div>
+        <div style="background:rgba(255, 255, 255, 0.05); border:1px solid rgba(255, 255, 255, 0.08); border-radius:12px; padding:10px 14px; max-width:85%;">
+          <div style="font-size:12px; font-weight:700; color:var(--teal);">Dr. Rumneek <span class="muted" style="font-size:10px; margin-left:6px;">10:30 AM</span></div>
+          <div style="font-size:13px; color:var(--text); margin-top:3px;">Assignment 1 has been uploaded for UCS310. Please submit your solution before the due date.</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:flex-start;">
+        <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, #A855F7, #6366F1); color:#fff; display:grid; place-items:center; font-weight:800; font-size:12px; flex-shrink:0;">GS</div>
+        <div style="background:rgba(255, 255, 255, 0.05); border:1px solid rgba(255, 255, 255, 0.08); border-radius:12px; padding:10px 14px; max-width:85%;">
+          <div style="font-size:12px; font-weight:700; color:#A855F7;">Guntaas Singh <span class="muted" style="font-size:10px; margin-left:6px;">11:15 AM</span></div>
+          <div style="font-size:13px; color:var(--text); margin-top:3px;">Are PDF and DOCX both accepted for the solution upload?</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:flex-start;">
+        <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, #14B8A6, #38BDF8); color:#031417; display:grid; place-items:center; font-weight:800; font-size:12px; flex-shrink:0;">DR</div>
+        <div style="background:rgba(255, 255, 255, 0.05); border:1px solid rgba(255, 255, 255, 0.08); border-radius:12px; padding:10px 14px; max-width:85%;">
+          <div style="font-size:12px; font-weight:700; color:var(--teal);">Dr. Rumneek <span class="muted" style="font-size:10px; margin-left:6px;">11:20 AM</span></div>
+          <div style="font-size:13px; color:var(--text); margin-top:3px;">Yes, PDF, Word (DOCX), and ZIP archives up to 50MB are supported directly via the solution dropzone.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <form id="chatSendForm" onsubmit="window.sendChatMessage&&window.sendChatMessage(event)" style="display:flex; gap:10px;">
+      <input type="text" id="chatInputMessage" placeholder="Type your message or question..." style="flex:1; background:var(--raised); border:1px solid var(--border); border-radius:12px; padding:10px 16px; color:var(--text); font-size:13.5px; outline:none;" required>
+      <button type="submit" class="btn primary magnetic" style="border-radius:12px; padding:0 18px;">
+        <i data-i="send"></i> Send
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Interactive Settings Modal (Screenshot 2: "Settings") -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box" style="max-width: 560px; padding: 24px;">
+    <div class="modal-head">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:34px; height:34px; border-radius:10px; background:rgba(91, 77, 255, 0.2); color:#5B4DFF; display:grid; place-items:center;">
+          <i data-i="settings"></i>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:17px;">User &amp; Portal Settings</h3>
+          <p class="muted" style="margin:2px 0 0; font-size:12px;">Customize your Athena experience &amp; security</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="window.closeSettingsModal()">&times;</button>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px; margin: 18px 0;">
+      <!-- Theme Switcher -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-radius:12px; background:var(--raised); border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:700; font-size:14px;">Appearance Theme</div>
+          <div class="muted" style="font-size:12px;">Toggle between Dark and Light mode</div>
+        </div>
+        <button type="button" class="btn" onclick="document.getElementById('themeToggle')?.click()">
+          <i data-i="moon"></i> Toggle Theme
+        </button>
+      </div>
+
+      <!-- Attendance 75% Alert Preferences -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-radius:12px; background:var(--raised); border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:700; font-size:14px;">75% Attendance Guard Alerts</div>
+          <div class="muted" style="font-size:12px;">Receive instant warning when attendance nears 75%</div>
+        </div>
+        <span class="chip ok">Active</span>
+      </div>
+
+      <!-- RBAC Security Badge -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-radius:12px; background:var(--raised); border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:700; font-size:14px;">Session Security</div>
+          <div class="muted" style="font-size:12px;">Spring Boot session with encrypted SHA-256 tokens</div>
+        </div>
+        <span class="chip ok"><i data-i="shield"></i> Encrypted</span>
+      </div>
+    </div>
+
+    <div class="form-actions" style="justify-content:flex-end;">
+      <button class="btn" type="button" onclick="window.closeSettingsModal()">Close</button>
+      <button class="btn primary" type="button" onclick="window.closeSettingsModal()">Save Preferences</button>
+    </div>
+  </div>
+</div>
+
+<script src="ui.js?v=20261105.5"></script>
+<script src="app.js?v=20261105.5"></script>
 </body>
 </html>

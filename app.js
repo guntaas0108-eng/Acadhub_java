@@ -2201,10 +2201,64 @@
   window.switchStudentView = function (view, el) {
     document.querySelectorAll('.athena-nav-link').forEach(l => l.classList.remove('active'));
     if (el) el.classList.add('active');
-    if (view === 'modules') window.scrollToSection('studyMaterialsSection');
-    else if (view === 'activity') window.scrollToSection('submissionsSection');
-    else if (view === 'chat') window.scrollToSection('notifDrawer');
-    else window.scrollToSection('studyMaterialsSection');
+    if (view === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (view === 'modules') {
+      window.scrollToSection('studyMaterialsSection');
+    } else if (view === 'activity') {
+      window.scrollToSection('submissionsSection');
+    } else if (view === 'chat') {
+      window.openChatBox();
+    } else if (view === 'settings') {
+      window.openSettingsModal();
+    }
+  };
+
+  window.openChatBox = function () {
+    const m = document.getElementById('chatBoxModal');
+    if (m) m.classList.add('active');
+  };
+  window.closeChatBox = function () {
+    const m = document.getElementById('chatBoxModal');
+    if (m) m.classList.remove('active');
+  };
+
+  window.selectChatChannel = function (ch) {
+    if (window.UI && window.UI.toast) window.UI.toast('info', 'Switched to channel: #' + ch);
+  };
+
+  window.sendChatMessage = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const input = document.getElementById('chatInputMessage');
+    if (!input || !input.value.trim()) return;
+    const text = input.value.trim();
+    input.value = '';
+    const stream = document.getElementById('chatMessagesStream');
+    if (stream) {
+      const u = ($('welcomeName') && $('welcomeName').textContent) || 'Student';
+      const initial = (u.charAt(0) || 'U').toUpperCase();
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex; gap:10px; align-items:flex-start; margin-top:4px;';
+      div.innerHTML = `
+        <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, #5B4DFF, #8B5CF6); color:#fff; display:grid; place-items:center; font-weight:800; font-size:12px; flex-shrink:0;">${initial}</div>
+        <div style="background:rgba(91, 77, 255, 0.15); border:1px solid rgba(91, 77, 255, 0.35); border-radius:12px; padding:10px 14px; max-width:85%;">
+          <div style="font-size:12px; font-weight:700; color:#A5B4FC;">${u} <span class="muted" style="font-size:10px; margin-left:6px;">Just now</span></div>
+          <div style="font-size:13px; color:#fff; margin-top:3px;">${text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))}</div>
+        </div>
+      `;
+      stream.appendChild(div);
+      stream.scrollTop = stream.scrollHeight;
+    }
+    if (window.UI && window.UI.toast) window.UI.toast('ok', 'Message sent to channel.');
+  };
+
+  window.openSettingsModal = function () {
+    const m = document.getElementById('settingsModal');
+    if (m) m.classList.add('active');
+  };
+  window.closeSettingsModal = function () {
+    const m = document.getElementById('settingsModal');
+    if (m) m.classList.remove('active');
   };
 
   window.markAllNotificationsRead = function () {
