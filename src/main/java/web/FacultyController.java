@@ -333,6 +333,19 @@ public class FacultyController {
     //   STUDY MATERIALS & STUDENT SUBMISSIONS (FACULTY VIEW)
     // ============================================================
 
+    // ---------- campus announcements for faculty ----------
+    @GetMapping("/announcements")
+    public ResponseEntity<?> getAnnouncements(HttpSession session) {
+        User user = getFaculty(session);
+        if (user == null) return notLoggedIn();
+        try {
+            var list = Rows.query("SELECT announcement_id, title, content, author, category, posted_at FROM announcements WHERE is_active = 1 ORDER BY announcement_id DESC LIMIT 20");
+            return ResponseEntity.ok(list);
+        } catch (SQLException e) {
+            return dbError(e);
+        }
+    }
+
     // ---------- list all materials uploaded by this faculty for a course ----------
     @GetMapping("/materials")
     public ResponseEntity<?> listMaterials(@RequestParam(required = false) String course, HttpSession session) {

@@ -88,7 +88,7 @@ public class StudentController {
             double overallPct = sumTotal > 0 ? Math.round(((double) sumAttended / sumTotal) * 1000.0) / 10.0 : 0.0;
 
             var announcements = Rows.query(
-                "SELECT announcement_id, title, content, author, category, posted_at FROM announcements WHERE is_active = 1 ORDER BY announcement_id DESC LIMIT 6");
+                "SELECT announcement_id, title, content, author, category, posted_at FROM announcements WHERE is_active = 1 ORDER BY announcement_id DESC LIMIT 20");
 
             var timetables = Rows.query(
                 "SELECT t.timetable_id, t.course_code, t.course_name, t.day_of_week, t.start_time, t.end_time, t.room, t.faculty_name "
@@ -117,6 +117,19 @@ public class StudentController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", "Server error"));
+        }
+    }
+
+    // ---------- campus announcements for students ----------
+    @GetMapping("/announcements")
+    public ResponseEntity<?> getAnnouncements(HttpSession session) {
+        User user = getStudent(session);
+        if (user == null) return notLoggedIn();
+        try {
+            var list = Rows.query("SELECT announcement_id, title, content, author, category, posted_at FROM announcements WHERE is_active = 1 ORDER BY announcement_id DESC LIMIT 20");
+            return ResponseEntity.ok(list);
+        } catch (SQLException e) {
+            return dbError(e);
         }
     }
 

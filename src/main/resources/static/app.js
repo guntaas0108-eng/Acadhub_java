@@ -2237,6 +2237,7 @@
     await refreshStudent();
     await window.loadStudentMaterials();
     await window.loadStudentSubmissions();
+    await window.loadStudentAnnouncements();
   }
 
   async function refreshStudent() {
@@ -2394,6 +2395,11 @@
         if (attDonutVal) attDonutVal.textContent = '75%';
         if (attCaption) attCaption.textContent = '3 of 4 classes attended';
       }
+    }
+
+    // Render campus announcements on student board & top banner
+    if (window.renderStudentAnnouncements) {
+      window.renderStudentAnnouncements(d.announcements || []);
     }
 
     // Notification Drawer updates from backend announcements if available
@@ -2578,6 +2584,9 @@
     if (el) el.classList.add('active');
     if (view === 'home') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (view === 'announcements') {
+      window.scrollToSection('announcementsSection');
+      if (window.loadStudentAnnouncements) window.loadStudentAnnouncements();
     } else if (view === 'modules') {
       window.scrollToSection('studyMaterialsSection');
       if (window.loadStudentMaterials) window.loadStudentMaterials();
@@ -2757,6 +2766,68 @@
     const materials = await apiGet('/api/student/materials');
     studentMaterialsCache = materials || [];
     window.renderStudentMaterials(studentMaterialsCache);
+  };
+
+  // ---------- Campus Announcements for Students ----------
+  window.renderStudentAnnouncements = function (announcements) {
+    const listEl = $('studentAnnouncementsList');
+    const badgeEl = $('announcementsCountBadge');
+    const bannerEl = $('latestAnnouncementBanner');
+    const bannerText = $('latestAnnouncementText');
+
+    if (!announcements || !announcements.length) {
+      if (listEl) listEl.innerHTML = '<p class="muted" style="grid-column:1/-1;padding:24px;text-align:center;">No campus announcements posted at this time.</p>';
+      if (badgeEl) badgeEl.textContent = '0 Notices';
+      if (bannerEl) bannerEl.style.display = 'none';
+      return;
+    }
+
+    if (badgeEl) badgeEl.textContent = `${announcements.length} Active Notice${announcements.length > 1 ? 's' : ''}`;
+
+    // Top banner shows the newest announcement
+    if (bannerEl && bannerText && announcements.length > 0) {
+      const latest = announcements[0];
+      bannerText.innerHTML = `<strong>${esc(latest.title)}</strong>: ${esc(latest.content)}`;
+      bannerEl.style.display = 'flex';
+    }
+
+    if (listEl) {
+      listEl.innerHTML = announcements.map(a => {
+        const cat = (a.category || 'University').toLowerCase();
+        let chipClass = 'sky';
+        if (cat.includes('exam')) chipClass = 'warn';
+        else if (cat.includes('urgent')) chipClass = 'danger';
+        else if (cat.includes('notice')) chipClass = 'ok';
+        else if (cat.includes('academic')) chipClass = 'teal';
+
+        const dateStr = a.posted_at ? String(a.posted_at).slice(0, 10) : 'Recent';
+        return `
+          <div class="ann-card ${cat.includes('urgent') ? 'urgent' : ''}">
+            <div class="ann-top">
+              <span class="chip ${chipClass}">${esc(a.category || 'University-Wide')}</span>
+              <span class="muted" style="font-size:11.5px;"><i data-i="clock"></i> ${esc(dateStr)}</span>
+            </div>
+            <div class="ann-title">${esc(a.title)}</div>
+            <div class="ann-content">${esc(a.content)}</div>
+            <div class="ann-footer">
+              <span style="display:flex;align-items:center;gap:6px;">
+                <i data-i="user" style="color:var(--teal)"></i>
+                <b>${esc(a.author || 'University Administration')}</b>
+              </span>
+              <span class="chip" style="font-size:11px;background:var(--raised);"><i data-i="shield"></i> Verified</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      if (window.UI && window.UI.icons) window.UI.icons();
+    }
+  };
+
+  window.loadStudentAnnouncements = async function () {
+    const list = await apiGet('/api/student/announcements');
+    if (list && Array.isArray(list)) {
+      window.renderStudentAnnouncements(list);
+    }
   };
 
   window.renderStudentMaterials = function (materials) {

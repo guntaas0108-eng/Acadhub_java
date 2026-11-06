@@ -81,6 +81,10 @@
         <i data-i="home" class="nav-icon"></i>
         <span>Home</span>
       </a>
+      <a href="#announcementsSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('announcements', this);return false;">
+        <i data-i="trend" class="nav-icon"></i>
+        <span>Announcements</span>
+      </a>
       <a href="#studyMaterialsSection" class="athena-nav-link" onclick="window.switchStudentView&&window.switchStudentView('modules', this);return false;">
         <i data-i="book" class="nav-icon"></i>
         <span>Modules</span>
@@ -147,10 +151,25 @@
             <p>Here's your academic overview for today.</p>
           </div>
           <div class="athena-action-pills">
+            <button type="button" class="athena-action-pill" onclick="window.switchStudentView&&window.switchStudentView('announcements', this)">📢 Campus Notices</button>
             <button type="button" class="athena-action-pill active" onclick="window.scrollToSection('studyMaterialsSection')">Modules &amp; Files</button>
             <button type="button" class="athena-action-pill" onclick="window.scrollToSection('submissionsSection')">Submissions</button>
             <button type="button" class="athena-action-pill" onclick="window.scrollToSection('overviewChartsGrid')">Academic Grades</button>
           </div>
+        </div>
+
+        <!-- Latest Campus Announcement Banner -->
+        <div class="announcement-banner" id="latestAnnouncementBanner" style="display:none;margin-bottom:20px;padding:12px 18px;border-radius:12px;background:linear-gradient(90deg, rgba(20,184,166,0.12) 0%, rgba(56,189,248,0.08) 100%);border:1px solid rgba(20,184,166,0.35);align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(20,184,166,0.2);display:flex;align-items:center;justify-content:center;color:var(--teal);flex-shrink:0;">
+              <i data-i="trend"></i>
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);">Latest Campus Broadcast</div>
+              <div id="latestAnnouncementText" style="font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+            </div>
+          </div>
+          <button class="btn ghost" type="button" style="padding:4px 12px;font-size:11.5px;flex-shrink:0;" onclick="window.scrollToSection('announcementsSection')">View All Notices &darr;</button>
         </div>
 
     <!-- Academic Overview: Marks by assessment & Attendance (2-Column Donut + Progress Bar Layout) -->
@@ -207,6 +226,28 @@
       </div>
 
     </div>
+
+    <!-- Campus Announcements & Broadcast Notices -->
+    <section class="card" id="announcementsSection" style="margin-bottom:24px;">
+      <div class="card-head" style="flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,0.15);color:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:18px;">
+            <i data-i="trend"></i>
+          </div>
+          <div>
+            <h2>📢 Campus Announcements &amp; Notices</h2>
+            <p class="muted" style="margin-top:2px;font-size:13px;">
+              Official broadcast notifications published by university administration and academic departments.
+            </p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span class="chip ok" id="announcementsCountBadge" style="font-weight:600;"><i data-i="check-circle"></i> Active Notices</span>
+          <button class="btn" type="button" onclick="window.loadStudentAnnouncements&&window.loadStudentAnnouncements()"><i data-i="search"></i>Refresh Notices</button>
+        </div>
+      </div>
+      <div class="announcements-grid" id="studentAnnouncementsList"></div>
+    </section>
 
     <!-- Enrolled Courses Study Material & Assignments -->
     <section class="card" id="studyMaterialsSection">
