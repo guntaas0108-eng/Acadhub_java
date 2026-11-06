@@ -150,10 +150,6 @@
         <i data-i="award" class="nav-icon"></i>
         <span>Grade Submissions</span>
       </a>
-      <a href="#tabAnalytics" class="athena-nav-link" onclick="window.switchFacultyTab&&window.switchFacultyTab('tabAnalytics', this);return false;">
-        <i data-i="alert" class="nav-icon"></i>
-        <span>Analytics &amp; Risk</span>
-      </a>
     </nav>
 
     <!-- User Profile Chip at bottom of slidebar -->
@@ -215,9 +211,6 @@
         <button type="button" data-tab="tabAssess">Assignments</button>
         <button type="button" data-tab="tabMaterial">Study Material</button>
         <button type="button" data-tab="tabSubmissions">Student Submissions</button>
-        <button type="button" data-tab="tabAnalytics">Performance Analytics</button>
-        <button type="button" data-tab="tabAtRisk">At-Risk Students</button>
-        <button type="button" data-tab="tabSummary">Class Summary</button>
       </div>
 
       <!-- Attendance Tab -->
@@ -402,63 +395,7 @@
         </div>
         <div class="submissions-grid" id="facultySubmissionsList"></div>
       </div>
-
-      <!-- Summary Tab -->
-      <div class="tab-panel" data-group="fac" id="tabSummary">
-        <div class="table-wrap" data-empty-title="No summary yet" data-empty-text="Class attendance and grades will show up here.">
-          <table><thead><tr><th>Student</th><th>Average Marks</th><th>Grade</th></tr></thead><tbody id="summaryBody"></tbody></table>
-        </div>
-      </div>
-
-      <!-- Performance Analytics Tab (Screenshot 3) -->
-      <div class="tab-panel" data-group="fac" id="tabAnalytics">
-        <div style="margin-bottom:18px;">
-          <h2><i data-i="award"></i>Class Performance Analytics</h2>
-          <p class="muted" style="font-size:13px;margin-top:4px;">Average marks, pass/fail counts, and submissions across your assigned courses.</p>
-        </div>
-        <div class="table-wrap" data-empty-title="No analytics data" data-empty-text="Analytics will calculate automatically as marks are published.">
-          <table>
-            <thead>
-              <tr>
-                <th>Course Code</th>
-                <th>Course Name</th>
-                <th>Enrolled</th>
-                <th>Avg Marks</th>
-                <th>Highest</th>
-                <th>Lowest</th>
-                <th>Fail Count</th>
-                <th>Materials</th>
-                <th>Submissions</th>
-              </tr>
-            </thead>
-            <tbody id="facAnalyticsBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Students at Risk Tab (Screenshot 3) -->
-      <div class="tab-panel" data-group="fac" id="tabAtRisk">
-        <div style="margin-bottom:18px;">
-          <h2><i data-i="warn"></i>Students at Academic Risk (&lt; 75% Attendance or Low Performance)</h2>
-          <p class="muted" style="font-size:13px;margin-top:4px;">Students identified for early intervention before term examinations.</p>
-        </div>
-        <div class="table-wrap" data-empty-title="All clear" data-empty-text="No students are currently at academic risk in your courses.">
-          <table>
-            <thead>
-              <tr>
-                <th>Roll No</th>
-                <th>Student Name</th>
-                <th>Course</th>
-                <th>Attendance</th>
-                <th>Avg Marks</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="facAtRiskBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+</section>
   </div> <!-- closes .bento -->
 </div> <!-- closes .athena-interior -->
 </div> <!-- closes .athena-main-wrap -->
