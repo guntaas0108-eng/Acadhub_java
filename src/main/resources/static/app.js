@@ -951,7 +951,7 @@
     const pInput = $('password');
     const errBox = $('loginError');
 
-    document.querySelectorAll('.role-chip').forEach(ch => {
+    document.querySelectorAll('.role-chip, .role').forEach(ch => {
       ch.addEventListener('click', () => {
         const r = ch.dataset.role;
         if (DEMO_ACCOUNTS[r]) {

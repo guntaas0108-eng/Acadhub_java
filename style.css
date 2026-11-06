@@ -1897,3 +1897,70 @@ body[data-page="faculty"] .athena-nav-link.active {
   }
 }
 
+/* FIX: Prevent overlapping input labels */
+.field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    position: relative !important;
+}
+
+.field label {
+    position: static !important;
+    display: block !important;
+    transform: none !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 16px !important;
+    font-size: 11px !important;
+    color: #91aab3 !important;
+    pointer-events: auto !important;
+}
+/* FIX: Prevent overlapping input labels */
+.field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    position: relative !important;
+}
+
+.field label {
+    position: static !important;
+    display: block !important;
+    transform: none !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 16px !important;
+    font-size: 11px !important;
+    color: #91aab3 !important;
+    pointer-events: auto !important;
+}
+
+.field input {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 49px !important;
+    padding: 0 14px !important;
+    line-height: normal !important;
+    font-size: 13px !important;
+    color: white !important;
+    text-align: left !important;
+    background: #142e38 !important;
+}
+
+.field input::placeholder {
+    color: #78939d !important;
+    opacity: 1 !important;
+}
+
+.password {
+    position: relative !important;
+    width: 100% !important;
+}
+
+.password input {
+    padding-right: 52px !important;
+}

@@ -1,757 +1,438 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AcadHub · Next-Gen University Academic Platform</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261106.8">
-<script>try{document.documentElement.dataset.theme=localStorage.getItem('acadhub-theme')||'dark'}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#06131b">
+<title>AcadHub — Your Academic Life, Simplified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
 <style>
-  /* ============================================================
-     AcadHub Cinematic Centered Portal with Tri-Color Neon & 3D Physics
-     Palette: Deep Space + Teal (#14B8A6) + Sky (#38BDF8) + Ultra Violet (#A855F7)
-     ============================================================ */
-  :root {
-    --violet: #A855F7;
-    --violet-glow: rgba(168, 85, 247, 0.35);
-    --violet-surface: rgba(168, 85, 247, 0.12);
-    --teal-glow: rgba(20, 184, 166, 0.4);
-    --sky-glow: rgba(56, 189, 248, 0.35);
-  }
+:root{
+--bg:#050e14;--panel:#0b1921;--text:#eaf7f8;
+--muted:#91aab3;--teal:#14b8a6;--sky:#38bdf8;
+--violet:#a855f7;--line:rgba(91,190,204,.16);
+--grad:linear-gradient(115deg,#14b8a6,#0ea5e9 52%,#a855f7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
 
-  body.auth-page {
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: radial-gradient(ellipse at 50% 20%, #081C26 0%, #050E14 60%, #03080C 100%);
-    color: var(--text);
-  }
+body:before{
+content:"";position:fixed;inset:0;z-index:-2;
+background:
+radial-gradient(ellipse at 15% 12%,rgba(20,184,166,.18),transparent 34%),
+radial-gradient(ellipse at 83% 35%,rgba(56,189,248,.15),transparent 35%),
+radial-gradient(ellipse at 55% 88%,rgba(168,85,247,.13),transparent 38%),
+linear-gradient(145deg,#071820,#050e14 55%,#08131d);
+}
+.stars{
+position:fixed;inset:0;z-index:-1;pointer-events:none;
+background-image:
+radial-gradient(#14b8a6 1.4px,transparent 1.8px),
+radial-gradient(#38bdf8 1px,transparent 1.5px),
+radial-gradient(#a855f7 1.2px,transparent 1.7px);
+background-size:230px 190px,310px 260px,370px 300px;
+background-position:20px 30px,100px 90px,170px 40px;
+opacity:.32;
+}
 
-  /* Fullscreen Dynamic Canvas (3D Gyroscope Rings & Stardust) */
-  #dynamicCanvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-  }
+/* NAVIGATION */
+.nav{
+height:78px;position:sticky;top:0;z-index:20;
+display:flex;align-items:center;justify-content:space-between;
+padding:0 clamp(20px,5vw,76px);
+background:rgba(5,17,24,.78);
+backdrop-filter:blur(18px);
+border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:11px;font-size:20px;font-weight:900}
+.logo{
+width:37px;height:37px;border-radius:11px;
+display:grid;place-items:center;color:#06131b;
+font-size:21px;font-weight:900;
+background:linear-gradient(135deg,var(--teal),var(--sky),var(--violet));
+box-shadow:0 0 24px #14b8a655;
+}
+.navlinks{display:flex;align-items:center;gap:30px;color:#b5c8ce;font-size:13px;font-weight:700}
+.navlinks a:hover{color:#5eead4}
+.navright{display:flex;align-items:center;gap:12px}
+.term{
+font-size:11px;font-weight:800;color:#c084fc;
+border:1px solid #a855f74d;background:#a855f714;
+padding:9px 13px;border-radius:30px;
+}
+.btn{
+display:inline-flex;align-items:center;justify-content:center;
+gap:10px;border:0;border-radius:12px;padding:13px 19px;
+background:var(--grad);background-size:180% auto;color:white;
+font-size:13px;font-weight:800;
+box-shadow:0 8px 25px #0284c755;
+transition:.25s;cursor:pointer;
+}
+.btn:hover{background-position:100% 0;transform:translateY(-2px);box-shadow:0 12px 32px #0284c777}
+.btn-outline{background:rgba(255,255,255,.035);border:1px solid #38bdf855;box-shadow:none;color:#dffbff}
+.btn-outline:hover{background:#38bdf81b}
+.menu{display:none;background:none;border:1px solid var(--line);color:white;border-radius:9px;padding:8px 11px}
 
-  /* Multi-Color Dynamic Aurora Nebula in Background */
-  .aurora-portal {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .aurora-portal i {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.35;
-    will-change: transform;
-    animation: portalDrift 22s ease-in-out infinite alternate;
-  }
-  .aurora-portal i:nth-child(1) {
-    width: 60vmax; height: 60vmax;
-    background: radial-gradient(circle, #14B8A6 0%, transparent 70%);
-    top: -25%; left: 10%;
-    opacity: 0.28;
-  }
-  .aurora-portal i:nth-child(2) {
-    width: 50vmax; height: 50vmax;
-    background: radial-gradient(circle, #A855F7 0%, transparent 70%);
-    top: 25%; left: 35%;
-    opacity: 0.22;
-    animation-delay: -7s;
-  }
-  .aurora-portal i:nth-child(3) {
-    width: 55vmax; height: 55vmax;
-    background: radial-gradient(circle, #38BDF8 0%, transparent 70%);
-    bottom: -20%; right: 5%;
-    opacity: 0.25;
-    animation-delay: -14s;
-  }
+/* HERO */
+.hero{
+min-height:650px;max-width:1220px;margin:auto;
+padding:90px 28px 80px;
+display:grid;grid-template-columns:1.08fr .92fr;
+align-items:center;gap:45px;
+}
+.eyebrow{
+display:inline-flex;align-items:center;gap:9px;
+padding:8px 14px;border:1px solid #14b8a655;
+border-radius:30px;background:#14b8a614;color:#5eead4;
+font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+}
+.pulse{width:7px;height:7px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 12px #2dd4bf}
+.hero h1{
+font-size:clamp(45px,6vw,76px);line-height:1.06;
+letter-spacing:-4px;margin:24px 0 18px;font-weight:900;
+}
+.gradient{
+background:linear-gradient(100deg,#fff 5%,#5eead4 38%,#38bdf8 68%,#c084fc 100%);
+background-clip:text;-webkit-background-clip:text;color:transparent;
+}
+.hero p{max-width:570px;color:var(--muted);font-size:16px;line-height:1.85;margin:0 0 28px}
+.hero-actions{display:flex;gap:13px;flex-wrap:wrap}
+.trust{display:flex;align-items:center;gap:13px;margin-top:35px;color:#91aab3;font-size:11px;font-weight:600}
+.trustline{height:1px;width:35px;background:#14b8a6}
 
-  @keyframes portalDrift {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-40px, 30px) scale(1.08); }
-    100% { transform: translate(30px, -40px) scale(0.95); }
-  }
+/* ANIMATED DASHBOARD GRAPHICS */
+.visual{position:relative;min-height:440px;display:grid;place-items:center}
+.orbit{
+position:absolute;width:min(420px,90vw);aspect-ratio:1;
+border:1px solid #38bdf833;border-radius:50%;
+box-shadow:0 0 70px #0ea5e91a,inset 0 0 70px #a855f70c;
+animation:spin 36s linear infinite;
+}
+.orbit:before,.orbit:after{
+content:"";position:absolute;border:1px solid #a855f744;
+border-radius:50%;inset:35px;
+transform:rotateX(65deg) rotate(25deg);
+}
+.orbit:after{inset:70px;border-color:#14b8a655;transform:rotateX(65deg) rotate(-35deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Dynamic Cursor Spotlight Following Mouse */
-  .cursor-spotlight {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 650px;
-    height: 650px;
-    margin-left: -325px;
-    margin-top: -325px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, rgba(20, 184, 166, 0.1) 40%, rgba(56, 189, 248, 0.04) 65%, transparent 75%);
-    pointer-events: none;
-    z-index: 2;
-    filter: blur(25px);
-    will-change: transform;
-    transition: opacity 0.3s;
-  }
+.dashboard{
+position:relative;width:min(410px,95%);padding:22px;
+border:1px solid #38bdf84a;border-radius:22px;
+background:linear-gradient(145deg,rgba(15,39,49,.96),rgba(8,22,31,.94));
+box-shadow:0 30px 90px #0009,0 0 55px #0ea5e922;
+transform:rotate(-2deg);
+}
+.dash-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.dash-title{font-size:14px;font-weight:800}
+.live{font-size:9px;color:#5eead4;background:#14b8a61c;border:1px solid #14b8a644;padding:6px 9px;border-radius:20px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.metric{padding:15px;border:1px solid var(--line);border-radius:13px;background:#ffffff06}
+.metric small{display:block;color:#91aab3;font-size:10px;margin-bottom:9px}
+.metric strong{font-size:23px;letter-spacing:-1px}
+.metric em{font-style:normal;color:#5eead4;font-size:10px;margin-left:5px}
+.progress{height:5px;background:#ffffff12;border-radius:8px;margin-top:12px;overflow:hidden}
+.progress i{display:block;height:100%;border-radius:8px;background:var(--grad)}
 
-  /* Top Navigation Bar */
-  .portal-nav {
-    position: relative;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 40px;
-    background: rgba(7, 19, 26, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(20, 184, 166, 0.15);
-  }
+/* FEATURES */
+.section{max-width:1160px;margin:auto;padding:78px 28px}
+.section-head{text-align:center;max-width:670px;margin:0 auto 42px}
+.kicker{color:#5eead4;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.section h2{font-size:clamp(29px,4vw,43px);letter-spacing:-1.8px;margin:12px 0}
+.section-head p{color:var(--muted);line-height:1.8;font-size:14px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature,.role{
+position:relative;padding:23px;border:1px solid var(--line);
+border-radius:17px;background:linear-gradient(145deg,#102630b8,#0a1820d9);
+transition:.25s;overflow:hidden;
+}
+.feature:hover,.role:hover{transform:translateY(-5px);border-color:#38bdf866;box-shadow:0 18px 45px #0004}
+.feature-icon{
+width:43px;height:43px;display:grid;place-items:center;
+border-radius:13px;font-size:20px;margin-bottom:18px;
+background:#14b8a61c;border:1px solid #14b8a644;
+}
+.feature:nth-child(2) .feature-icon,.role:nth-child(2) .role-icon{background:#38bdf81a;border-color:#38bdf844}
+.feature:nth-child(3) .feature-icon,.role:nth-child(3) .role-icon{background:#a855f71c;border-color:#a855f744}
+.feature h3,.role h3{font-size:15px;margin:0 0 9px}
+.feature p,.role p{color:var(--muted);font-size:12px;line-height:1.8;margin:0}
 
-  .portal-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 19px;
-    color: var(--text);
-  }
-  .portal-brand .logo-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #14B8A6, #38BDF8, #A855F7);
-    color: #07131A;
-    display: grid;
-    place-items: center;
-    font-size: 18px;
-    font-weight: 900;
-    box-shadow: 0 4px 18px rgba(20, 184, 166, 0.5);
-  }
+/* THREE PORTALS */
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}
+.role{padding:26px}
+.role-icon{
+width:49px;height:49px;display:grid;place-items:center;
+border-radius:15px;font-size:23px;margin-bottom:17px;
+background:#14b8a61c;border:1px solid #14b8a644;
+}
+.role ul{list-style:none;padding:0;margin:17px 0 0;display:grid;gap:9px;color:#b7cbd1;font-size:11px}
+.role li:before{content:'✓';color:#5eead4;font-weight:900;margin-right:9px}
+.role-link{display:inline-block;margin-top:19px;color:#5eead4;font-size:11px;font-weight:800}
 
-  .status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 99px;
-    font-size: 12px;
-    font-weight: 700;
-    background: rgba(168, 85, 247, 0.08);
-    border: 1px solid rgba(168, 85, 247, 0.3);
-    color: #C084FC;
-    box-shadow: 0 0 16px -4px rgba(168, 85, 247, 0.3);
-  }
-  .status-pill .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #A855F7;
-    box-shadow: 0 0 10px #A855F7;
-    animation: pulse 1.8s infinite;
-  }
+/* FINAL SECTION */
+.simple{padding-top:30px}
+.simplebox{
+display:flex;align-items:center;justify-content:space-between;gap:30px;
+padding:35px 40px;border:1px solid #38bdf844;border-radius:22px;
+background:radial-gradient(ellipse at 10% 20%,#14b8a622,transparent 50%),
+radial-gradient(ellipse at 90% 80%,#a855f722,transparent 50%),#0b1b24;
+}
+.simplebox h2{font-size:clamp(25px,3vw,36px);margin:0 0 9px}
+.simplebox p{color:var(--muted);font-size:13px;margin:0;line-height:1.7}
+.footer{
+border-top:1px solid var(--line);padding:25px clamp(20px,5vw,76px);
+display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;
+color:#79939c;font-size:11px;
+}
+.footer b{color:#d8edef}
 
-  /* Centered Hero Stage */
-  .center-stage {
-    position: relative;
-    z-index: 10;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px 20px 40px;
-    perspective: 1200px;
-  }
-
-  /* Hero Centerpiece Typography & Emblem */
-  .hero-center {
-    text-align: center;
-    margin-bottom: 24px;
-    transform-style: preserve-3d;
-    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
-    will-change: transform;
-  }
-
-  .hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 18px;
-    border-radius: 99px;
-    font-size: 12.5px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #5EEAD4;
-    background: rgba(20, 184, 166, 0.1);
-    border: 1px solid rgba(20, 184, 166, 0.35);
-    box-shadow: 0 0 24px -4px rgba(20, 184, 166, 0.4), inset 0 0 12px rgba(20, 184, 166, 0.1);
-    margin-bottom: 14px;
-    backdrop-filter: blur(12px);
-  }
-
-  /* Grand AcadHub Brand Headline with 3-Color Dynamic Shimmer */
-  .hero-title-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    margin: 0 0 10px;
-  }
-
-  .hero-crest {
-    width: 68px;
-    height: 68px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #14B8A6 0%, #38BDF8 48%, #A855F7 100%);
-    display: grid;
-    place-items: center;
-    color: #050E14;
-    font-size: 38px;
-    font-weight: 900;
-    box-shadow: 0 10px 35px -4px rgba(20, 184, 166, 0.7), 0 0 25px rgba(168, 85, 247, 0.5);
-    flex-shrink: 0;
-    position: relative;
-    animation: crestGlow 4s ease-in-out infinite alternate;
-  }
-  .hero-crest::after {
-    content: "";
-    position: absolute;
-    inset: -3px;
-    border-radius: 23px;
-    background: linear-gradient(135deg, #14B8A6, #38BDF8, #A855F7);
-    opacity: 0.4;
-    z-index: -1;
-    filter: blur(8px);
-  }
-
-  @keyframes crestGlow {
-    0% { transform: scale(1) rotate(0deg); box-shadow: 0 10px 30px -4px rgba(20, 184, 166, 0.6), 0 0 20px rgba(168, 85, 247, 0.4); }
-    100% { transform: scale(1.05) rotate(1deg); box-shadow: 0 14px 45px -2px rgba(56, 189, 248, 0.8), 0 0 35px rgba(168, 85, 247, 0.7); }
-  }
-
-  .hero-brand-name {
-    font-size: clamp(52px, 7.5vw, 84px);
-    font-weight: 900;
-    letter-spacing: -0.045em;
-    line-height: 1;
-    background: linear-gradient(135deg, #FFFFFF 15%, #2DD4BF 45%, #38BDF8 70%, #C084FC 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 45px rgba(45, 212, 191, 0.4));
-    animation: shimmerGrad 8s linear infinite alternate;
-  }
-
-  @keyframes shimmerGrad {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-  }
-
-  .hero-subhead {
-    font-size: clamp(15px, 1.8vw, 19px);
-    font-weight: 600;
-    color: var(--muted);
-    max-width: 580px;
-    margin: 0 auto;
-    letter-spacing: -0.01em;
-    line-height: 1.5;
-  }
-
-  /* Centered 3D Interactive Obsidian Glass Card */
-  .auth-card-stage {
-    position: relative;
-    width: 100%;
-    max-width: 450px;
-    transform-style: preserve-3d;
-    transition: transform 0.12s ease-out;
-    will-change: transform;
-  }
-
-  .auth-card-stage .auth-card {
-    position: relative;
-    background: rgba(11, 25, 33, 0.82);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(56, 189, 248, 0.28);
-    border-radius: 24px;
-    padding: 32px 30px;
-    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), 0 0 50px -10px rgba(168, 85, 247, 0.25), 0 0 30px -10px rgba(20, 184, 166, 0.3);
-    overflow: hidden;
-  }
-
-  /* Dynamic Specular Sheen Tracking Cursor */
-  .auth-card-stage .auth-card::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: 24px;
-    background: radial-gradient(circle 380px at var(--card-mx, 50%) var(--card-my, 50%), rgba(168, 85, 247, 0.22) 0%, rgba(56, 189, 248, 0.12) 40%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .auth-card-stage .auth-card > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Role Switcher Chips with Tri-Color Glow */
-  .role-chips {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 18px 0 20px;
-  }
-  .role-chip {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 12px 6px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--muted);
-    font: 700 13px "Plus Jakarta Sans", sans-serif;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .role-chip:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-  }
-  .role-chip.active {
-    color: #FFFFFF;
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--rc, var(--teal));
-    box-shadow: 0 0 0 1px var(--rc, var(--teal)), 0 0 24px -4px var(--rc, var(--teal));
-    transform: translateY(-3px);
-  }
-  .role-chip.active .ic {
-    color: var(--rc, var(--teal));
-  }
-
-  /* Role specific theme accents */
-  .role-chip[data-role="ADMIN"] { --rc: #14B8A6; }
-  .role-chip[data-role="FACULTY"] { --rc: #38BDF8; }
-  .role-chip[data-role="STUDENT"] { --rc: #A855F7; }
-
-  /* Submit Button with High-Tech Shimmer Gradient */
-  .btn-submit-nexus {
-    position: relative;
-    width: 100%;
-    padding: 14px 20px;
-    border-radius: 12px;
-    border: none;
-    font: 700 15px "Plus Jakarta Sans", sans-serif;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: linear-gradient(135deg, #0D9488 0%, #0284C7 50%, #9333EA 100%);
-    background-size: 200% auto;
-    box-shadow: 0 8px 25px -4px rgba(14, 165, 233, 0.5), 0 0 20px rgba(168, 85, 247, 0.35);
-    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-    overflow: hidden;
-  }
-  .btn-submit-nexus:hover {
-    background-position: 100% 0;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px -2px rgba(14, 165, 233, 0.7), 0 0 30px rgba(168, 85, 247, 0.6);
-  }
-  .btn-submit-nexus:active {
-    transform: translateY(0);
-  }
-
-  /* Bottom Interactive Status Bar */
-  .portal-footer {
-    position: relative;
-    z-index: 20;
-    text-align: center;
-    padding: 16px 24px;
-    color: var(--muted);
-    font-size: 12.5px;
-    border-top: 1px solid rgba(20, 184, 166, 0.12);
-    background: rgba(7, 19, 26, 0.5);
-    backdrop-filter: blur(12px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 18px;
-    flex-wrap: wrap;
-  }
-  .portal-footer a {
-    color: #38BDF8;
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .portal-footer a:hover {
-    color: #A855F7;
-    text-decoration: underline;
-  }
+/* RESPONSIVE */
+@media(max-width:850px){
+.hero{grid-template-columns:1fr;text-align:center;padding-top:70px;gap:15px}
+.hero p{margin-left:auto;margin-right:auto}
+.hero-actions,.trust{justify-content:center}
+.visual{min-height:410px}
+.features{grid-template-columns:repeat(2,1fr)}
+.navlinks{gap:16px}.term{display:none}
+}
+@media(max-width:600px){
+.nav{height:68px;padding:0 18px}
+.navlinks{
+display:none;position:absolute;top:68px;left:0;right:0;
+padding:18px;background:#081820;border-bottom:1px solid var(--line);
+flex-direction:column;
+}
+.navlinks.open{display:flex}
+.menu{display:block}
+.navright .btn{padding:10px 13px;font-size:11px}
+.hero{padding:58px 20px 35px;min-height:auto}
+.hero h1{letter-spacing:-2.5px}
+.hero p{font-size:14px}
+.visual{min-height:350px}
+.dashboard{padding:16px}
+.orbit{width:330px}
+.section{padding:58px 20px}
+.features,.roles{grid-template-columns:1fr}
+.simplebox{padding:27px 22px;align-items:flex-start;flex-direction:column}
+.footer{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){
+*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+}
 </style>
 </head>
-<body data-page="login" class="auth-page">
 
-<!-- Multi-Color Aurora Nebula -->
-<div class="aurora-portal" aria-hidden="true"><i></i><i></i><i></i></div>
+<body>
+<div class="stars" aria-hidden="true"></div>
 
-<!-- Fullscreen 3D Gyroscope & Interactive Stardust Canvas -->
-<canvas id="dynamicCanvas"></canvas>
-
-<!-- Dynamic Cursor Spotlight Follower -->
-<div class="cursor-spotlight" id="cursorSpotlight" aria-hidden="true"></div>
-
-<!-- Top Navigation -->
-<nav class="portal-nav">
-  <a class="portal-brand" href="index.html">
-    <span class="logo-icon">A</span>
-    <span>AcadHub</span>
-  </a>
-  <div style="display:flex; align-items:center; gap:16px;">
-    <div class="status-pill">
-      <span class="dot"></span>
-      <span>Quantum Core Active &middot; Term 2026</span>
-    </div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" type="button">
-      <i data-i="moon"></i><i data-i="sun"></i>
-    </button>
-  </div>
+<header class="nav">
+<a class="brand" href="#home">
+<span class="logo">A</span><span>AcadHub</span>
+</a>
+<nav class="navlinks" id="navLinks">
+<a href="#features">Features</a>
+<a href="#portals">Portals</a>
+<a href="#about">About</a>
 </nav>
+<div class="navright">
+<span class="term">● &nbsp;ACADEMIC HUB · 2026</span>
+<a class="btn" href="login.html">Sign in ↗</a>
+<button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
+</div>
+</header>
 
-<!-- Main Centered Stage (Zero Clutter, Pure AcadHub Focus) -->
-<main class="center-stage">
+<main id="home">
 
-  <!-- Hero Centerpiece: Focused Exclusively on AcadHub -->
-  <div class="hero-center" id="heroCenter">
-    <div class="hero-tag">
-      <i data-i="sparkle"></i>
-      <span>Next-Generation Academic Operating System</span>
-    </div>
+<!-- HERO -->
+<section class="hero">
+<div>
+<div class="eyebrow"><span class="pulse"></span> One platform. Your entire academic life.</div>
 
-    <div class="hero-title-group">
-      <div class="hero-crest">A</div>
-      <h1 class="hero-brand-name">AcadHub</h1>
-    </div>
-  </div>
+<h1>Make campus life<br><span class="gradient">a little simpler.</span></h1>
 
-  <!-- Centered Interactive 3D Card -->
-  <div class="auth-card-stage" id="authCardStage">
-    <section class="card auth-card" id="authCard">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div>
-          <h2 style="font-size:21px;font-weight:800;margin:0 0 4px;color:var(--text);">Portal Sign In</h2>
-          <p class="muted" style="font-size:13px;margin:0;">Select your role to load credentials</p>
-        </div>
-        <span class="pill" style="font-size:11px;background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.3);color:#C084FC;">Secure RBAC</span>
-      </div>
+<p>
+Meet <b style="color:#eaf7f8">AcadHub</b> — your easy-to-use academic companion.
+Keep track of attendance, check your CGPA, access study material
+and manage your enrolled courses, all in one simple place.
+</p>
 
-      <!-- Role Selector with Vibrant Neon Glows -->
-      <div class="role-chips" role="group" aria-label="Sign in as">
-        <button type="button" class="role-chip" data-role="ADMIN" style="--rc:#14B8A6">
-          <i data-i="shield"></i>Admin
-        </button>
-        <button type="button" class="role-chip" data-role="FACULTY" style="--rc:#38BDF8">
-          <i data-i="book"></i>Faculty
-        </button>
-        <button type="button" class="role-chip active" data-role="STUDENT" style="--rc:#A855F7">
-          <i data-i="cap"></i>Student
-        </button>
-      </div>
+<div class="hero-actions">
+<a class="btn" href="login.html">Get started →</a>
+<a class="btn btn-outline" href="#features">Explore features ↓</a>
+</div>
 
-      <!-- Authentication Form -->
-      <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
-        <select id="role" hidden>
-          <option value="ADMIN">Admin</option>
-          <option value="FACULTY">Faculty</option>
-          <option value="STUDENT" selected>Student</option>
-        </select>
-        
-        <div class="field">
-          <input id="username" type="text" placeholder=" " autocomplete="username" required>
-          <label for="username">Username</label>
-        </div>
-        
-        <div class="field">
-          <input id="password" type="password" placeholder=" " autocomplete="current-password" required>
-          <label for="password">Password</label>
-          <button class="icon-btn eye" type="button" data-eye="#password" aria-label="Show or hide password"><i data-i="eye"></i></button>
-        </div>
-        
-        <p id="loginError" class="form-error" role="alert"></p>
-        
-        <button id="loginBtn" class="btn-submit-nexus magnetic spin" type="submit">
-          Initialize Session <i data-i="arrow"></i>
-        </button>
-      </form>
+<div class="trust"><span class="trustline"></span>Designed for students, faculty and administrators</div>
+</div>
 
-      <p class="auth-foot">Press <kbd>T</kbd> to toggle theme &middot; Click a role to switch credentials</p>
-    </section>
-  </div>
+<!-- ORIGINAL ORBITAL DASHBOARD GRAPHICS -->
+<div class="visual">
+<div class="orbit"></div>
+<div class="dashboard">
+<div class="dash-top">
+<div class="dash-title">Your academic overview</div>
+<span class="live">● LIVE OVERVIEW</span>
+</div>
+
+<div class="dash-grid">
+<div class="metric">
+<small>Attendance</small>
+<strong>86%</strong><em>On track</em>
+<div class="progress"><i style="width:86%"></i></div>
+</div>
+<div class="metric">
+<small>Current CGPA</small>
+<strong>8.9</strong><em>↗</em>
+<div class="progress"><i style="width:89%"></i></div>
+</div>
+<div class="metric">
+<small>Enrolled courses</small>
+<strong>06</strong><em>Courses</em>
+</div>
+<div class="metric">
+<small>Study resources</small>
+<strong>24</strong><em>Available</em>
+</div>
+</div>
+
+<div style="font-size:9px;color:#6f929d;text-align:center;margin-top:13px">
+A simple preview of what your academic space can bring together
+</div>
+</div>
+</div>
+</section>
+
+<!-- FEATURES: NO TIMETABLE OR UPDATES -->
+<section class="section" id="features">
+<div class="section-head">
+<div class="kicker">Everything in one place</div>
+<h2>Your academics, <span class="gradient">without the hassle.</span></h2>
+<p>No need to jump between different places for everyday academic information. Find the essentials you need through one simple platform.</p>
+</div>
+
+<div class="features">
+<article class="feature">
+<div class="feature-icon">◷</div>
+<h3>Attendance Tracking</h3>
+<p>Check your attendance subject-wise and keep an eye on your attendance record.</p>
+</article>
+
+<article class="feature">
+<div class="feature-icon">▥</div>
+<h3>CGPA & Grades</h3>
+<p>View your academic performance, grades and CGPA information in one place.</p>
+</article>
+
+<article class="feature">
+<div class="feature-icon">▤</div>
+<h3>Study Material</h3>
+<p>Access notes, learning resources and subject-related study material shared with you.</p>
+</article>
+
+<article class="feature">
+<div class="feature-icon">▦</div>
+<h3>Courses & Subjects</h3>
+<p>See the courses you are enrolled in and keep your academic information organised.</p>
+</article>
+
+<article class="feature">
+<div class="feature-icon">▣</div>
+<h3>Academic Records</h3>
+<p>Find your important academic details and records together in one convenient place.</p>
+</article>
+
+<article class="feature">
+<div class="feature-icon">◎</div>
+<h3>One Student Portal</h3>
+<p>A clear, easy-to-use space to find your essential academic details without clutter.</p>
+</article>
+</div>
+</section>
+
+<!-- THREE PORTALS -->
+<section class="section" id="portals">
+<div class="section-head">
+<div class="kicker">Three connected portals</div>
+<h2>One hub. <span class="gradient">Three roles.</span></h2>
+<p>AcadHub brings students, faculty and administrators onto the same academic platform, with a portal for each role.</p>
+</div>
+
+<div class="roles">
+<article class="role">
+<div class="role-icon">🎓</div>
+<h3>Student Portal</h3>
+<p>Your everyday academic space. Quickly find the information and resources you need as a student.</p>
+<ul>
+<li>Attendance and CGPA</li>
+<li>Study material and courses</li>
+<li>Academic records</li>
+</ul>
+<a class="role-link" href="login.html">Enter student portal →</a>
+</article>
+
+<article class="role">
+<div class="role-icon">📘</div>
+<h3>Faculty Portal</h3>
+<p>A dedicated space for faculty to manage their academic responsibilities and student-related information.</p>
+<ul>
+<li>Manage classes and courses</li>
+<li>Share study resources</li>
+<li>Attendance and student records</li>
+</ul>
+<a class="role-link" href="login.html">Enter faculty portal →</a>
+</article>
+
+<article class="role">
+<div class="role-icon">🛡️</div>
+<h3>Admin Portal</h3>
+<p>A central space for administrators to oversee platform information and academic operations.</p>
+<ul>
+<li>Manage student and faculty records</li>
+<li>Course and portal management</li>
+<li>Academic information overview</li>
+</ul>
+<a class="role-link" href="login.html">Enter admin portal →</a>
+</article>
+</div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section simple" id="about">
+<div class="simplebox">
+<div>
+<div class="kicker">Less searching. More learning.</div>
+<h2>Ready to make academics easier?</h2>
+<p>Sign in to your AcadHub portal and get to the things that matter.</p>
+</div>
+<a class="btn" href="login.html">Continue to AcadHub →</a>
+</div>
+</section>
+
 </main>
 
-<!-- Bottom Footer -->
-<footer class="portal-footer">
-  <span>Spring Boot 3.5.6 &middot; MySQL 8.0 &middot; Java 17 LTS Core</span>
-  <span style="opacity:0.3;">&bull;</span>
-  <span>Connected to <a href="https://github.com/guntaas0108-eng/Acadhub_java" target="_blank" rel="noopener">guntaas0108-eng</a> / <a href="https://github.com/kriti006/Acadhub_java" target="_blank" rel="noopener">kriti006</a></span>
-  <span style="opacity:0.3;">&bull;</span>
-  <span>&copy; 2026 AcadHub University</span>
+<footer class="footer">
+<span><b>AcadHub</b> · Your academic life, simplified.</span>
+<span>Student · Faculty · Admin &nbsp; | &nbsp; © 2026 AcadHub</span>
 </footer>
 
-<script src="ui.js?v=20261106.8"></script>
-<script src="app.js?v=20261106.8"></script>
-
-<!-- Interactive 3D Gyroscope Rings, Particle Stardust & Cursor Physics Engine -->
 <script>
-(function() {
-  'use strict';
-  const heroCenter = document.getElementById('heroCenter');
-  const cardStage = document.getElementById('authCardStage');
-  const card = document.getElementById('authCard');
-  const spotlight = document.getElementById('cursorSpotlight');
-  const canvas = document.getElementById('dynamicCanvas');
+const menuBtn=document.getElementById('menuBtn');
+const navLinks=document.getElementById('navLinks');
 
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let targetX = mouseX;
-  let targetY = mouseY;
-  let currentRotX = 0;
-  let currentRotY = 0;
+menuBtn.addEventListener('click',()=>{
+navLinks.classList.toggle('open');
+});
 
-  // Stardust trail array
-  const stardust = [];
-
-  // Track cursor movement
-  window.addEventListener('mousemove', (e) => {
-    targetX = e.clientX;
-    targetY = e.clientY;
-
-    // Add trailing stardust particle on cursor movement
-    if (Math.random() > 0.3) {
-      stardust.push({
-        x: e.clientX,
-        y: e.clientY,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: (Math.random() - 0.5) * 1.5,
-        r: Math.random() * 2.5 + 1,
-        alpha: 1,
-        color: ['#14B8A6', '#38BDF8', '#A855F7', '#F43F5E'][Math.floor(Math.random() * 4)]
-      });
-    }
-  }, { passive: true });
-
-  // 60 FPS Physics & 3D Tilt loop
-  function updatePhysics() {
-    mouseX += (targetX - mouseX) * 0.12;
-    mouseY += (targetY - mouseY) * 0.12;
-
-    // 1. Move dynamic cursor spotlight
-    if (spotlight) {
-      spotlight.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-    }
-
-    // Normalized center offset (-1 to 1)
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    const nx = (mouseX - cx) / cx;
-    const ny = (mouseY - cy) / cy;
-
-    // 2. 3D Tilt on the central authentication card
-    const targetRotX = -ny * 10;
-    const targetRotY = nx * 10;
-    currentRotX += (targetRotX - currentRotX) * 0.1;
-    currentRotY += (targetRotY - currentRotY) * 0.1;
-
-    if (cardStage) {
-      cardStage.style.transform = `perspective(1000px) rotateX(${currentRotX.toFixed(2)}deg) rotateY(${currentRotY.toFixed(2)}deg)`;
-    }
-
-    // 3. Dynamic specular reflection on card face
-    if (card) {
-      const rect = card.getBoundingClientRect();
-      const cardX = mouseX - rect.left;
-      const cardY = mouseY - rect.top;
-      card.style.setProperty('--card-mx', `${cardX}px`);
-      card.style.setProperty('--card-my', `${cardY}px`);
-    }
-
-    // 4. Subtle perspective tilt on Hero Centerpiece
-    if (heroCenter) {
-      const heroRotX = -ny * 5;
-      const heroRotY = nx * 5;
-      heroCenter.style.transform = `perspective(1000px) rotateX(${heroRotX.toFixed(2)}deg) rotateY(${heroRotY.toFixed(2)}deg) translateZ(15px)`;
-    }
-
-    requestAnimationFrame(updatePhysics);
-  }
-  requestAnimationFrame(updatePhysics);
-
-  // Canvas Engine: 3D Gyroscope Rings + Ambient Nodes + Dynamic Cursor Stardust
-  if (canvas) {
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
-    window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    });
-
-    // 3 Concentric 3D Gyroscope Rings
-    const rings = [
-      { radius: 260, tiltAngle: 65,  rotSpeed: 0.004, color: 'rgba(20, 184, 166,',  satAngle: 0, satSpeed: 0.016 },
-      { radius: 360, tiltAngle: -45, rotSpeed: -0.003, color: 'rgba(56, 189, 248,', satAngle: 2, satSpeed: -0.012 },
-      { radius: 460, tiltAngle: 28,  rotSpeed: 0.002, color: 'rgba(168, 85, 247,',  satAngle: 4, satSpeed: 0.009 }
-    ];
-
-    // Background cosmic floating nodes
-    const nodes = [];
-    const nodeCount = Math.min(32, Math.floor((width * height) / 32000));
-    for (let i = 0; i < nodeCount; i++) {
-      nodes.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        r: Math.random() * 2 + 1,
-        color: ['rgba(20, 184, 166,', 'rgba(56, 189, 248,', 'rgba(168, 85, 247,'][i % 3]
-      });
-    }
-
-    let globalAngle = 0;
-
-    function renderCanvas() {
-      ctx.clearRect(0, 0, width, height);
-
-      const cx = width / 2;
-      const cy = height / 2;
-      const nx = (mouseX - cx) / cx;
-      const ny = (mouseY - cy) / cy;
-
-      globalAngle += 0.005;
-
-      // 1. Draw 3D Gyroscope Rings centered behind AcadHub
-      rings.forEach(ring => {
-        ring.satAngle += ring.satSpeed;
-
-        const tiltRad = (ring.tiltAngle + ny * 25) * (Math.PI / 180);
-        const rotRad = globalAngle * ring.rotSpeed * 100 + nx * 0.4;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rotRad);
-        ctx.scale(1, Math.cos(tiltRad));
-
-        // Ring stroke
-        ctx.beginPath();
-        ctx.arc(0, 0, ring.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = ring.color + '0.22)';
-        ctx.lineWidth = 1.6;
-        ctx.stroke();
-
-        // Orbiting glowing satellite photon
-        const sx = Math.cos(ring.satAngle) * ring.radius;
-        const sy = Math.sin(ring.satAngle) * ring.radius;
-
-        ctx.beginPath();
-        ctx.arc(sx, sy, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.shadowColor = ring.color + '1)';
-        ctx.shadowBlur = 18;
-        ctx.fill();
-
-        ctx.restore();
-      });
-
-      // 2. Draw ambient floating nodes with laser connections
-      for (let i = 0; i < nodes.length; i++) {
-        const n1 = nodes[i];
-        n1.x += n1.vx;
-        n1.y += n1.vy;
-
-        if (n1.x < 0 || n1.x > width) n1.vx *= -1;
-        if (n1.y < 0 || n1.y > height) n1.vy *= -1;
-
-        ctx.beginPath();
-        ctx.arc(n1.x, n1.y, n1.r, 0, Math.PI * 2);
-        ctx.fillStyle = n1.color + '0.7)';
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = n1.color + '0.8)';
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Connect nearby nodes
-        for (let j = i + 1; j < nodes.length; j++) {
-          const n2 = nodes[j];
-          const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(n1.x, n1.y);
-            ctx.lineTo(n2.x, n2.y);
-            ctx.strokeStyle = n1.color + (1 - dist / 120) * 0.16 + ')';
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-        }
-
-        // Connect to cursor when mouse is close
-        const mDist = Math.hypot(n1.x - mouseX, n1.y - mouseY);
-        if (mDist < 150) {
-          ctx.beginPath();
-          ctx.moveTo(n1.x, n1.y);
-          ctx.lineTo(mouseX, mouseY);
-          ctx.strokeStyle = n1.color + (1 - mDist / 150) * 0.35 + ')';
-          ctx.lineWidth = 1.1;
-          ctx.stroke();
-        }
-      }
-
-      // 3. Render dynamic cursor stardust trail
-      for (let i = stardust.length - 1; i >= 0; i--) {
-        const p = stardust[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= 0.025;
-        p.r *= 0.97;
-
-        if (p.alpha <= 0 || p.r < 0.2) {
-          stardust.splice(i, 1);
-          continue;
-        }
-
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 12;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      requestAnimationFrame(renderCanvas);
-    }
-    requestAnimationFrame(renderCanvas);
-  }
-})();
+navLinks.querySelectorAll('a').forEach(link=>{
+link.addEventListener('click',()=>{
+navLinks.classList.remove('open');
+});
+});
 </script>
 </body>
 </html>
