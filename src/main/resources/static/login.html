@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AcadHub | Portal Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;min-height:100vh;
+font-family:'Plus Jakarta Sans',sans-serif;
+color:#eafafa;
+background:radial-gradient(ellipse at 20% 15%,#103b42,transparent 45%),
+radial-gradient(ellipse at 85% 75%,#182b50,transparent 45%),#050e14;
+}
+nav{
+padding:17px 35px;display:flex;justify-content:space-between;
+align-items:center;background:#071820cc;
+border-bottom:1px solid #14b8a633;
+}
+.brand{font-size:20px;font-weight:800;text-decoration:none;color:white}
+.logo{
+display:inline-grid;place-items:center;width:35px;height:35px;
+border-radius:10px;margin-right:8px;color:#07131a;
+background:linear-gradient(135deg,#14b8a6,#38bdf8,#a855f7);
+}
+.home{color:#5eead4;text-decoration:none;font-size:13px;font-weight:700}
+.container{
+min-height:calc(100vh - 70px);display:flex;
+justify-content:center;align-items:center;padding:35px 15px;
+}
+.login{
+width:100%;max-width:440px;padding:32px;
+background:#0b1921eF;border:1px solid #38bdf855;
+border-radius:23px;box-shadow:0 25px 70px #0008,0 0 35px #a855f722;
+}
+.heading{text-align:center;margin-bottom:25px}
+.heading h1{
+font-size:32px;margin:0 0 8px;
+background:linear-gradient(90deg,#fff,#2dd4bf,#38bdf8,#c084fc);
+background-clip:text;color:transparent;
+}
+.heading p{color:#91aab3;font-size:13px}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:22px 0}
+.role{
+padding:14px 5px;border-radius:13px;
+border:1px solid #ffffff20;background:#ffffff08;
+color:#a9c0c9;cursor:pointer;font-weight:700;
+}
+.role:hover{background:#ffffff12}
+.role.active{
+color:white;border-color:#a855f7;
+box-shadow:0 0 15px #a855f755;background:#a855f71c;
+}
+.role span{display:block;font-size:22px;margin-bottom:6px}
+.field{margin:17px 0}
+.field label{display:block;color:#91aab3;font-size:12px;margin-bottom:8px}
+.field input{
+width:100%;padding:14px;background:#142c36;
+border:1px solid #14b8a655;border-radius:10px;
+color:white;outline:none;font-size:14px;
+}
+.field input:focus{border-color:#38bdf8;box-shadow:0 0 12px #38bdf833}
+.password{display:flex;gap:8px}
+.password input{flex:1;min-width:0}
+.eye{
+background:#142c36;border:1px solid #ffffff20;
+border-radius:9px;color:#9bb4bf;padding:0 13px;cursor:pointer;
+}
+.submit{
+width:100%;padding:15px;border:0;border-radius:11px;
+background:linear-gradient(110deg,#0d9488,#0284c7,#9333ea);
+color:white;font-weight:800;font-size:15px;cursor:pointer;margin-top:12px;
+}
+.submit:hover{filter:brightness(1.15);box-shadow:0 8px 25px #0284c755}
+.error{color:#fb7185;font-size:12px;margin:10px 0}
+.note{text-align:center;color:#819ba5;font-size:11px;margin-top:20px}
+@media(max-width:450px){.login{padding:23px}.role{font-size:11px}}
+</style>
+</head>
+
+<body>
+
+<nav>
+<a href="index.html" class="brand">
+<span class="logo">A</span>AcadHub
+</a>
+<a href="index.html" class="home">← Home</a>
+</nav>
+
+<div class="container">
+<div class="login">
+
+<div class="heading">
+<h1>Welcome Back!</h1>
+<p>Sign in to access your AcadHub portal</p>
+</div>
+
+<div class="roles">
+<button type="button" class="role" data-role="ADMIN">
+<span>🛡️</span>Admin
+</button>
+<button type="button" class="role" data-role="FACULTY">
+<span>📘</span>Faculty
+</button>
+<button type="button" class="role active" data-role="STUDENT">
+<span>🎓</span>Student
+</button>
+</div>
+
+<form id="loginForm" onsubmit="if(window.login){window.login()} return false;" novalidate>
+
+<select id="role" hidden>
+<option value="ADMIN">Admin</option>
+<option value="FACULTY">Faculty</option>
+<option value="STUDENT" selected>Student</option>
+</select>
+
+<div class="field">
+<label for="username">Username</label>
+<input id="username" type="text" placeholder="Enter username" autocomplete="username" required>
+</div>
+
+<div class="field">
+<label for="password">Password</label>
+<div class="password">
+<input id="password" type="password" placeholder="Enter password" autocomplete="current-password" required>
+<button type="button" class="eye" id="eye">👁</button>
+</div>
+</div>
+
+<p id="loginError" class="error" role="alert"></p>
+
+<button type="submit" id="loginBtn" class="submit">
+Initialize Session →
+</button>
+
+</form>
+
+<p class="note">Secure Academic Portal · AcadHub 2026</p>
+</div>
+</div>
+
+<script src="ui.js"></script>
+<script src="app.js"></script>
+
+<script>
+// Change selected portal
+const roleSelect=document.getElementById('role');
+document.querySelectorAll('.role').forEach(button=>{
+button.addEventListener('click',()=>{
+document.querySelectorAll('.role').forEach(b=>b.classList.remove('active'));
+button.classList.add('active');
+roleSelect.value=button.dataset.role;
+document.getElementById('loginError').textContent='';
+});
+});
+
+// Show or hide password
+document.getElementById('eye').addEventListener('click',()=>{
+const password=document.getElementById('password');
+password.type=password.type==='password'?'text':'password';
+});
+</script>
+
+</body>
+</html>
