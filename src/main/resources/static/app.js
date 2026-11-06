@@ -828,7 +828,7 @@
           <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Attached Document / Presentation:</div>
           <a href="/api/files/material/${m.material_id}" class="mat-file-link" style="width:100%;justify-content:center;padding:12px;" download="${esc(m.file_name)}" onclick="return window.handleFileDownload(event, 'material', ${m.material_id}, '${esc(m.file_name)}')">
             <i data-i="file"></i>
-            <span>Download Attached File: <b>${esc(m.file_name)}</b></span>
+            <span>Download Attached ${isAssignment ? "Question Paper" : "File"}: <b>${esc(m.file_name)}</b></span>
             <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(m.file_size || 'Attached')})</span>
           </a>
         `;
@@ -844,7 +844,7 @@
     const actionSlot = $('mvActionSlot');
     if (actionSlot) {
       if (document.body.dataset.page === 'student') {
-        actionSlot.innerHTML = `<button class="btn primary magnetic" onclick="window.closeMaterialViewer();window.openSubmitModal(${m.material_id}, '${esc(m.course_code)}', '${esc(m.title)}', '${esc(m.faculty_name || 'Professor')}')"><i data-i="send"></i>Send Work to Professor</button>`;
+        actionSlot.innerHTML = `<button class="btn primary magnetic" onclick="window.closeMaterialViewer();window.openSubmitModal(${m.material_id}, '${esc(m.course_code)}', '${esc(m.title)}', '${esc(m.faculty_name || 'Professor')}')"><i data-i="send"></i>${isAssignment ? "Submit Assignment" : "Send Work"} to Professor</button>`;
       } else {
         actionSlot.innerHTML = '';
       }
@@ -1604,7 +1604,16 @@
   async function initFacultyPage() {
     if (document.body.dataset.page !== 'faculty') return;
     setupDropzoneEvents('smDropzone', 'smFileInput', window.handleMaterialFileSelect);
+    setupDropzoneEvents('asDropzone', 'asFileInput', window.handleAssignmentFileSelect);
     await whoami();
+    document.querySelectorAll('.seg[data-group="fac"] button').forEach(b => {
+      b.addEventListener('click', () => {
+        const tab = b.dataset.tab;
+        if (tab === 'tabAssess' && window.loadFacultyAssignments) window.loadFacultyAssignments();
+        else if (tab === 'tabMaterial' && window.loadFacultyMaterials) window.loadFacultyMaterials();
+        else if (tab === 'tabSubmissions' && window.loadFacultySubmissions) window.loadFacultySubmissions();
+      });
+    });
     await window.refreshFaculty();
   }
 
@@ -1613,7 +1622,7 @@
     if (!d) return;
 
     const courses = d.courses || [];
-    ['fCourse', 'mCourse', 'faCourse', 'smCourse'].forEach(id => {
+    ['fCourse', 'mCourse', 'faCourse', 'smCourse', 'asCourse'].forEach(id => {
       const el = $(id);
       if (el) {
         el.innerHTML = courses.map(c => `<option value="${esc(c.course_code)}">${esc(c.course_code)} - ${esc(c.course_name)}</option>`).join('');
@@ -1628,6 +1637,7 @@
     if (courses.length) {
       await window.loadStudents();
       await window.loadFacultyMaterials();
+      await window.loadFacultyAssignments();
       await window.loadFacultySubmissions();
     }
   };
@@ -1750,6 +1760,164 @@
     } else {
       if (window.UI && window.UI.toast) window.UI.toast('error', r.data.error || 'Failed to publish assessment.');
     }
+  };
+
+  
+  // ============================================================
+  //   FACULTY COURSE ASSIGNMENT PUBLISHING & MANAGEMENT SYSTEM
+  // ============================================================
+  window.handleAssignmentFileSelect = function (input) {
+    if (!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 50 * 1024 * 1024) {
+      if (window.UI && window.UI.toast) window.UI.toast('error', 'File exceeds 50MB limit: ' + formatBytes(file.size));
+      input.value = '';
+      return;
+    }
+    const nameEl = $('asSelectedName');
+    const sizeEl = $('asSelectedSize');
+    const extEl = $('asExtBadge');
+    const box = $('asSelectedBox');
+    const dropzone = $('asDropzone');
+
+    if (nameEl) nameEl.textContent = file.name;
+    if (sizeEl) sizeEl.textContent = formatBytes(file.size);
+    if (extEl) {
+      const parts = file.name.split('.');
+      extEl.textContent = (parts.length > 1 ? parts.pop() : 'FILE').toUpperCase().slice(0, 4);
+    }
+    if (box) box.style.display = 'flex';
+    if (dropzone) dropzone.style.display = 'none';
+  };
+
+  window.clearAssignmentFile = function () {
+    const input = $('asFileInput');
+    if (input) input.value = '';
+    const box = $('asSelectedBox');
+    const dropzone = $('asDropzone');
+    if (box) box.style.display = 'none';
+    if (dropzone) dropzone.style.display = 'flex';
+  };
+
+  window.resetAssignmentForm = function () {
+    ['asTitle', 'asContent', 'asDueDate'].forEach(id => { if ($(id)) $(id).value = ''; });
+    if ($('asMaxMarks')) $('asMaxMarks').value = '50';
+    window.clearAssignmentFile();
+  };
+
+  window.uploadFacultyAssignment = async function () {
+    const course = $('asCourse') ? $('asCourse').value : '';
+    const title = $('asTitle') ? $('asTitle').value.trim() : '';
+    const type = $('asType') ? $('asType').value : 'Assignment';
+    const content = $('asContent') ? $('asContent').value.trim() : '';
+    const dueDate = $('asDueDate') ? $('asDueDate').value : '';
+    const maxMarks = $('asMaxMarks') ? $('asMaxMarks').value : '50';
+    const fileInput = $('asFileInput');
+    const file = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
+
+    if (!course || !title) {
+      if (window.UI && window.UI.toast) window.UI.toast('error', 'Course and Title are required.');
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('course', course);
+    fd.append('title', title);
+    fd.append('type', type);
+    fd.append('content', content);
+    if (dueDate) fd.append('dueDate', dueDate);
+    if (maxMarks) fd.append('maxMarks', maxMarks);
+    if (file) fd.append('file', file);
+
+    const r = await apiPostFormData('/api/faculty/material-upload', fd);
+    if (r.ok) {
+      if (window.UI && window.UI.toast) {
+        window.UI.toast('success', file ? `Assignment & question file "${file.name}" published successfully!` : 'Assignment published successfully!');
+      }
+      window.resetAssignmentForm();
+      await window.loadFacultyAssignments();
+      if (window.loadFacultyMaterials) await window.loadFacultyMaterials();
+    } else {
+      const err = (r.data && r.data.error) || 'Failed to upload assignment';
+      if (window.UI && window.UI.toast) window.UI.toast('error', err);
+    }
+  };
+
+  window.loadFacultyAssignments = async function () {
+    const listEl = $('facultyAssignmentsList');
+    if (!listEl) return;
+
+    const materials = await apiGet('/api/faculty/materials');
+    if (!materials) return;
+
+    // Filter assignments, quizzes, and tutorials
+    const assignments = materials.filter(m => {
+      const t = (m.material_type || '').toLowerCase();
+      return t === 'assignment' || t === 'quiz' || t === 'tutorials' || t === 'homework' || t === 'project';
+    });
+
+    if (!assignments.length) {
+      listEl.innerHTML = '<p class="muted" style="grid-column:1/-1;padding:20px;text-align:center;">No assignments published yet. Use the form above to publish assignments or lab tasks with attached question sheets.</p>';
+      return;
+    }
+
+    listEl.innerHTML = assignments.map(a => {
+      const typeClass = (a.material_type || 'Assignment').toLowerCase();
+      return `
+        <div class="mat-card">
+          <div class="mat-top">
+            <span class="mat-course">${esc(a.course_code)}</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="badge ${typeClass}">${esc(a.material_type || 'Assignment')}</span>
+              ${a.max_marks ? `<span class="chip ok" style="font-size:11px;padding:2px 6px;">${esc(a.max_marks)} pts</span>` : ''}
+              ${a.due_date ? `<span class="chip warn" style="font-size:11px;padding:2px 6px;">Due: ${esc(a.due_date)}</span>` : ''}
+            </div>
+          </div>
+          <div class="mat-title">${esc(a.title)}</div>
+          <div class="mat-content">${esc(a.content || 'Assignment problem statement and submission guidelines.')}</div>
+          ${a.file_name ? `
+            <div style="margin-top:6px;margin-bottom:8px;">
+              <a href="/api/files/material/${a.material_id}" class="mat-file-link" download="${esc(a.file_name)}" onclick="return window.handleFileDownload(event, 'material', ${a.material_id}, '${esc(a.file_name)}')">
+                <i data-i="file"></i>
+                <span>Download Question Paper: <b>${esc(a.file_name)}</b></span>
+                <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(a.file_size || 'Attached')})</span>
+              </a>
+            </div>
+          ` : ''}
+          <div class="mat-card-actions">
+            <button type="button" class="mat-view-btn" onclick="window.viewAssignmentSubmissions('${esc(a.course_code)}', '${esc(a.title)}')">
+              <i data-i="users"></i> View Submissions (${a.submissions_count || 0} submitted)
+            </button>
+          </div>
+          <div class="mat-footer">
+            <span>Posted: ${esc(a.upload_date || 'Recent')}</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn ghost" style="padding:4px 8px;font-size:12px;color:var(--danger);" onclick="window.deleteFacultyAssignment(${a.material_id})" title="Delete assignment"><i data-i="trash"></i></button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.UI && window.UI.icons) window.UI.icons();
+  };
+
+  window.deleteFacultyAssignment = async function (id) {
+    if (!confirm('Are you sure you want to delete this assignment?')) return;
+    const r = await apiDelete('/api/faculty/material/' + id);
+    if (r.ok) {
+      if (window.UI && window.UI.toast) window.UI.toast('success', 'Assignment deleted.');
+      await window.loadFacultyAssignments();
+      if (window.loadFacultyMaterials) await window.loadFacultyMaterials();
+    }
+  };
+
+  window.viewAssignmentSubmissions = function (courseCode, assignmentTitle) {
+    const subTabBtn = document.querySelector('.seg[data-group="fac"] button[data-tab="tabSubmissions"]');
+    if (subTabBtn) subTabBtn.click();
+    const sec = $('tabSubmissions');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+    if (window.UI && window.UI.toast) window.UI.toast('info', `Viewing student submissions for ${courseCode}`);
   };
 
   window.handleMaterialFileSelect = function (input) {
@@ -1878,12 +2046,18 @@
     const materials = await apiGet('/api/faculty/materials');
     window.__facultyMaterialsCache = materials || [];
 
+    // Filter to study materials (Notes, Slides, Tutorials, Reference)
+    const studyMats = (materials || []).filter(m => {
+      const t = (m.material_type || '').toLowerCase();
+      return t !== 'assignment' && t !== 'quiz';
+    });
+
     if (!materials || !materials.length) {
       listEl.innerHTML = '<p class="muted" style="grid-column:1/-1;padding:20px;text-align:center;">No study materials published yet. Use the form above to add notes, slides, or tutorials.</p>';
       return;
     }
 
-    listEl.innerHTML = materials.map(m => {
+    listEl.innerHTML = studyMats.map(m => {
       const typeClass = (m.material_type || 'Notes').toLowerCase();
       return `
         <div class="mat-card">
@@ -1897,7 +2071,7 @@
             <div style="margin-top:6px;margin-bottom:8px;">
               <a href="/api/files/material/${m.material_id}" class="mat-file-link" download="${esc(m.file_name)}" onclick="return window.handleFileDownload(event, 'material', ${m.material_id}, '${esc(m.file_name)}')">
                 <i data-i="file"></i>
-                <span>Download Attached File: <b>${esc(m.file_name)}</b></span>
+                <span>Download Attached ${isAssignment ? "Question Paper" : "File"}: <b>${esc(m.file_name)}</b></span>
                 <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(m.file_size || 'Attached')})</span>
               </a>
             </div>
@@ -1963,7 +2137,7 @@
             <div style="margin-top:4px;">
               <a href="/api/files/submission/${s.submission_id}" class="mat-file-link" download="${esc(s.file_name)}" onclick="return window.handleFileDownload(event, 'submission', ${s.submission_id}, '${esc(s.file_name)}')">
                 <i data-i="file"></i>
-                <span>Download Attached File: <b>${esc(s.file_name)}</b></span>
+                <span>Download Attached ${isAssignment ? "Question Paper" : "File"}: <b>${esc(s.file_name)}</b></span>
                 <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(s.file_size || 'Attached')})</span>
               </a>
             </div>
@@ -2430,7 +2604,9 @@
     }
 
     // Immediately load relevant live data
-    if (tabId === 'tabMaterial' && window.loadFacultyMaterials) {
+    if (tabId === 'tabAssess' && window.loadFacultyAssignments) {
+      window.loadFacultyAssignments();
+    } else if (tabId === 'tabMaterial' && window.loadFacultyMaterials) {
       window.loadFacultyMaterials();
     } else if (tabId === 'tabSubmissions' && window.loadFacultySubmissions) {
       window.loadFacultySubmissions();
@@ -2576,19 +2752,21 @@
     if (!listEl) return;
 
     if (!materials || !materials.length) {
-      listEl.innerHTML = '<p class="muted" style="grid-column:1/-1;padding:24px;text-align:center;">No study materials posted yet for your enrolled courses.</p>';
+      listEl.innerHTML = '<p class="muted" style="grid-column:1/-1;padding:24px;text-align:center;">No study materials or assignments posted yet for your enrolled courses.</p>';
       return;
     }
 
     listEl.innerHTML = materials.map(m => {
       const typeClass = (m.material_type || 'Notes').toLowerCase();
+      const isAssignment = ['assignment', 'quiz', 'tutorials'].includes(typeClass);
       return `
-        <div class="mat-card">
+        <div class="mat-card ${isAssignment ? 'assignment-card' : ''}">
           <div class="mat-top">
-            <span class="mat-course">${esc(m.course_code)} · ${esc(m.course_name || '')}</span>
+            <span class="mat-course">${esc(m.course_code)} - ${esc(m.course_name || '')}</span>
             <div style="display:flex;gap:6px;align-items:center;">
               <span class="badge ${typeClass}">${esc(m.material_type || 'Notes')}</span>
               ${m.max_marks ? `<span class="chip ok" style="font-size:11px;padding:2px 6px;">${esc(m.max_marks)} pts</span>` : ''}
+              ${m.due_date ? `<span class="chip warn" style="font-size:11px;padding:2px 6px;">Due: ${esc(m.due_date)}</span>` : ''}
             </div>
           </div>
           <div class="mat-title">${esc(m.title)}</div>
@@ -2597,7 +2775,7 @@
             <div style="margin-top:6px;margin-bottom:8px;">
               <a href="/api/files/material/${m.material_id}" class="mat-file-link" download="${esc(m.file_name)}" onclick="return window.handleFileDownload(event, 'material', ${m.material_id}, '${esc(m.file_name)}')">
                 <i data-i="file"></i>
-                <span>Download Attached File: <b>${esc(m.file_name)}</b></span>
+                <span>Download Attached ${isAssignment ? "Question Paper" : "File"}: <b>${esc(m.file_name)}</b></span>
                 <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(m.file_size || 'Attached')})</span>
               </a>
             </div>
@@ -2613,7 +2791,7 @@
               <span style="font-size:11px;">Posted: ${esc(m.upload_date || 'Recent')}</span>
             </div>
             <button class="btn primary magnetic" style="font-size:12px;padding:6px 12px;" onclick="window.openSubmitModal(${m.material_id}, '${esc(m.course_code)}', '${esc(m.title)}', '${esc(m.faculty_name || 'Professor')}')">
-              <i data-i="send"></i>Send Work
+              <i data-i="send"></i>${isAssignment ? "Submit Assignment" : "Send Work"}
             </button>
           </div>
         </div>
