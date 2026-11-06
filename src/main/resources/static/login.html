@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AcadHub | Portal Login</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 
@@ -66,7 +67,7 @@ padding:35px 15px;
 
 .login{
 width:100%;
-max-width:440px;
+max-width:495px;
 padding:32px;
 background:#0b1921ef;
 border:1px solid #38bdf855;
@@ -80,7 +81,7 @@ margin-bottom:25px;
 }
 
 .heading h1{
-font-size:32px;
+font-size:36px;
 margin:0 0 8px;
 background:linear-gradient(90deg,#fff,#2dd4bf,#38bdf8,#c084fc);
 background-clip:text;
@@ -93,7 +94,7 @@ color:#91aab3;
 font-size:13px;
 }
 
-/* ROLE SELECTION */
+/* ROLE BUTTONS */
 
 .roles{
 display:grid;
@@ -111,9 +112,13 @@ color:#a9c0c9;
 cursor:pointer;
 font-weight:700;
 font-family:inherit;
+transition:.25s;
 }
 
-.role:hover{background:#ffffff12}
+.role:hover{
+background:#ffffff12;
+transform:translateY(-2px);
+}
 
 .role.active{
 color:white;
@@ -128,9 +133,9 @@ font-size:22px;
 margin-bottom:6px;
 }
 
-/* CORRECTED INPUT FIELDS */
+/* INPUT FIELDS */
 
-.field{
+.login .field{
 display:flex !important;
 flex-direction:column !important;
 align-items:stretch !important;
@@ -140,7 +145,7 @@ margin:17px 0;
 position:relative;
 }
 
-.field label{
+.login .field label{
 position:static !important;
 display:block !important;
 float:none !important;
@@ -152,19 +157,18 @@ font-weight:700;
 line-height:18px !important;
 margin:0 !important;
 padding:0 !important;
-pointer-events:auto;
 }
 
-.field input{
+.login .field input{
 display:block !important;
 position:relative !important;
 width:100% !important;
-height:49px !important;
-min-height:49px;
+height:53px !important;
+min-height:53px;
 padding:0 14px !important;
 background:#142c36 !important;
 border:1px solid #14b8a655 !important;
-border-radius:10px !important;
+border-radius:11px !important;
 color:white !important;
 outline:none;
 font-family:inherit;
@@ -174,17 +178,17 @@ text-align:left !important;
 box-shadow:none;
 }
 
-.field input::placeholder{
+.login .field input::placeholder{
 color:#91aab3 !important;
-opacity:1 !important;
+opacity:.85 !important;
 }
 
-.field input:focus{
+.login .field input:focus{
 border-color:#38bdf8 !important;
 box-shadow:0 0 12px #38bdf833 !important;
 }
 
-/* PASSWORD FIELD */
+/* PASSWORD */
 
 .password{
 display:block !important;
@@ -193,28 +197,27 @@ width:100%;
 }
 
 .password input{
-padding-right:50px !important;
+padding-right:55px !important;
 }
 
 .eye{
 position:absolute;
 right:7px;
 top:7px;
-height:35px;
-width:38px;
+height:39px;
+width:39px;
 background:#142c36;
 border:1px solid #ffffff20;
 border-radius:9px;
 color:#9bb4bf;
 cursor:pointer;
-padding:0;
 }
 
 /* LOGIN BUTTON */
 
 .submit{
 width:100%;
-padding:15px;
+padding:16px;
 border:0;
 border-radius:11px;
 background:linear-gradient(110deg,#0d9488,#0284c7,#9333ea);
@@ -224,11 +227,13 @@ font-family:inherit;
 font-size:15px;
 cursor:pointer;
 margin-top:12px;
+transition:.25s;
 }
 
 .submit:hover{
 filter:brightness(1.15);
 box-shadow:0 8px 25px #0284c755;
+transform:translateY(-2px);
 }
 
 .error{
@@ -248,11 +253,14 @@ margin-top:20px;
 .login{padding:23px}
 .role{font-size:11px}
 nav{padding:15px 18px}
+.heading h1{font-size:30px}
 }
 </style>
 </head>
 
 <body>
+
+<!-- NAVBAR -->
 
 <nav>
 <a href="index.html" class="brand">
@@ -261,13 +269,17 @@ nav{padding:15px 18px}
 <a href="index.html" class="home">← Home</a>
 </nav>
 
+<!-- LOGIN SECTION -->
+
 <div class="container">
 <div class="login">
 
 <div class="heading">
-<h1>Welcome Back!</h1>
+<h1 id="welcomeTitle">Welcome Student!</h1>
 <p>Sign in to access your AcadHub portal</p>
 </div>
+
+<!-- ROLE SELECTION -->
 
 <div class="roles">
 
@@ -285,9 +297,13 @@ nav{padding:15px 18px}
 
 </div>
 
-<form id="loginForm" onsubmit="if(window.login){window.login()} return false;" novalidate>
+<!-- LOGIN FORM -->
 
-<select id="role" hidden>
+<form id="loginForm"
+onsubmit="if(window.login){window.login()} return false;"
+novalidate>
+
+<select id="role" name="role" hidden>
 <option value="ADMIN">Admin</option>
 <option value="FACULTY">Faculty</option>
 <option value="STUDENT" selected>Student</option>
@@ -296,31 +312,38 @@ nav{padding:15px 18px}
 <!-- USERNAME -->
 
 <div class="field">
+
 <label for="username">Username</label>
+
 <input
 id="username"
 name="username"
 type="text"
-placeholder="Enter your username"
-autocomplete="username"
+placeholder="kriti16"
+autocomplete="off"
 required>
+
 </div>
 
 <!-- PASSWORD -->
 
 <div class="field">
+
 <label for="password">Password</label>
 
 <div class="password">
+
 <input
 id="password"
 name="password"
 type="password"
 placeholder="Enter your password"
-autocomplete="current-password"
+autocomplete="new-password"
 required>
 
-<button type="button" class="eye" id="eye" aria-label="Show password">👁</button>
+<button type="button" class="eye" id="eye"
+aria-label="Show password">👁</button>
+
 </div>
 </div>
 
@@ -332,35 +355,115 @@ Initialize Session →
 
 </form>
 
-<p class="note">Secure Academic Portal · AcadHub 2026</p>
+<p class="note">
+Secure Academic Portal · AcadHub 2026
+</p>
 
 </div>
 </div>
+
+<!-- EXISTING JAVASCRIPT FILES -->
 
 <script src="ui.js"></script>
 <script src="app.js"></script>
 
 <script>
-// Role selection
-const roleSelect=document.getElementById('role');
+
+// ROLE INFORMATION
+
+const roleDetails = {
+
+STUDENT:{
+welcome:"Welcome Student!",
+username:"kriti16"
+},
+
+FACULTY:{
+welcome:"Welcome Faculty!",
+username:"rumneek24"
+},
+
+ADMIN:{
+welcome:"Welcome Admin!",
+username:"doaa30"
+}
+
+};
+
+// ELEMENTS
+
+const roleSelect = document.getElementById('role');
+const username = document.getElementById('username');
+const password = document.getElementById('password');
+const welcomeTitle = document.getElementById('welcomeTitle');
+const loginError = document.getElementById('loginError');
+
+// ROLE SELECTION FUNCTION
+
+function selectRole(role){
+
+const details = roleDetails[role];
+
+if(!details) return;
+
+// Update selected role
+roleSelect.value = role;
+
+// Update heading
+welcomeTitle.textContent = details.welcome;
+
+// Show username as light placeholder
+username.value = "";
+username.placeholder = details.username;
+
+// Clear password
+password.value = "";
+password.type = "password";
+
+// Clear previous errors
+loginError.textContent = "";
+
+// Update selected button
+document.querySelectorAll('.role').forEach(button=>{
+
+button.classList.toggle(
+'active',
+button.dataset.role === role
+);
+
+});
+
+}
+
+// ROLE BUTTON EVENTS
 
 document.querySelectorAll('.role').forEach(button=>{
+
 button.addEventListener('click',()=>{
-document.querySelectorAll('.role').forEach(b=>b.classList.remove('active'));
-button.classList.add('active');
-roleSelect.value=button.dataset.role;
-document.getElementById('loginError').textContent='';
-});
+
+selectRole(button.dataset.role);
+
 });
 
-// Show/hide password
+});
+
+// DEFAULT ROLE
+
+selectRole('STUDENT');
+
+// SHOW / HIDE PASSWORD
+
 document.getElementById('eye').addEventListener('click',()=>{
-const password=document.getElementById('password');
-const isHidden=password.type==='password';
 
-password.type=isHidden?'text':'password';
-document.getElementById('eye').textContent=isHidden?'🙈':'👁';
+const hidden = password.type === 'password';
+
+password.type = hidden ? 'text' : 'password';
+
+document.getElementById('eye').textContent =
+hidden ? '🙈' : '👁';
+
 });
+
 </script>
 
 </body>
