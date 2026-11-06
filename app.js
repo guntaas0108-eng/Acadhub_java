@@ -1796,7 +1796,7 @@
     const type = $('smType') ? $('smType').value : 'Notes';
     const content = $('smContent') ? $('smContent').value.trim() : '';
     const dueDate = $('smDueDate') ? $('smDueDate').value : '';
-    const maxMarks = $('smMaxMarks') ? $('smMaxMarks').value : '20';
+    const maxMarks = $('smMaxMarks') ? $('smMaxMarks').value : '';
     const fileInput = $('smFileInput');
     const file = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
 
