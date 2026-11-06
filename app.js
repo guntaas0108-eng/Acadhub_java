@@ -2768,6 +2768,35 @@
     window.renderStudentMaterials(studentMaterialsCache);
   };
 
+  // Helper to determine announcement freshness (< 1 hour)
+  function getAnnouncementFreshness(postedAt) {
+    if (!postedAt) return { isRecent: false, timeLabel: 'Recent', diffMins: 99999 };
+    const str = String(postedAt).replace(' ', 'T');
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return { isRecent: false, timeLabel: String(postedAt).slice(0, 10), diffMins: 99999 };
+
+    const now = Date.now();
+    const diffMs = now - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+
+    // Very recent if posted within the last 60 minutes (about an hour)
+    const isRecent = diffMins <= 60 && diffMs > -5 * 60 * 1000;
+
+    let timeLabel = '';
+    if (diffMins < 1) {
+      timeLabel = 'Just now';
+    } else if (diffMins < 60) {
+      timeLabel = `${diffMins}m ago`;
+    } else if (diffHours < 24) {
+      timeLabel = `${diffHours}h ago`;
+    } else {
+      timeLabel = String(postedAt).slice(0, 10);
+    }
+
+    return { isRecent, timeLabel, diffMins };
+  }
+
   // ---------- Campus Announcements for Students ----------
   window.renderStudentAnnouncements = function (announcements) {
     const listEl = $('studentAnnouncementsList');
@@ -2782,12 +2811,29 @@
       return;
     }
 
-    if (badgeEl) badgeEl.textContent = `${announcements.length} Active Notice${announcements.length > 1 ? 's' : ''}`;
+    const freshCount = announcements.filter(a => getAnnouncementFreshness(a.posted_at).isRecent).length;
 
-    // Top banner shows the newest announcement
+    if (badgeEl) {
+      if (freshCount > 0) {
+        badgeEl.className = 'chip ok';
+        badgeEl.innerHTML = `<span class="fresh-dot" style="margin-right:6px;"></span> ${announcements.length} Notices (${freshCount} New)`;
+      } else {
+        badgeEl.className = 'chip sky';
+        badgeEl.textContent = `${announcements.length} Active Notice${announcements.length > 1 ? 's' : ''}`;
+      }
+    }
+
+    // Top banner shows the newest announcement with fresh highlight if < 1h
     if (bannerEl && bannerText && announcements.length > 0) {
       const latest = announcements[0];
-      bannerText.innerHTML = `<strong>${esc(latest.title)}</strong>: ${esc(latest.content)}`;
+      const latestAge = getAnnouncementFreshness(latest.posted_at);
+      if (latestAge.isRecent) {
+        bannerEl.classList.add('fresh-banner');
+        bannerText.innerHTML = `<span class="chip-fresh-pulse" style="margin-right:8px;padding:1px 7px;font-size:10px;"><span class="fresh-dot"></span> NEW (${latestAge.timeLabel})</span> <strong>${esc(latest.title)}</strong>: ${esc(latest.content)}`;
+      } else {
+        bannerEl.classList.remove('fresh-banner');
+        bannerText.innerHTML = `<strong>${esc(latest.title)}</strong>: ${esc(latest.content)}`;
+      }
       bannerEl.style.display = 'flex';
     }
 
@@ -2800,14 +2846,22 @@
         else if (cat.includes('notice')) chipClass = 'ok';
         else if (cat.includes('academic')) chipClass = 'teal';
 
-        const dateStr = a.posted_at ? String(a.posted_at).slice(0, 10) : 'Recent';
+        const age = getAnnouncementFreshness(a.posted_at);
+        const isRecent = age.isRecent;
+
         return `
-          <div class="ann-card ${cat.includes('urgent') ? 'urgent' : ''}">
+          <div class="ann-card ${isRecent ? 'fresh-announcement' : ''} ${cat.includes('urgent') ? 'urgent' : ''}">
+            ${isRecent ? `<div class="fresh-ribbon"><i data-i="zap"></i> Broadcasted within the last hour</div>` : ''}
             <div class="ann-top">
-              <span class="chip ${chipClass}">${esc(a.category || 'University-Wide')}</span>
-              <span class="muted" style="font-size:11.5px;"><i data-i="clock"></i> ${esc(dateStr)}</span>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span class="chip ${chipClass}">${esc(a.category || 'University-Wide')}</span>
+                ${isRecent ? `<span class="chip-fresh-pulse"><span class="fresh-dot"></span> NEW &bull; ${esc(age.timeLabel)}</span>` : ''}
+              </div>
+              <span class="${isRecent ? 'fresh-time' : 'muted'}" style="font-size:11.5px;" title="${esc(a.posted_at || '')}">
+                <i data-i="clock"></i> ${esc(age.timeLabel)}
+              </span>
             </div>
-            <div class="ann-title">${esc(a.title)}</div>
+            <div class="ann-title" style="${isRecent ? 'color:#f0fdfa;' : ''}">${esc(a.title)}</div>
             <div class="ann-content">${esc(a.content)}</div>
             <div class="ann-footer">
               <span style="display:flex;align-items:center;gap:6px;">
