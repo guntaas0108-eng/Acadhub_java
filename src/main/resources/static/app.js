@@ -810,6 +810,7 @@
     
     const m = mats.find(x => x.material_id == materialId) || mats[0];
     if (!m) return;
+    const isAssignment = ['assignment', 'quiz', 'tutorials', 'homework', 'project'].includes(((m.material_type || '')).toLowerCase());
 
     if ($('mvModalHead')) $('mvModalHead').textContent = 'Study Material Details';
     if ($('mvCategory')) {
@@ -1884,10 +1885,11 @@
               </a>
             </div>
           ` : ''}
-          <div class="mat-card-actions">
+          <div class="mat-card-actions" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <button type="button" class="mat-view-btn" onclick="window.viewAssignmentSubmissions('${esc(a.course_code)}', '${esc(a.title)}')">
               <i data-i="users"></i> View Submissions (${a.submissions_count || 0} submitted)
             </button>
+            ${(a.submissions_count || 0) > 0 ? `<span class="chip ok" style="font-weight:700;"><i data-i="check-circle"></i> ${a.submissions_count} Submission${a.submissions_count > 1 ? 's' : ''} Received</span>` : `<span class="muted" style="font-size:12px;">Awaiting submissions</span>`}
           </div>
           <div class="mat-footer">
             <span>Posted: ${esc(a.upload_date || 'Recent')}</span>
@@ -1914,10 +1916,17 @@
 
   window.viewAssignmentSubmissions = function (courseCode, assignmentTitle) {
     const subTabBtn = document.querySelector('.seg[data-group="fac"] button[data-tab="tabSubmissions"]');
-    if (subTabBtn) subTabBtn.click();
+    if (subTabBtn) {
+      subTabBtn.click();
+    } else {
+      document.querySelectorAll('.tab-panel[data-group="fac"]').forEach(p => {
+        p.classList.toggle('show', p.id === 'tabSubmissions');
+      });
+    }
     const sec = $('tabSubmissions');
     if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-    if (window.UI && window.UI.toast) window.UI.toast('info', `Viewing student submissions for ${courseCode}`);
+    if (window.loadFacultySubmissions) window.loadFacultySubmissions();
+    if (window.UI && window.UI.toast) window.UI.toast('info', `Viewing student submissions for ${assignmentTitle || courseCode}`);
   };
 
   window.handleMaterialFileSelect = function (input) {
@@ -2059,6 +2068,7 @@
 
     listEl.innerHTML = studyMats.map(m => {
       const typeClass = (m.material_type || 'Notes').toLowerCase();
+      const isAssignment = ['assignment', 'quiz', 'tutorials', 'homework', 'project'].includes(typeClass);
       return `
         <div class="mat-card">
           <div class="mat-top">
@@ -2125,10 +2135,12 @@
               <span>${esc(s.student_name)}</span>
               <span class="muted">(Roll: ${esc(s.roll_no)})</span>
               <span class="mat-course">${esc(s.course_code)}</span>
+              ${s.material_title ? `<span class="chip warn" style="font-size:11px;padding:2px 6px;">For: ${esc(s.material_title)}</span>` : ''}
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
+              ${s.marks_awarded != null ? `<span class="chip ok" style="font-size:11.5px;font-weight:700;">Score: ${esc(s.marks_awarded)} ${s.max_marks ? '/ ' + esc(s.max_marks) : 'pts'}</span>` : ''}
               <span class="chip ${isRev ? 'ok' : 'sky'}">${esc(s.status || 'Submitted')}</span>
-              <button class="btn" style="padding:4px 10px;font-size:12px;" onclick="window.openReviewModal(${s.submission_id}, '${esc(s.student_name)}', '${esc(s.title)}', '${encodeURIComponent(s.submission_text || '')}', '${esc(s.status || 'Reviewed')}', '${encodeURIComponent(s.feedback || '')}', '${esc(s.file_name || '')}', '${esc(s.file_size || '')}', '${esc(s.file_url || '')}')"><i data-i="award"></i>Review</button>
+              <button class="btn" style="padding:4px 10px;font-size:12px;" onclick="window.openReviewModal(${s.submission_id}, '${esc(s.student_name)}', '${esc(s.title)}', '${encodeURIComponent(s.submission_text || '')}', '${esc(s.status || 'Reviewed')}', '${encodeURIComponent(s.feedback || '')}', '${esc(s.file_name || '')}', '${esc(s.file_size || '')}', '${esc(s.file_url || '')}', ${s.marks_awarded != null ? s.marks_awarded : (s.max_marks || 20)})"><i data-i="award"></i>Review & Grade</button>
             </div>
           </div>
           <div style="font-weight:700;font-size:15px;color:var(--text);">${esc(s.title)}</div>
@@ -2137,7 +2149,7 @@
             <div style="margin-top:4px;">
               <a href="/api/files/submission/${s.submission_id}" class="mat-file-link" download="${esc(s.file_name)}" onclick="return window.handleFileDownload(event, 'submission', ${s.submission_id}, '${esc(s.file_name)}')">
                 <i data-i="file"></i>
-                <span>Download Attached ${isAssignment ? "Question Paper" : "File"}: <b>${esc(s.file_name)}</b></span>
+                <span>Download Student Submission: <b>${esc(s.file_name)}</b></span>
                 <span class="muted" style="margin-left:auto;font-size:11.5px;">(${esc(s.file_size || 'Attached')})</span>
               </a>
             </div>
@@ -2150,14 +2162,14 @@
     if (window.UI && window.UI.icons) window.UI.icons();
   };
 
-  window.openReviewModal = function (subId, studentName, title, encContent, status, encFeedback, fileName, fileSize, fileUrl) {
+  window.openReviewModal = function (subId, studentName, title, encContent, status, encFeedback, fileName, fileSize, fileUrl, marks) {
     if ($('revSubId')) $('revSubId').value = subId;
     if ($('revStudentName')) $('revStudentName').textContent = studentName;
     if ($('revTitle')) $('revTitle').textContent = title;
     if ($('revContent')) $('revContent').textContent = decodeURIComponent(encContent);
     if ($('revStatus')) $('revStatus').value = status || 'Reviewed';
     if ($('revFeedback')) $('revFeedback').value = decodeURIComponent(encFeedback) || 'Good work! Verified.';
-    if ($('revMarksAwarded')) $('revMarksAwarded').value = 18;
+    if ($('revMarksAwarded')) $('revMarksAwarded').value = marks != null ? marks : 20;
 
     const fileSection = $('revFileSection');
     if (fileSection) {
