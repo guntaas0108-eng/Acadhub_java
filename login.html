@@ -6,8 +6,8 @@
 <title>AcadHub | Portal Login</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261106.8">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261106.9">
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,21 +20,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30px 16px;
+  padding: 40px 20px;
   position: relative;
   overflow-x: hidden;
 }
 
-/* AcadHub Signature Drifting Mesh & Starfield Background */
+/* AcadHub Signature Midnight Ambient Backdrop */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse at 15% 12%, rgba(20, 184, 166, 0.22), transparent 42%),
-    radial-gradient(ellipse at 85% 25%, rgba(56, 189, 248, 0.18), transparent 40%),
-    radial-gradient(ellipse at 50% 85%, rgba(168, 85, 247, 0.16), transparent 45%),
+    radial-gradient(ellipse at 18% 15%, rgba(20, 184, 166, 0.24), transparent 42%),
+    radial-gradient(ellipse at 82% 28%, rgba(56, 189, 248, 0.20), transparent 44%),
+    radial-gradient(ellipse at 50% 88%, rgba(124, 58, 237, 0.22), transparent 48%),
     linear-gradient(145deg, #071820 0%, #050E14 55%, #08131D 100%);
 }
 
@@ -47,17 +47,17 @@ body::before {
     radial-gradient(#14B8A6 1.4px, transparent 1.8px),
     radial-gradient(#38BDF8 1px, transparent 1.5px),
     radial-gradient(#A855F7 1.2px, transparent 1.7px);
-  background-size: 230px 190px, 310px 260px, 370px 300px;
-  background-position: 20px 30px, 100px 90px, 170px 40px;
+  background-size: 240px 200px, 320px 270px, 380px 310px;
+  background-position: 20px 30px, 110px 95px, 180px 45px;
   opacity: .35;
 }
 
 /* Top Mini Header Navigation */
 .top-nav {
   position: absolute;
-  top: 20px;
-  left: 32px;
-  right: 32px;
+  top: 24px;
+  left: 36px;
+  right: 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -66,55 +66,57 @@ body::before {
 .brand-link {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
   text-decoration: none;
   color: #FFFFFF;
   font-weight: 800;
-  font-size: 20px;
+  font-size: 21px;
   letter-spacing: -0.02em;
 }
 .brand-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #14B8A6, #38BDF8, #A855F7);
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #14B8A6, #38BDF8 55%, #8B5CF6);
   color: #050E14;
   display: grid;
   place-items: center;
   font-weight: 900;
-  font-size: 19px;
-  box-shadow: 0 0 20px rgba(20, 184, 166, 0.45);
+  font-size: 20px;
+  box-shadow: 0 0 24px rgba(20, 184, 166, 0.45);
 }
 .back-link {
   text-decoration: none;
   color: #5EEAD4;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
-  background: rgba(14, 32, 41, 0.65);
+  background: rgba(14, 32, 41, 0.7);
   backdrop-filter: blur(12px);
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 999px;
-  border: 1px solid rgba(20, 184, 166, 0.28);
+  border: 1px solid rgba(20, 184, 166, 0.3);
   transition: all .2s ease;
 }
 .back-link:hover {
-  background: rgba(20, 184, 166, 0.18);
+  background: rgba(20, 184, 166, 0.2);
   border-color: #14B8A6;
   transform: translateY(-1px);
 }
 
-/* Main Split Card (Exact Composition of Reference Screenshot) */
+/* ============================================================ */
+/* MAIN 2-COLUMN SPLIT STAGE (Exact Layout of Reference Image)  */
+/* ============================================================ */
 .auth-stage {
   width: 100%;
-  max-width: 1040px;
-  background: rgba(11, 25, 33, 0.88);
+  max-width: 1120px;
+  background: rgba(9, 23, 31, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(56, 189, 248, 0.24);
-  border-radius: 24px;
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(20, 184, 166, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 26px;
+  box-shadow: 0 30px 85px rgba(0, 0, 0, 0.7), 0 0 45px rgba(20, 184, 166, 0.16);
   display: grid;
-  grid-template-columns: 1fr 1.12fr;
+  grid-template-columns: 460px 1fr;
   align-items: stretch;
   overflow: hidden;
   position: relative;
@@ -122,26 +124,32 @@ body::before {
   margin-top: 36px;
 }
 
-/* Left Column: Login Form Pane */
-.form-pane {
-  padding: 44px 44px 38px;
+/* Left Column: Form Card Container */
+.form-column {
+  padding: 38px 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: transparent;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(12, 28, 37, 0.5);
+}
+
+/* Card-within-card effect matching the reference UI */
+.login-card-inner {
+  background: rgba(14, 32, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
 }
 
 .pane-heading {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .pane-heading h1 {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
-  background: linear-gradient(90deg, #FFFFFF, #2DD4BF, #38BDF8);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #FFFFFF;
   letter-spacing: -0.03em;
   margin-bottom: 6px;
 }
@@ -159,42 +167,52 @@ body::before {
   text-decoration: underline;
 }
 
-/* Role Selector Tabs (Preserving RBAC Feature) */
+/* Role Selector Tabs (Student, Faculty, Admin) */
 .role-tabs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  background: rgba(14, 32, 41, 0.7);
+  background: rgba(8, 20, 27, 0.85);
   padding: 5px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 20px;
 }
 .role-tab-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 9px 10px;
+  padding: 8px 6px;
   border-radius: 9px;
   border: 1px solid transparent;
   background: transparent;
   color: #8CA8B1;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .2s ease;
   font-family: inherit;
 }
 .role-tab-btn:hover {
   color: #E7F5F6;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 .role-tab-btn.active {
   background: linear-gradient(135deg, #14B8A6, #0D9488);
   color: #031417;
   font-weight: 800;
   box-shadow: 0 4px 14px rgba(20, 184, 166, 0.4);
+}
+.role-tab-btn.active[data-role="FACULTY"] {
+  background: linear-gradient(135deg, #0284C7, #38BDF8);
+  color: #031417;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+}
+.role-tab-btn.active[data-role="ADMIN"] {
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4);
 }
 
 /* Form Fields */
@@ -233,7 +251,7 @@ body::before {
   padding: 12px 14px;
   font-size: 14px;
   color: #E7F5F6;
-  background: rgba(14, 32, 41, 0.7);
+  background: rgba(7, 18, 25, 0.85);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   outline: none;
@@ -243,7 +261,7 @@ body::before {
 .input-box input:focus {
   border-color: #14B8A6;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.22);
-  background: rgba(14, 32, 41, 0.9);
+  background: rgba(7, 18, 25, 0.98);
 }
 .input-box input::placeholder {
   color: #58747D;
@@ -269,12 +287,12 @@ body::before {
   color: #5EEAD4;
 }
 
-/* Checkbox Row */
+/* Remember Me Checkbox */
 .remember-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 .remember-row input[type="checkbox"] {
   width: 16px;
@@ -299,22 +317,22 @@ body::before {
   margin-bottom: 12px;
 }
 
-/* Primary Vibrant Login Button */
+/* Main Vibrant Login Button (Reference Pill Style in Ocean Teal/Purple) */
 .btn-login-theme {
   width: 100%;
   padding: 13px 20px;
-  background: linear-gradient(115deg, #14B8A6, #0EA5E9 52%, #A855F7);
+  background: linear-gradient(115deg, #7C3AED, #6366F1 50%, #14B8A6);
   background-size: 180% auto;
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   transition: all .25s ease;
-  box-shadow: 0 6px 22px rgba(14, 165, 233, 0.35);
+  box-shadow: 0 6px 22px rgba(124, 58, 237, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,13 +342,13 @@ body::before {
 .btn-login-theme:hover {
   background-position: 100% 0;
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.5);
+  box-shadow: 0 10px 28px rgba(20, 184, 166, 0.45);
 }
 .btn-login-theme:active {
   transform: translateY(0);
 }
 
-/* Quick Role Switcher Buttons */
+/* Divider: "or quick preset" */
 .divider {
   display: flex;
   align-items: center;
@@ -349,22 +367,23 @@ body::before {
   padding: 0 12px;
 }
 
+/* Quick Demo Switchers (matching Google / Facebook card buttons in reference) */
 .social-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 .btn-preset {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: rgba(14, 32, 41, 0.6);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  gap: 7px;
+  padding: 10px 12px;
+  background: rgba(7, 18, 25, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.09);
   border-radius: 9px;
   color: #B5C8CE;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all .2s;
@@ -377,50 +396,102 @@ body::before {
   transform: translateY(-1px);
 }
 
-/* Right Column: Illustration Pane in Ocean Teal Theme */
+/* ============================================================ */
+/* RIGHT COLUMN: DYNAMIC ROLE ILLUSTRATION PANE                 */
+/* ============================================================ */
 .illustration-pane {
-  background: rgba(7, 19, 26, 0.65);
+  background: radial-gradient(circle at 60% 40%, rgba(14, 34, 46, 0.95), rgba(7, 19, 26, 0.92));
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 32px 30px;
   position: relative;
+  overflow: hidden;
 }
 
-.illustration-svg {
+/* Dynamic Role Header Banner above illustration */
+.illust-role-header {
+  margin-bottom: 8px;
+  text-align: center;
+  z-index: 5;
+}
+.illust-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  background: rgba(20, 184, 166, 0.16);
+  border: 1px solid rgba(20, 184, 166, 0.38);
+  color: #5EEAD4;
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
+  transition: all .3s ease;
+}
+.illust-role-desc {
+  font-size: 12.5px;
+  color: #8CA8B1;
+  margin-top: 6px;
+  font-weight: 500;
+  max-width: 440px;
+  line-height: 1.45;
+  transition: all .3s ease;
+}
+
+/* Scene Stage & Smooth Cross-Fade */
+.scene-stage {
+  position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 580px;
+  min-height: 400px;
+  display: grid;
+  place-items: center;
+}
+.illust-scene {
+  grid-area: 1 / 1;
+  width: 100%;
   height: auto;
-  display: block;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96) translateY(8px);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.illust-scene.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
 }
 
-/* Subtle floating badge keyframe */
+/* Floating animation for badge bubbles */
 @keyframes badgeFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
 }
-.badge-1 { animation: badgeFloat 3.4s ease-in-out infinite; }
-.badge-2 { animation: badgeFloat 4s ease-in-out infinite 0.7s; }
-.badge-3 { animation: badgeFloat 3.6s ease-in-out infinite 1.3s; }
-.badge-4 { animation: badgeFloat 4.2s ease-in-out infinite 0.4s; }
+.b-float-1 { animation: badgeFloat 3.2s ease-in-out infinite; }
+.b-float-2 { animation: badgeFloat 3.8s ease-in-out infinite 0.6s; }
+.b-float-3 { animation: badgeFloat 3.5s ease-in-out infinite 1.2s; }
+.b-float-4 { animation: badgeFloat 4.1s ease-in-out infinite 0.3s; }
 
 /* Responsive Viewports */
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .auth-stage {
     grid-template-columns: 1fr;
-    max-width: 480px;
-    margin-top: 50px;
+    max-width: 500px;
+    margin-top: 60px;
+  }
+  .form-column {
+    border-right: none;
+    padding: 30px 22px;
   }
   .illustration-pane {
     display: none;
   }
-  .form-pane {
-    padding: 36px 24px;
-    border-right: none;
-  }
   .top-nav {
-    left: 18px;
-    right: 18px;
+    left: 20px;
+    right: 20px;
   }
 }
 </style>
@@ -439,239 +510,479 @@ body::before {
   <a href="index.html" class="back-link">← Back to Home</a>
 </header>
 
-<!-- Main Split Auth Stage (Layout from Screenshot in AcadHub Theme) -->
+<!-- Main Split Auth Stage (Reference Image Layout in Ocean Teal Theme) -->
 <main class="auth-stage">
 
   <!-- Left Form Column -->
-  <section class="form-pane">
-    <div class="pane-heading">
-      <h1>Login</h1>
-      <p>Doesn't have an account yet? <a href="index.html#portals">Contact Admin</a></p>
-    </div>
-
-    <!-- Role Switcher Tabs (Admin, Faculty, Student) -->
-    <div class="role-tabs" role="tablist" aria-label="Select Role">
-      <button type="button" class="role-tab-btn active" data-role="STUDENT">
-        <span>🎓</span> Student
-      </button>
-      <button type="button" class="role-tab-btn" data-role="FACULTY">
-        <span>📘</span> Faculty
-      </button>
-      <button type="button" class="role-tab-btn" data-role="ADMIN">
-        <span>🛡️</span> Admin
-      </button>
-    </div>
-
-    <!-- Main Authentication Form -->
-    <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
-      <select id="role" hidden>
-        <option value="STUDENT" selected>Student</option>
-        <option value="FACULTY">Faculty</option>
-        <option value="ADMIN">Admin</option>
-      </select>
-
-      <!-- Username / Roll No -->
-      <div class="form-group">
-        <label class="form-label" for="username">Username or Roll Number</label>
-        <div class="input-box">
-          <input id="username" type="text" placeholder="you@example.com or roll no" autocomplete="username" required>
-        </div>
+  <section class="form-column">
+    <div class="login-card-inner">
+      <div class="pane-heading">
+        <h1>Login</h1>
+        <p>Doesn't have an account yet? <a href="index.html#portals">Contact Admin</a></p>
       </div>
 
-      <!-- Password Field with Forgot Password Link -->
-      <div class="form-group">
-        <div class="form-label-row">
-          <label class="form-label" for="password">Password</label>
-          <a href="javascript:void(0)" onclick="if(window.UI&&window.UI.toast){window.UI.toast('info','Please contact the Dean of Academic Affairs (doaa30) to reset credentials.')}" class="forgot-link">Forgot Password?</a>
+      <!-- Role Switcher Tabs (Student, Faculty, Admin) -->
+      <div class="role-tabs" role="tablist" aria-label="Select Role">
+        <button type="button" class="role-tab-btn active" data-role="STUDENT">
+          <span>🎓</span> Student
+        </button>
+        <button type="button" class="role-tab-btn" data-role="FACULTY">
+          <span>📘</span> Faculty
+        </button>
+        <button type="button" class="role-tab-btn" data-role="ADMIN">
+          <span>🛡️</span> Admin
+        </button>
+      </div>
+
+      <!-- Main Authentication Form -->
+      <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
+        <select id="role" hidden>
+          <option value="STUDENT" selected>Student</option>
+          <option value="FACULTY">Faculty</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+
+        <!-- Username / Roll No -->
+        <div class="form-group">
+          <label class="form-label" for="username">Email Address or Roll No</label>
+          <div class="input-box">
+            <input id="username" type="text" placeholder="you@example.com or roll no" autocomplete="username" required>
+          </div>
         </div>
-        <div class="input-box">
-          <input id="password" type="password" placeholder="Enter 6 character or more" autocomplete="current-password" required>
-          <button type="button" class="password-toggle-btn" id="pwToggle" aria-label="Toggle password visibility">
-            <span id="pwIcon">👁️</span>
+
+        <!-- Password Field with Forgot Password Link -->
+        <div class="form-group">
+          <div class="form-label-row">
+            <label class="form-label" for="password">Password</label>
+            <a href="javascript:void(0)" onclick="if(window.UI&&window.UI.toast){window.UI.toast('info','Please contact Dean of Academic Affairs (doaa30) to reset credentials.')}" class="forgot-link">Forgot Password?</a>
+          </div>
+          <div class="input-box">
+            <input id="password" type="password" placeholder="Enter 6 character or more" autocomplete="current-password" required>
+            <button type="button" class="password-toggle-btn" id="pwToggle" aria-label="Toggle password visibility">
+              <span id="pwIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="remember-row">
+          <input type="checkbox" id="rememberMe" checked>
+          <label for="rememberMe">Remember me</label>
+        </div>
+
+        <!-- Error Box -->
+        <p id="loginError" class="form-error" role="alert"></p>
+
+        <!-- Main Login Button -->
+        <button id="loginBtn" class="btn-login-theme" type="submit">
+          <span>LOGIN</span> →
+        </button>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>or quick preset</span>
+        </div>
+
+        <!-- Quick Preset Switcher Buttons -->
+        <div class="social-grid">
+          <button type="button" class="btn-preset" onclick="window.switchAndFillRole('STUDENT')">
+            <span style="font-size:15px;">🎓</span> Student Demo
+          </button>
+          <button type="button" class="btn-preset" onclick="window.switchAndFillRole('FACULTY')">
+            <span style="font-size:15px;">📘</span> Faculty Demo
           </button>
         </div>
-      </div>
-
-      <!-- Remember Me -->
-      <div class="remember-row">
-        <input type="checkbox" id="rememberMe" checked>
-        <label for="rememberMe">Remember me</label>
-      </div>
-
-      <!-- Error Box -->
-      <p id="loginError" class="form-error" role="alert"></p>
-
-      <!-- Main Login Button -->
-      <button id="loginBtn" class="btn-login-theme" type="submit">
-        <span>LOGIN</span> →
-      </button>
-
-      <!-- Divider -->
-      <div class="divider">
-        <span>or quick preset</span>
-      </div>
-
-      <!-- Quick Preset Switcher Buttons -->
-      <div class="social-grid">
-        <button type="button" class="btn-preset" onclick="window.switchAndFillRole('STUDENT')">
-          <span style="font-size:15px;">🎓</span> Student Demo
-        </button>
-        <button type="button" class="btn-preset" onclick="window.switchAndFillRole('FACULTY')">
-          <span style="font-size:15px;">📘</span> Faculty Demo
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   </section>
 
-  <!-- Right Column: Vector Artwork matching Screenshot in AcadHub Ocean Teal Theme -->
-  <section class="illustration-pane" aria-hidden="true">
-    <svg class="illustration-svg" viewBox="0 0 600 460" fill="none" xmlns="http://www.w3.org/2000/svg">
-      
-      <!-- Radial Mesh Glow Behind Monitor -->
-      <circle cx="370" cy="220" r="160" fill="#14B8A6" opacity="0.12"/>
-      <ellipse cx="440" cy="380" rx="90" ry="25" fill="#38BDF8" opacity="0.08"/>
+  <!-- Right Column: Dynamic Role Workstation Illustration -->
+  <section class="illustration-pane" aria-label="Role Workstation Illustration">
+    
+    <!-- Dynamic Role Header Banner -->
+    <div class="illust-role-header">
+      <div class="illust-role-badge" id="illustRoleBadge">
+        <span>🎓</span> Student Learning Desk
+      </div>
+      <p class="illust-role-desc" id="illustRoleDesc">
+        Access enrolled course study materials, submit lab assignments, track 79% marks & 75% attendance.
+      </p>
+    </div>
 
-      <!-- Modern Desk Legs in Deep Slate with Glow -->
-      <!-- Left Legs -->
-      <polygon points="265,260 273,260 220,405 210,405" fill="#14303C"/>
-      <polygon points="295,260 303,260 345,405 335,405" fill="#0E2029"/>
-      <!-- Right Legs -->
-      <polygon points="495,260 503,260 545,405 535,405" fill="#14303C"/>
-      <polygon points="465,260 473,260 425,405 415,405" fill="#0E2029"/>
-      <!-- Crossbars -->
-      <rect x="250" y="325" width="245" height="4" fill="#14303C" opacity="0.8"/>
+    <!-- 3 Dynamic Vector Scenes Container -->
+    <div class="scene-stage">
 
-      <!-- Desktop Table Surface -->
-      <rect x="215" y="250" width="320" height="10" rx="3" fill="#0E2029" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
-      <rect x="215" y="250" width="320" height="2.5" fill="#14B8A6"/>
+      <!-- ============================================================ -->
+      <!-- SCENE 1: STUDENT WORKSPACE (Active by default)                 -->
+      <!-- ============================================================ -->
+      <svg class="illust-scene active" id="sceneStudent" viewBox="0 0 680 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ambient Glowing Aura -->
+        <circle cx="390" cy="200" r="160" fill="#14B8A6" opacity="0.12"/>
+        <ellipse cx="430" cy="385" rx="140" ry="24" fill="#38BDF8" opacity="0.08"/>
 
-      <!-- Desktop Monitor Base & Stand -->
-      <ellipse cx="360" cy="246" rx="32" ry="5" fill="#14303C"/>
-      <path d="M356,246 L354,228 L366,228 L364,246 Z" fill="#1E3A47"/>
-      
-      <!-- Computer Monitor Outer Body (Modern Glass Border) -->
-      <rect x="282" y="146" width="156" height="102" rx="9" fill="#0B1A22" stroke="#2DD4BF" stroke-width="2"/>
-      <!-- Monitor Screen (Dark Ocean Glow) -->
-      <rect x="288" y="152" width="144" height="90" rx="6" fill="#07131A"/>
-      
-      <!-- Screen Content (AcadHub Student Profile Card) -->
-      <circle cx="360" cy="182" r="14" fill="url(#avatarTealGrad)"/>
-      <defs>
-        <linearGradient id="avatarTealGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#14B8A6"/>
-          <stop offset="100%" stop-color="#38BDF8"/>
-        </linearGradient>
-        <linearGradient id="screenBtnGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#14B8A6"/>
-          <stop offset="100%" stop-color="#0EA5E9"/>
-        </linearGradient>
-      </defs>
-      <!-- Inside Avatar Graphic -->
-      <circle cx="360" cy="179" r="5" fill="#031417"/>
-      <path d="M352,193 C352,187 356,186 360,186 C364,186 368,187 368,193" fill="#031417"/>
-      <!-- Profile Detail Lines on Screen -->
-      <rect x="330" y="202" width="60" height="3" rx="1.5" fill="#14303C"/>
-      <rect x="340" y="209" width="40" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
-      <rect x="346" y="217" width="28" height="5" rx="2.5" fill="url(#screenBtnGrad)"/>
+        <!-- Modern Desk Trestle Legs -->
+        <polygon points="275,250 283,250 225,395 215,395" fill="#14303C"/>
+        <polygon points="305,250 313,250 355,395 345,395" fill="#0E2029"/>
+        <polygon points="535,250 543,250 585,395 575,395" fill="#14303C"/>
+        <polygon points="505,250 513,250 465,395 455,395" fill="#0E2029"/>
+        <rect x="255" y="325" width="285" height="4" fill="#14303C" opacity="0.8"/>
 
-      <!-- Floating Badges Above Monitor (Screenshot Style with Theme Accents) -->
-      <!-- 1. Lock Security Badge (Orange/Gold) -->
-      <g class="badge-1">
-        <circle cx="316" cy="132" r="13" fill="#F59E0B" filter="drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45))"/>
-        <rect x="311" y="129" width="10" height="8" rx="1.5" fill="#031417"/>
-        <path d="M313,129 L313,126 C313,124.5 314.5,123.5 316,123.5 C317.5,123.5 319,124.5 319,126 L319,129" fill="none" stroke="#031417" stroke-width="1.6"/>
-      </g>
+        <!-- Desk Surface Tabletop with Teal Glow Edge -->
+        <rect x="225" y="242" width="355" height="10" rx="3" fill="#0E2029" stroke="rgba(20, 184, 166, 0.45)" stroke-width="1.2"/>
+        <rect x="225" y="242" width="355" height="2.5" fill="#14B8A6"/>
 
-      <!-- 2. Message Envelope Badge (Pink/Coral) -->
-      <g class="badge-2">
-        <circle cx="350" cy="112" r="14" fill="#F43F5E" filter="drop-shadow(0 4px 10px rgba(244, 63, 94, 0.45))"/>
-        <rect x="343" y="106" width="14" height="10" rx="1.5" fill="#FFFFFF"/>
-        <path d="M343,107 L350,112 L357,107" fill="none" stroke="#F43F5E" stroke-width="1.3"/>
-      </g>
+        <!-- Desktop Monitor (All-in-one on sleek stand) -->
+        <ellipse cx="380" cy="240" rx="32" ry="5" fill="#14303C"/>
+        <path d="M376,240 L373,222 L387,222 L384,240 Z" fill="#1E3A47"/>
+        <rect x="300" y="132" width="160" height="106" rx="9" fill="#0B1A22" stroke="#2DD4BF" stroke-width="2"/>
+        <rect x="306" y="138" width="148" height="94" rx="6" fill="#07131A"/>
 
-      <!-- 3. Checkmark Evaluation Badge (Emerald/Green) -->
-      <g class="badge-3">
-        <circle cx="384" cy="104" r="13" fill="#10B981" filter="drop-shadow(0 4px 10px rgba(16, 185, 129, 0.45))"/>
-        <path d="M379,104 L382.5,108 L389,100" fill="none" stroke="#031417" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>
+        <!-- Student Monitor Screen: 79% Grade Donut & UCS310 Lab 4 -->
+        <circle cx="348" cy="172" r="17" stroke="#14303C" stroke-width="4" fill="none"/>
+        <path d="M348,155 A17,17 0 1,1 334,183" stroke="#14B8A6" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <text x="348" y="176" font-family="'Plus Jakarta Sans',sans-serif" font-size="9.5" font-weight="800" fill="#E7F5F6" text-anchor="middle">79%</text>
+        <rect x="375" y="162" width="65" height="3" rx="1.5" fill="#14303C"/>
+        <rect x="375" y="169" width="48" height="3" rx="1.5" fill="#14B8A6"/>
+        <rect x="375" y="176" width="56" height="3" rx="1.5" fill="#38BDF8"/>
+        <rect x="316" y="200" width="128" height="20" rx="4" fill="#0E2029" stroke="rgba(20,184,166,0.3)" stroke-width="1"/>
+        <text x="325" y="213" font-family="'JetBrains Mono',monospace" font-size="8" font-weight="700" fill="#5EEAD4">UCS310 Lab 4 · Done ✓</text>
 
-      <!-- 4. User Profile Badge (Cyan/Sky) -->
-      <g class="badge-4">
-        <circle cx="414" cy="128" r="13" fill="#38BDF8" filter="drop-shadow(0 4px 10px rgba(56, 189, 248, 0.45))"/>
-        <circle cx="414" cy="125" r="3.5" fill="#031417"/>
-        <path d="M408,135 C408,131.5 410.5,130.5 414,130.5 C417.5,130.5 420,131.5 420,135" fill="#031417"/>
-      </g>
+        <!-- Floating Badges for Student (Radiating Arc above Monitor) -->
+        <!-- 1. Orange/Coral Bubble: Verified Checkmark -->
+        <g class="b-float-1">
+          <circle cx="330" cy="100" r="14" fill="#F97316" filter="drop-shadow(0 4px 10px rgba(249, 115, 22, 0.45))"/>
+          <path d="M324,100 L328.5,104.5 L336.5,95.5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <!-- 2. Purple Bubble: Graduation Cap -->
+        <g class="b-float-2">
+          <circle cx="368" cy="74" r="15" fill="#8B5CF6" filter="drop-shadow(0 4px 10px rgba(139, 92, 246, 0.45))"/>
+          <path d="M361,75 L368,71 L375,75 L368,79 Z" fill="#FFFFFF"/>
+          <path d="M364,77 L364,81 C364,82.5 372,82.5 372,81 L372,77" fill="none" stroke="#FFFFFF" stroke-width="1.4"/>
+          <line x1="375" y1="75" x2="375" y2="82" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+        <!-- 3. Amber Bubble: A+ Grade Badge -->
+        <g class="b-float-3">
+          <circle cx="410" cy="76" r="15" fill="#F59E0B" filter="drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45))"/>
+          <text x="410" y="81" font-family="'Plus Jakarta Sans',sans-serif" font-size="11.5" font-weight="900" fill="#031417" text-anchor="middle">A+</text>
+        </g>
+        <!-- 4. Cyan Bubble: Attendance Calendar (75%) -->
+        <g class="b-float-4">
+          <circle cx="448" cy="100" r="14" fill="#38BDF8" filter="drop-shadow(0 4px 10px rgba(56, 189, 248, 0.45))"/>
+          <rect x="442" y="94" width="12" height="11" rx="2" fill="none" stroke="#031417" stroke-width="1.6"/>
+          <line x1="442" y1="97" x2="454" y2="97" stroke="#031417" stroke-width="1.4"/>
+          <circle cx="445" cy="101" r="1" fill="#031417"/>
+          <circle cx="448" cy="101" r="1" fill="#031417"/>
+          <circle cx="451" cy="101" r="1" fill="#031417"/>
+        </g>
 
-      <!-- Coffee Mug on Desk (Ruby Coral) -->
-      <rect x="456" y="238" width="14" height="12" rx="2.5" fill="#EF4444"/>
-      <path d="M470,241 C474,241 474,247 470,247" fill="none" stroke="#EF4444" stroke-width="2"/>
+        <!-- Desk Accessories: Red Coffee Mug with Steam -->
+        <rect x="480" y="228" width="14" height="13" rx="2.5" fill="#EF4444"/>
+        <path d="M494,231 C498,231 498,237 494,237" fill="none" stroke="#EF4444" stroke-width="2"/>
+        <path d="M483,225 Q485,219 487,225" stroke="rgba(255,255,255,0.45)" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <path d="M488,223 Q490,217 492,223" stroke="rgba(255,255,255,0.45)" stroke-width="1" fill="none" stroke-linecap="round"/>
 
-      <!-- 3 Vertical File Binders on Desk (Amber, Teal, Cyan) -->
-      <rect x="480" y="206" width="10" height="44" rx="2" fill="#F59E0B"/>
-      <circle cx="485" cy="228" r="1.8" fill="#B45309"/>
-      <rect x="492" y="206" width="10" height="44" rx="2" fill="#14B8A6"/>
-      <circle cx="497" cy="228" r="1.8" fill="#042F2E"/>
-      <rect x="504" y="206" width="10" height="44" rx="2" fill="#38BDF8"/>
-      <circle cx="509" cy="228" r="1.8" fill="#0369A1"/>
+        <!-- 3 Color-Coded Vertical Folder Binders on Desk -->
+        <rect x="504" y="194" width="11" height="47" rx="2" fill="#F59E0B"/>
+        <circle cx="509.5" cy="217" r="2" fill="#78350F"/>
+        <rect x="517" y="194" width="11" height="47" rx="2" fill="#14B8A6"/>
+        <circle cx="522.5" cy="217" r="2" fill="#042F2E"/>
+        <rect x="530" y="194" width="11" height="47" rx="2" fill="#38BDF8"/>
+        <circle cx="535.5" cy="217" r="2" fill="#0369A1"/>
 
-      <!-- Modern Ergonomic Chair -->
-      <!-- Backrest -->
-      <path d="M210,238 L204,295 L242,295 L246,238 Z" fill="#14303C" stroke="rgba(20, 184, 166, 0.3)" stroke-width="1"/>
-      <!-- Seat -->
-      <path d="M198,295 L276,295 L268,312 L198,312 Z" fill="#0E2029" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
-      <!-- Chair Legs -->
-      <line x1="206" y1="312" x2="190" y2="378" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round"/>
-      <line x1="256" y1="312" x2="238" y2="378" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Modern Ergonomic Shell Chair (Facing Right) -->
+        <path d="M140,205 C140,190 152,185 160,205 L178,285 L148,285 Z" fill="#1E3A47"/>
+        <path d="M142,285 L230,285 C235,285 236,292 230,296 L212,308 L138,308 Z" fill="#0E2029" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
+        <line x1="205" y1="308" x2="182" y2="395" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="145" y1="308" x2="118" y2="395" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round"/>
 
-      <!-- Character (Student at AcadHub Workstation) -->
-      <!-- Long Flowing Dark Indigo Hair -->
-      <path d="M256,155 C236,150 216,170 220,205 C224,230 242,254 252,248 C256,220 248,190 264,170 Z" fill="#0A1822"/>
-      
-      <!-- Head / Face (Profile looking right) -->
-      <circle cx="266" cy="176" r="13" fill="#FED7AA"/>
-      <!-- Front Hair Bangs -->
-      <path d="M258,162 Q274,162 274,176 Q268,172 258,172 Z" fill="#0A1822"/>
+        <!-- Student Figure Seated & Typing (Stylized Vector Character) -->
+        <!-- Flowing Hair behind shoulders -->
+        <path d="M194,142 C164,148 148,185 154,235 C158,255 174,255 180,232 C184,196 178,172 200,162 Z" fill="#0A1822"/>
+        <!-- Head & Face Profile -->
+        <circle cx="198" cy="162" r="16" fill="#FED7AA"/>
+        <path d="M208,156 L215,163 L209,167 L211,172 L203,176" fill="#FED7AA"/>
+        <!-- Hair Fringe -->
+        <path d="M192,146 Q214,144 216,158 Q202,154 192,154 Z" fill="#0A1822"/>
+        <!-- Student Teal Hoodie / Top -->
+        <path d="M188,180 C188,176 212,174 220,180 L234,244 L180,244 Z" fill="#14B8A6"/>
+        <!-- Arms extending to Keyboard -->
+        <path d="M206,192 L234,240" stroke="#14B8A6" stroke-width="12" stroke-linecap="round"/>
+        <path d="M234,240 L278,245" stroke="#14B8A6" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="280" cy="246" r="4.5" fill="#FED7AA"/>
+        <!-- Low-profile Keyboard -->
+        <rect x="264" y="244" width="42" height="3" rx="1" fill="#1E3A47" stroke="#14B8A6" stroke-width="0.8"/>
+        <!-- Trousers & Seated Legs -->
+        <path d="M178,244 L250,244 C256,244 260,252 255,262 L242,288 L172,288 Z" fill="#1E293B"/>
+        <path d="M242,288 L235,370 L214,370 L220,288 Z" fill="#0F172A"/>
+        <!-- Shoes / Sneakers -->
+        <path d="M208,370 L248,370 C254,370 258,376 250,380 L206,380 Z" fill="#031417"/>
+        <rect x="210" y="376" width="36" height="2.5" rx="1" fill="#14B8A6"/>
 
-      <!-- Torso / Top (AcadHub Violet Blouse) -->
-      <path d="M250,192 L280,192 L290,245 L240,245 Z" fill="#A855F7"/>
+        <!-- Student Backpack Satchel on Floor under Desk -->
+        <rect x="375" y="336" width="48" height="34" rx="4" fill="#0284C7"/>
+        <path d="M391,336 L391,327 L407,327 L407,336" fill="none" stroke="#38BDF8" stroke-width="3"/>
+        <line x1="375" y1="348" x2="423" y2="348" stroke="#0369A1" stroke-width="2"/>
+        <rect x="396" y="345" width="6" height="6" rx="1" fill="#FFFFFF"/>
 
-      <!-- Arms typing towards computer keyboard -->
-      <path d="M275,200 L310,240 L335,248" fill="none" stroke="#A855F7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- Hand -->
-      <circle cx="337" cy="249" r="4.5" fill="#FED7AA"/>
+        <!-- Potted Botanical Plant beside Desk (Vibrant Magenta, Teal & Purple) -->
+        <polygon points="505,346 545,346 538,386 512,386" fill="#14303C" stroke="rgba(20, 184, 166, 0.45)" stroke-width="1.2"/>
+        <path d="M518,346 Q472,316 482,294 Q507,320 522,346 Z" fill="#F43F5E"/>
+        <path d="M525,346 Q516,268 538,264 Q545,306 528,346 Z" fill="#14B8A6"/>
+        <path d="M532,346 Q568,290 562,312 Q548,332 534,346 Z" fill="#A855F7"/>
+      </svg>
 
-      <!-- Lower Body (Deep Indigo Pants) -->
-      <path d="M245,245 L306,245 L306,270 L245,270 Z" fill="#1E293B"/>
-      <path d="M306,252 L306,340 L282,340 L282,252 Z" fill="#0F172A"/>
+      <!-- ============================================================ -->
+      <!-- SCENE 2: FACULTY PORTAL (Professor & Teaching Desk)           -->
+      <!-- ============================================================ -->
+      <svg class="illust-scene" id="sceneFaculty" viewBox="0 0 680 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sky Blue Radial Aura -->
+        <circle cx="390" cy="200" r="160" fill="#0284C7" opacity="0.14"/>
+        <ellipse cx="430" cy="385" rx="140" ry="24" fill="#38BDF8" opacity="0.08"/>
 
-      <!-- Shoes -->
-      <path d="M278,340 L308,340 L312,352 L274,352 Z" rx="3" fill="#031417"/>
+        <!-- Wall Digital Smartboard (CS310 Lecture Flow & Architecture) -->
+        <rect x="260" y="86" width="240" height="96" rx="8" fill="#071822" stroke="#38BDF8" stroke-width="2"/>
+        <rect x="266" y="92" width="228" height="84" rx="5" fill="#0C2330"/>
+        <text x="276" y="108" font-family="'Plus Jakarta Sans',sans-serif" font-size="9" font-weight="800" fill="#38BDF8">CS310 · Advanced Database Systems</text>
+        <line x1="276" y1="113" x2="475" y2="113" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+        <!-- Flow diagram blocks on board -->
+        <rect x="278" y="121" width="48" height="18" rx="3" fill="#14303C" stroke="#14B8A6" stroke-width="1"/>
+        <text x="302" y="133" font-family="'JetBrains Mono',monospace" font-size="7" font-weight="700" fill="#5EEAD4" text-anchor="middle">Queries</text>
+        <line x1="326" y1="130" x2="344" y2="130" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <rect x="344" y="121" width="52" height="18" rx="3" fill="#14303C" stroke="#38BDF8" stroke-width="1"/>
+        <text x="370" y="133" font-family="'JetBrains Mono',monospace" font-size="7" font-weight="700" fill="#38BDF8" text-anchor="middle">Triggers</text>
+        <line x1="396" y1="130" x2="414" y2="130" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <rect x="414" y="121" width="58" height="18" rx="3" fill="#14303C" stroke="#A855F7" stroke-width="1"/>
+        <text x="443" y="133" font-family="'JetBrains Mono',monospace" font-size="7" font-weight="700" fill="#C084FC" text-anchor="middle">Audit Logs</text>
+        <!-- Bell curve on board -->
+        <path d="M280,162 Q325,162 370,144 Q415,162 460,162" fill="none" stroke="#2DD4BF" stroke-width="1.6"/>
 
-      <!-- Floor Accessories -->
-      <!-- Blue Briefcase / Laptop Bag -->
-      <rect x="390" y="340" width="46" height="32" rx="4" fill="#0284C7"/>
-      <path d="M406,340 L406,332 L420,332 L420,340" fill="none" stroke="#38BDF8" stroke-width="2.8"/>
-      <line x1="390" y1="352" x2="436" y2="352" stroke="#0369A1" stroke-width="2"/>
-      <rect x="410" y="349" width="6" height="6" rx="1" fill="#FFFFFF"/>
+        <!-- Faculty Trestle Desk Legs -->
+        <polygon points="275,250 283,250 225,395 215,395" fill="#14303C"/>
+        <polygon points="305,250 313,250 355,395 345,395" fill="#0E2029"/>
+        <polygon points="535,250 543,250 585,395 575,395" fill="#14303C"/>
+        <polygon points="505,250 513,250 465,395 455,395" fill="#0E2029"/>
+        <rect x="255" y="325" width="285" height="4" fill="#14303C" opacity="0.8"/>
 
-      <!-- Tropical Potted Plant -->
-      <!-- Modern Slate Planter -->
-      <polygon points="466,346 504,346 498,380 472,380" fill="#14303C" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
-      <!-- Lush Leaves in Theme Colors (Pink, Teal, Violet) -->
-      <path d="M480,346 Q435,320 445,300 Q468,322 483,346 Z" fill="#F43F5E"/>
-      <path d="M485,346 Q476,275 498,270 Q504,310 488,346 Z" fill="#14B8A6"/>
-      <path d="M490,346 Q525,295 520,315 Q506,335 492,346 Z" fill="#A855F7"/>
+        <!-- Desk Surface Tabletop with Sky Blue Glow Edge -->
+        <rect x="225" y="242" width="355" height="10" rx="3" fill="#0E2029" stroke="rgba(56, 189, 248, 0.45)" stroke-width="1.2"/>
+        <rect x="225" y="242" width="355" height="2.5" fill="#38BDF8"/>
 
-    </svg>
+        <!-- Professor Evaluation Tablet on Desk -->
+        <rect x="315" y="215" width="85" height="32" rx="4" fill="#07131A" stroke="#38BDF8" stroke-width="1.6"/>
+        <text x="322" y="228" font-family="'Plus Jakarta Sans',sans-serif" font-size="7" font-weight="800" fill="#FFFFFF">Grade: 42/50</text>
+        <rect x="322" y="233" width="54" height="3" rx="1.5" fill="#14B8A6"/>
+        <rect x="382" y="223" width="14" height="14" rx="3" fill="#10B981"/>
+        <path d="M386,230 L389,233 L394,227" stroke="#031417" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+
+        <!-- Stack of Evaluated Student Papers with Red A+ Stamp -->
+        <rect x="415" y="228" width="44" height="18" rx="2" fill="#F8FAFC"/>
+        <rect x="412" y="225" width="44" height="18" rx="2" fill="#EDE9FE"/>
+        <rect x="410" y="222" width="44" height="18" rx="2" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+        <circle cx="432" cy="231" r="7.5" fill="#F43F5E"/>
+        <text x="432" y="234.5" font-family="'Plus Jakarta Sans',sans-serif" font-size="8" font-weight="900" fill="#FFFFFF" text-anchor="middle">A+</text>
+
+        <!-- Attendance Roster Register Sheet on Desk -->
+        <rect x="468" y="215" width="36" height="31" rx="2" fill="#0B1A22" stroke="rgba(20, 184, 166, 0.45)" stroke-width="1"/>
+        <line x1="472" y1="220" x2="500" y2="220" stroke="#5EEAD4" stroke-width="1.5"/>
+        <circle cx="475" cy="226" r="1.5" fill="#10B981"/>
+        <circle cx="475" cy="232" r="1.5" fill="#10B981"/>
+        <circle cx="475" cy="238" r="1.5" fill="#10B981"/>
+        <line x1="480" y1="226" x2="496" y2="226" stroke="#8CA8B1" stroke-width="1"/>
+        <line x1="480" y1="232" x2="494" y2="232" stroke="#8CA8B1" stroke-width="1"/>
+        <line x1="480" y1="238" x2="497" y2="238" stroke="#8CA8B1" stroke-width="1"/>
+
+        <!-- Professor #1 Mug -->
+        <rect x="515" y="228" width="14" height="13" rx="2.5" fill="#38BDF8"/>
+        <path d="M529,231 C533,231 533,237 529,237" fill="none" stroke="#38BDF8" stroke-width="2"/>
+        <text x="522" y="238" font-family="'Plus Jakarta Sans',sans-serif" font-size="7" font-weight="900" fill="#031417" text-anchor="middle">#1</text>
+
+        <!-- Floating Badges for Faculty (Radiating Arc) -->
+        <!-- 1. Sky Blue Bubble: Grade Analytics -->
+        <g class="b-float-1">
+          <circle cx="450" cy="74" r="14" fill="#38BDF8" filter="drop-shadow(0 4px 10px rgba(56, 189, 248, 0.45))"/>
+          <path d="M445,74 L449,78 L457,69" fill="none" stroke="#031417" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <!-- 2. Emerald Bubble: Attendance Roll 100% -->
+        <g class="b-float-2">
+          <circle cx="488" cy="95" r="14" fill="#10B981" filter="drop-shadow(0 4px 10px rgba(16, 185, 129, 0.45))"/>
+          <text x="488" y="99" font-family="'Plus Jakarta Sans',sans-serif" font-size="9.5" font-weight="900" fill="#031417" text-anchor="middle">100%</text>
+        </g>
+        <!-- 3. Purple Bubble: Syllabus Cloud Upload -->
+        <g class="b-float-3">
+          <circle cx="524" cy="80" r="14" fill="#8B5CF6" filter="drop-shadow(0 4px 10px rgba(139, 92, 246, 0.45))"/>
+          <path d="M518,83 C518,80 520,78 522,78 C523,76 527,76 528,78 C530,78 531,80 531,83" fill="none" stroke="#FFFFFF" stroke-width="1.4"/>
+          <line x1="524" y1="80" x2="524" y2="85" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M522,82 L524,80 L526,82" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+        <!-- 4. Amber Bubble: Professor Star -->
+        <g class="b-float-4">
+          <circle cx="482" cy="138" r="13" fill="#F59E0B" filter="drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45))"/>
+          <polygon points="482,130 484,136 490,136 485,139 487,145 482,141 477,145 479,139 474,136 480,136" fill="#031417"/>
+        </g>
+
+        <!-- Modern Shell Chair -->
+        <path d="M140,205 C140,190 152,185 160,205 L178,285 L148,285 Z" fill="#1E3A47"/>
+        <path d="M142,285 L230,285 C235,285 236,292 230,296 L212,308 L138,308 Z" fill="#0E2029" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1"/>
+        <line x1="205" y1="308" x2="182" y2="395" stroke="#38BDF8" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="145" y1="308" x2="118" y2="395" stroke="#38BDF8" stroke-width="4.5" stroke-linecap="round"/>
+
+        <!-- Professor Seated & Grading with Stylus Pen -->
+        <path d="M194,142 C164,148 148,185 154,235 C158,255 174,255 180,232 C184,196 178,172 200,162 Z" fill="#1E293B"/>
+        <circle cx="198" cy="162" r="16" fill="#FED7AA"/>
+        <!-- Professor Glasses -->
+        <rect x="202" y="158" width="7" height="6" rx="1.5" stroke="#38BDF8" stroke-width="1.2" fill="none"/>
+        <line x1="197" y1="160" x2="202" y2="160" stroke="#38BDF8" stroke-width="1.2"/>
+        <!-- Sky Blue Academic Blazer -->
+        <path d="M188,180 C188,176 212,174 220,180 L234,244 L180,244 Z" fill="#0284C7"/>
+        <!-- Arm reaching out with grading pen -->
+        <path d="M206,192 L234,236" stroke="#0284C7" stroke-width="12" stroke-linecap="round"/>
+        <path d="M234,236 L276,230" stroke="#0284C7" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="278" cy="230" r="4.5" fill="#FED7AA"/>
+        <!-- Red grading stylus pen in hand -->
+        <line x1="278" y1="230" x2="288" y2="222" stroke="#F43F5E" stroke-width="2.6" stroke-linecap="round"/>
+
+        <!-- Trousers & Shoes -->
+        <path d="M178,244 L250,244 C256,244 260,252 255,262 L242,288 L172,288 Z" fill="#1E293B"/>
+        <path d="M242,288 L235,370 L214,370 L220,288 Z" fill="#0F172A"/>
+        <path d="M208,370 L248,370 C254,370 258,376 250,380 L206,380 Z" fill="#031417"/>
+
+        <!-- Professor Leather Briefcase under Desk -->
+        <rect x="365" y="336" width="50" height="36" rx="4" fill="#78350F"/>
+        <path d="M381,336 L381,327 L399,327 L399,336" fill="none" stroke="#B45309" stroke-width="3"/>
+        <line x1="365" y1="350" x2="415" y2="350" stroke="#92400E" stroke-width="2"/>
+        <rect x="387" y="347" width="6" height="6" rx="1" fill="#FBBF24"/>
+      </svg>
+
+      <!-- ============================================================ -->
+      <!-- SCENE 3: ADMIN CONSOLE (Campus Governance & Master Control)   -->
+      <!-- ============================================================ -->
+      <svg class="illust-scene" id="sceneAdmin" viewBox="0 0 680 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Royal Purple Aura -->
+        <circle cx="390" cy="200" r="160" fill="#7C3AED" opacity="0.14"/>
+        <ellipse cx="430" cy="385" rx="140" ry="24" fill="#14B8A6" opacity="0.08"/>
+
+        <!-- Classical University Pillars Silhouette in Background -->
+        <g opacity="0.25">
+          <rect x="250" y="80" width="250" height="8" rx="2" fill="#A855F7"/>
+          <polygon points="375,55 245,80 505,80" fill="#A855F7"/>
+          <line x1="275" y1="88" x2="275" y2="150" stroke="#A855F7" stroke-width="4"/>
+          <line x1="325" y1="88" x2="325" y2="150" stroke="#A855F7" stroke-width="4"/>
+          <line x1="375" y1="88" x2="375" y2="150" stroke="#A855F7" stroke-width="4"/>
+          <line x1="425" y1="88" x2="425" y2="150" stroke="#A855F7" stroke-width="4"/>
+          <line x1="475" y1="88" x2="475" y2="150" stroke="#A855F7" stroke-width="4"/>
+        </g>
+
+        <!-- Admin Trestle Desk Legs -->
+        <polygon points="275,250 283,250 225,395 215,395" fill="#14303C"/>
+        <polygon points="305,250 313,250 355,395 345,395" fill="#0E2029"/>
+        <polygon points="535,250 543,250 585,395 575,395" fill="#14303C"/>
+        <polygon points="505,250 513,250 465,395 455,395" fill="#0E2029"/>
+        <rect x="255" y="325" width="285" height="4" fill="#14303C" opacity="0.8"/>
+
+        <!-- Desk Surface Tabletop with Purple Glow Edge -->
+        <rect x="225" y="242" width="355" height="10" rx="3" fill="#0E2029" stroke="rgba(168, 85, 247, 0.45)" stroke-width="1.2"/>
+        <rect x="225" y="242" width="355" height="2.5" fill="#A855F7"/>
+
+        <!-- Dual Curved Command Screens -->
+        <!-- Left Screen: Course Enrollment Distribution Graph -->
+        <rect x="280" y="140" width="115" height="92" rx="6" fill="#07131A" stroke="#14B8A6" stroke-width="1.6"/>
+        <text x="288" y="154" font-family="'Plus Jakarta Sans',sans-serif" font-size="6.5" font-weight="800" fill="#5EEAD4">Enrollment Graph</text>
+        <!-- Bar Chart columns -->
+        <rect x="288" y="198" width="11" height="22" rx="2" fill="#14B8A6"/>
+        <rect x="304" y="178" width="11" height="42" rx="2" fill="#38BDF8"/>
+        <rect x="320" y="168" width="11" height="52" rx="2" fill="#A855F7"/>
+        <rect x="336" y="188" width="11" height="32" rx="2" fill="#F59E0B"/>
+        <rect x="352" y="182" width="11" height="38" rx="2" fill="#10B981"/>
+
+        <!-- Right Screen: Accountability Matrix Network -->
+        <rect x="405" y="140" width="115" height="92" rx="6" fill="#07131A" stroke="#A855F7" stroke-width="1.6"/>
+        <text x="413" y="154" font-family="'Plus Jakarta Sans',sans-serif" font-size="6.5" font-weight="800" fill="#C084FC">Accountability 360°</text>
+        <!-- Connected network nodes -->
+        <circle cx="462" cy="180" r="8" fill="#14B8A6"/>
+        <text x="462" y="183" font-family="'Plus Jakarta Sans',sans-serif" font-size="4.5" font-weight="900" fill="#031417" text-anchor="middle">UCS</text>
+        <circle cx="428" cy="206" r="6" fill="#38BDF8"/>
+        <circle cx="496" cy="206" r="6" fill="#A855F7"/>
+        <line x1="462" y1="180" x2="428" y2="206" stroke="#38BDF8" stroke-width="1.4" stroke-dasharray="2,2"/>
+        <line x1="462" y1="180" x2="496" y2="206" stroke="#A855F7" stroke-width="1.4" stroke-dasharray="2,2"/>
+
+        <!-- Server Rack Tower on the right with blinking status LEDs -->
+        <rect x="532" y="180" width="42" height="185" rx="5" fill="#0A1822" stroke="#14303C" stroke-width="2"/>
+        <!-- Server blades -->
+        <rect x="537" y="190" width="32" height="15" rx="2" fill="#14303C"/>
+        <circle cx="543" cy="197" r="2" fill="#10B981"/>
+        <circle cx="550" cy="197" r="2" fill="#14B8A6"/>
+        <circle cx="557" cy="197" r="2" fill="#38BDF8"/>
+        <rect x="537" y="212" width="32" height="15" rx="2" fill="#14303C"/>
+        <circle cx="543" cy="219" r="2" fill="#10B981"/>
+        <circle cx="550" cy="219" r="2" fill="#10B981"/>
+        <circle cx="557" cy="219" r="2" fill="#A855F7"/>
+        <rect x="537" y="234" width="32" height="15" rx="2" fill="#14303C"/>
+        <circle cx="543" cy="241" r="2" fill="#10B981"/>
+        <circle cx="550" cy="241" r="2" fill="#F59E0B"/>
+        <rect x="537" y="256" width="32" height="15" rx="2" fill="#14303C"/>
+        <circle cx="543" cy="263" r="2" fill="#10B981"/>
+        <circle cx="550" cy="263" r="2" fill="#14B8A6"/>
+
+        <!-- Floating Badges for Admin (Radiating Arc) -->
+        <!-- 1. Royal Purple Bubble: RBAC Master Shield -->
+        <g class="b-float-1">
+          <circle cx="355" cy="95" r="15" fill="#8B5CF6" filter="drop-shadow(0 4px 12px rgba(139, 92, 246, 0.5))"/>
+          <path d="M355,86 L362,89 L362,96 C362,100 355,103 355,103 C355,103 348,100 348,96 L348,89 Z" fill="#031417"/>
+          <path d="M355,88 L360,90.5 L360,96 C360,99 355,101 355,101 C355,101 350,99 350,96 L350,90.5 Z" fill="#8B5CF6"/>
+        </g>
+        <!-- 2. Teal Bubble: University Degree Seal -->
+        <g class="b-float-2">
+          <circle cx="395" cy="78" r="14" fill="#14B8A6" filter="drop-shadow(0 4px 10px rgba(20, 184, 166, 0.45))"/>
+          <circle cx="395" cy="76" r="5" stroke="#031417" stroke-width="1.5" fill="none"/>
+          <path d="M392,80 L390,86 L395,84 L400,86 L398,80" fill="#031417"/>
+        </g>
+        <!-- 3. Amber Bubble: At-Risk Early Warning Radar -->
+        <g class="b-float-3">
+          <circle cx="435" cy="94" r="14" fill="#F59E0B" filter="drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45))"/>
+          <polygon points="435,87 442,99 428,99" fill="#031417"/>
+          <line x1="435" y1="91" x2="435" y2="95" stroke="#F59E0B" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="435" cy="97.5" r="0.8" fill="#F59E0B"/>
+        </g>
+        <!-- 4. Cyan Bubble: Campus Users Directory -->
+        <g class="b-float-4">
+          <circle cx="475" cy="115" r="13" fill="#38BDF8" filter="drop-shadow(0 4px 10px rgba(56, 189, 248, 0.45))"/>
+          <circle cx="475" cy="112" r="3" fill="#031417"/>
+          <path d="M470,120 C470,117 472,116 475,116 C478,116 480,117 480,120" fill="#031417"/>
+        </g>
+
+        <!-- Modern Shell Chair -->
+        <path d="M140,205 C140,190 152,185 160,205 L178,285 L148,285 Z" fill="#1E3A47"/>
+        <path d="M142,285 L230,285 C235,285 236,292 230,296 L212,308 L138,308 Z" fill="#0E2029" stroke="rgba(168, 85, 247, 0.4)" stroke-width="1"/>
+        <line x1="205" y1="308" x2="182" y2="395" stroke="#8B5CF6" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="145" y1="308" x2="118" y2="395" stroke="#8B5CF6" stroke-width="4.5" stroke-linecap="round"/>
+
+        <!-- Administrator Seated at Terminal -->
+        <path d="M194,142 C164,148 148,185 154,235 C158,255 174,255 180,232 C184,196 178,172 200,162 Z" fill="#0E1726"/>
+        <circle cx="198" cy="162" r="16" fill="#FED7AA"/>
+        <!-- Royal Purple Executive Suit -->
+        <path d="M188,180 C188,176 212,174 220,180 L234,244 L180,244 Z" fill="#6D28D9"/>
+        <!-- Typing arms -->
+        <path d="M206,192 L234,240" stroke="#6D28D9" stroke-width="12" stroke-linecap="round"/>
+        <path d="M234,240 L278,245" stroke="#6D28D9" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="280" cy="246" r="4.5" fill="#FED7AA"/>
+        <rect x="264" y="244" width="42" height="3" rx="1" fill="#1E3A47" stroke="#8B5CF6" stroke-width="0.8"/>
+
+        <!-- Trousers & Shoes -->
+        <path d="M178,244 L250,244 C256,244 260,252 255,262 L242,288 L172,288 Z" fill="#1E293B"/>
+        <path d="M242,288 L235,370 L214,370 L220,288 Z" fill="#0F172A"/>
+        <path d="M208,370 L248,370 C254,370 258,376 250,380 L206,380 Z" fill="#031417"/>
+      </svg>
+
+    </div>
   </section>
 
 </main>
 
-<script src="ui.js?v=20261106.8"></script>
-<script src="app.js?v=20261106.8"></script>
+<script src="ui.js?v=20261106.9"></script>
+<script src="app.js?v=20261106.9"></script>
 
 <script>
-// Show/Hide Password Toggle
+// Password Show/Hide Toggle
 const pwInput = document.getElementById('password');
 const pwToggle = document.getElementById('pwToggle');
 const pwIcon = document.getElementById('pwIcon');
@@ -684,23 +995,45 @@ if (pwToggle && pwInput) {
   });
 }
 
-// Preset Demo Credentials
+// Preset Demo Credentials & Workstation Scene Data
 const DEMO_PRESETS = {
-  STUDENT: { u: 'kriti16', p: 'kri16' },
-  FACULTY: { u: 'rumneek24', p: 'rum24' },
-  ADMIN:   { u: 'doaa30', p: 'adm@123' }
+  STUDENT: {
+    u: 'kriti16',
+    p: 'kri16',
+    title: '🎓 Student Learning Desk',
+    desc: 'Access enrolled course study materials, submit lab assignments, track 79% marks & 75% attendance.',
+    sceneId: 'sceneStudent'
+  },
+  FACULTY: {
+    u: 'rumneek24',
+    p: 'rum24',
+    title: '📘 Faculty Academic Portal',
+    desc: 'Conduct lectures, evaluate student assignments with A+ feedback, and mark daily course attendance.',
+    sceneId: 'sceneFaculty'
+  },
+  ADMIN: {
+    u: 'doaa30',
+    p: 'adm@123',
+    title: '🛡️ Admin University Console',
+    desc: 'Govern campus RBAC accounts, monitor live course enrollment graphs, and oversee 360° accountability.',
+    sceneId: 'sceneAdmin'
+  }
 };
 
-// Switch Role Function
+// Switch Role & Dynamically Swap Illustrated Workstations
 window.switchAndFillRole = function(role) {
   const roleSelect = document.getElementById('role');
   const uInput = document.getElementById('username');
   const pInput = document.getElementById('password');
   const errBox = document.getElementById('loginError');
 
+  const badgeEl = document.getElementById('illustRoleBadge');
+  const descEl = document.getElementById('illustRoleDesc');
+
   if (roleSelect) roleSelect.value = role;
   if (errBox) errBox.textContent = '';
 
+  // 1. Update Tab Buttons
   document.querySelectorAll('.role-tab-btn').forEach(btn => {
     if (btn.dataset.role === role) {
       btn.classList.add('active');
@@ -709,9 +1042,24 @@ window.switchAndFillRole = function(role) {
     }
   });
 
-  if (DEMO_PRESETS[role]) {
-    if (uInput) uInput.value = DEMO_PRESETS[role].u;
-    if (pInput) pInput.value = DEMO_PRESETS[role].p;
+  const preset = DEMO_PRESETS[role];
+  if (!preset) return;
+
+  // 2. Pre-fill Credentials
+  if (uInput) uInput.value = preset.u;
+  if (pInput) pInput.value = preset.p;
+
+  // 3. Update Dynamic Illustration Title & Subtitle
+  if (badgeEl) badgeEl.textContent = preset.title;
+  if (descEl) descEl.textContent = preset.desc;
+
+  // 4. Smooth Cross-Fade Switch of Illustrations
+  document.querySelectorAll('.illust-scene').forEach(svg => {
+    svg.classList.remove('active');
+  });
+  const targetSvg = document.getElementById(preset.sceneId);
+  if (targetSvg) {
+    targetSvg.classList.add('active');
   }
 };
 
@@ -722,12 +1070,9 @@ document.querySelectorAll('.role-tab-btn').forEach(btn => {
   });
 });
 
-// Auto-fill Student default credentials on initial load
+// Auto-populate default Student credentials and illustration on initial load
 window.addEventListener('DOMContentLoaded', () => {
-  const uInput = document.getElementById('username');
-  const pInput = document.getElementById('password');
-  if (uInput && !uInput.value) uInput.value = DEMO_PRESETS.STUDENT.u;
-  if (pInput && !pInput.value) pInput.value = DEMO_PRESETS.STUDENT.p;
+  window.switchAndFillRole('STUDENT');
 });
 </script>
 
