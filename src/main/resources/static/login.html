@@ -1,469 +1,734 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AcadHub | Portal Login</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261106.8">
 
 <style>
-*{box-sizing:border-box}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-body{
-margin:0;
-min-height:100vh;
-font-family:'Plus Jakarta Sans',sans-serif;
-color:#eafafa;
-background:
-radial-gradient(ellipse at 20% 15%,#103b42,transparent 45%),
-radial-gradient(ellipse at 85% 75%,#182b50,transparent 45%),
-#050e14;
+body {
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #E7F5F6;
+  background: #050E14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  position: relative;
+  overflow-x: hidden;
 }
 
-nav{
-padding:17px 35px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:#071820cc;
-border-bottom:1px solid #14b8a633;
+/* AcadHub Signature Drifting Mesh & Starfield Background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 15% 12%, rgba(20, 184, 166, 0.22), transparent 42%),
+    radial-gradient(ellipse at 85% 25%, rgba(56, 189, 248, 0.18), transparent 40%),
+    radial-gradient(ellipse at 50% 85%, rgba(168, 85, 247, 0.16), transparent 45%),
+    linear-gradient(145deg, #071820 0%, #050E14 55%, #08131D 100%);
 }
 
-.brand{
-font-size:20px;
-font-weight:800;
-text-decoration:none;
-color:white;
+.stars {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(#14B8A6 1.4px, transparent 1.8px),
+    radial-gradient(#38BDF8 1px, transparent 1.5px),
+    radial-gradient(#A855F7 1.2px, transparent 1.7px);
+  background-size: 230px 190px, 310px 260px, 370px 300px;
+  background-position: 20px 30px, 100px 90px, 170px 40px;
+  opacity: .35;
 }
 
-.logo{
-display:inline-grid;
-place-items:center;
-width:35px;
-height:35px;
-border-radius:10px;
-margin-right:8px;
-color:#07131a;
-background:linear-gradient(135deg,#14b8a6,#38bdf8,#a855f7);
+/* Top Mini Header Navigation */
+.top-nav {
+  position: absolute;
+  top: 20px;
+  left: 32px;
+  right: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #14B8A6, #38BDF8, #A855F7);
+  color: #050E14;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 19px;
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.45);
+}
+.back-link {
+  text-decoration: none;
+  color: #5EEAD4;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(14, 32, 41, 0.65);
+  backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 184, 166, 0.28);
+  transition: all .2s ease;
+}
+.back-link:hover {
+  background: rgba(20, 184, 166, 0.18);
+  border-color: #14B8A6;
+  transform: translateY(-1px);
 }
 
-.home{
-color:#5eead4;
-text-decoration:none;
-font-size:13px;
-font-weight:700;
+/* Main Split Card (Exact Composition of Reference Screenshot) */
+.auth-stage {
+  width: 100%;
+  max-width: 1040px;
+  background: rgba(11, 25, 33, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(20, 184, 166, 0.16);
+  display: grid;
+  grid-template-columns: 1fr 1.12fr;
+  align-items: stretch;
+  overflow: hidden;
+  position: relative;
+  z-index: 5;
+  margin-top: 36px;
 }
 
-.container{
-min-height:calc(100vh - 70px);
-display:flex;
-justify-content:center;
-align-items:center;
-padding:35px 15px;
+/* Left Column: Login Form Pane */
+.form-pane {
+  padding: 44px 44px 38px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.login{
-width:100%;
-max-width:495px;
-padding:32px;
-background:#0b1921ef;
-border:1px solid #38bdf855;
-border-radius:23px;
-box-shadow:0 25px 70px #0008,0 0 35px #a855f722;
+.pane-heading {
+  margin-bottom: 22px;
+}
+.pane-heading h1 {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #FFFFFF, #2DD4BF, #38BDF8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.pane-heading p {
+  font-size: 13.5px;
+  color: #8CA8B1;
+  font-weight: 500;
+}
+.pane-heading p a {
+  color: #14B8A6;
+  text-decoration: none;
+  font-weight: 700;
+}
+.pane-heading p a:hover {
+  text-decoration: underline;
 }
 
-.heading{
-text-align:center;
-margin-bottom:25px;
+/* Role Selector Tabs (Preserving RBAC Feature) */
+.role-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: rgba(14, 32, 41, 0.7);
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 22px;
+}
+.role-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #8CA8B1;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.role-tab-btn:hover {
+  color: #E7F5F6;
+  background: rgba(255, 255, 255, 0.04);
+}
+.role-tab-btn.active {
+  background: linear-gradient(135deg, #14B8A6, #0D9488);
+  color: #031417;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.4);
 }
 
-.heading h1{
-font-size:36px;
-margin:0 0 8px;
-background:linear-gradient(90deg,#fff,#2dd4bf,#38bdf8,#c084fc);
-background-clip:text;
--webkit-background-clip:text;
-color:transparent;
+/* Form Fields */
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.form-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #B5C8CE;
+  display: block;
+}
+.forgot-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #38BDF8;
+  text-decoration: none;
+}
+.forgot-link:hover {
+  text-decoration: underline;
+  color: #5EEAD4;
 }
 
-.heading p{
-color:#91aab3;
-font-size:13px;
+.input-box {
+  position: relative;
+  width: 100%;
+}
+.input-box input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #E7F5F6;
+  background: rgba(14, 32, 41, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  outline: none;
+  transition: all .2s ease;
+  font-family: inherit;
+}
+.input-box input:focus {
+  border-color: #14B8A6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.22);
+  background: rgba(14, 32, 41, 0.9);
+}
+.input-box input::placeholder {
+  color: #58747D;
+  font-size: 13px;
 }
 
-/* ROLE BUTTONS */
-
-.roles{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:9px;
-margin:22px 0;
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #8CA8B1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  font-size: 15px;
+  transition: color .2s;
+}
+.password-toggle-btn:hover {
+  color: #5EEAD4;
 }
 
-.role{
-padding:14px 5px;
-border-radius:13px;
-border:1px solid #ffffff20;
-background:#ffffff08;
-color:#a9c0c9;
-cursor:pointer;
-font-weight:700;
-font-family:inherit;
-transition:.25s;
+/* Checkbox Row */
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.remember-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #14B8A6;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.remember-row label {
+  font-size: 13px;
+  color: #8CA8B1;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.role:hover{
-background:#ffffff12;
-transform:translateY(-2px);
+/* Error Message */
+.form-error {
+  min-height: 20px;
+  font-size: 12.5px;
+  color: #EF4444;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
-.role.active{
-color:white;
-border-color:#a855f7;
-box-shadow:0 0 15px #a855f755;
-background:#a855f71c;
+/* Primary Vibrant Login Button */
+.btn-login-theme {
+  width: 100%;
+  padding: 13px 20px;
+  background: linear-gradient(115deg, #14B8A6, #0EA5E9 52%, #A855F7);
+  background-size: 180% auto;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .25s ease;
+  box-shadow: 0 6px 22px rgba(14, 165, 233, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+}
+.btn-login-theme:hover {
+  background-position: 100% 0;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.5);
+}
+.btn-login-theme:active {
+  transform: translateY(0);
 }
 
-.role span{
-display:block;
-font-size:22px;
-margin-bottom:6px;
+/* Quick Role Switcher Buttons */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0;
+  color: #58747D;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.divider::before, .divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.divider span {
+  padding: 0 12px;
 }
 
-/* INPUT FIELDS */
-
-.login .field{
-display:flex !important;
-flex-direction:column !important;
-align-items:stretch !important;
-width:100%;
-gap:8px;
-margin:17px 0;
-position:relative;
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.btn-preset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(14, 32, 41, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  color: #B5C8CE;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.btn-preset:hover {
+  background: rgba(20, 184, 166, 0.12);
+  border-color: rgba(20, 184, 166, 0.4);
+  color: #5EEAD4;
+  transform: translateY(-1px);
 }
 
-.login .field label{
-position:static !important;
-display:block !important;
-float:none !important;
-transform:none !important;
-width:100%;
-color:#91aab3 !important;
-font-size:12px !important;
-font-weight:700;
-line-height:18px !important;
-margin:0 !important;
-padding:0 !important;
+/* Right Column: Illustration Pane in Ocean Teal Theme */
+.illustration-pane {
+  background: rgba(7, 19, 26, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  position: relative;
 }
 
-.login .field input{
-display:block !important;
-position:relative !important;
-width:100% !important;
-height:53px !important;
-min-height:53px;
-padding:0 14px !important;
-background:#142c36 !important;
-border:1px solid #14b8a655 !important;
-border-radius:11px !important;
-color:white !important;
-outline:none;
-font-family:inherit;
-font-size:13px !important;
-line-height:normal !important;
-text-align:left !important;
-box-shadow:none;
+.illustration-svg {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  display: block;
 }
 
-.login .field input::placeholder{
-color:#91aab3 !important;
-opacity:.85 !important;
+/* Subtle floating badge keyframe */
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
 }
+.badge-1 { animation: badgeFloat 3.4s ease-in-out infinite; }
+.badge-2 { animation: badgeFloat 4s ease-in-out infinite 0.7s; }
+.badge-3 { animation: badgeFloat 3.6s ease-in-out infinite 1.3s; }
+.badge-4 { animation: badgeFloat 4.2s ease-in-out infinite 0.4s; }
 
-.login .field input:focus{
-border-color:#38bdf8 !important;
-box-shadow:0 0 12px #38bdf833 !important;
-}
-
-/* PASSWORD */
-
-.password{
-display:block !important;
-position:relative;
-width:100%;
-}
-
-.password input{
-padding-right:55px !important;
-}
-
-.eye{
-position:absolute;
-right:7px;
-top:7px;
-height:39px;
-width:39px;
-background:#142c36;
-border:1px solid #ffffff20;
-border-radius:9px;
-color:#9bb4bf;
-cursor:pointer;
-}
-
-/* LOGIN BUTTON */
-
-.submit{
-width:100%;
-padding:16px;
-border:0;
-border-radius:11px;
-background:linear-gradient(110deg,#0d9488,#0284c7,#9333ea);
-color:white;
-font-weight:800;
-font-family:inherit;
-font-size:15px;
-cursor:pointer;
-margin-top:12px;
-transition:.25s;
-}
-
-.submit:hover{
-filter:brightness(1.15);
-box-shadow:0 8px 25px #0284c755;
-transform:translateY(-2px);
-}
-
-.error{
-color:#fb7185;
-font-size:12px;
-margin:10px 0;
-}
-
-.note{
-text-align:center;
-color:#819ba5;
-font-size:11px;
-margin-top:20px;
-}
-
-@media(max-width:450px){
-.login{padding:23px}
-.role{font-size:11px}
-nav{padding:15px 18px}
-.heading h1{font-size:30px}
+/* Responsive Viewports */
+@media (max-width: 860px) {
+  .auth-stage {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin-top: 50px;
+  }
+  .illustration-pane {
+    display: none;
+  }
+  .form-pane {
+    padding: 36px 24px;
+    border-right: none;
+  }
+  .top-nav {
+    left: 18px;
+    right: 18px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<div class="stars"></div>
 
-<nav>
-<a href="index.html" class="brand">
-<span class="logo">A</span>AcadHub
-</a>
-<a href="index.html" class="home">← Home</a>
-</nav>
+<!-- Top Navigation -->
+<header class="top-nav">
+  <a href="index.html" class="brand-link">
+    <div class="brand-logo">A</div>
+    <span>AcadHub</span>
+  </a>
+  <a href="index.html" class="back-link">← Back to Home</a>
+</header>
 
-<!-- LOGIN SECTION -->
+<!-- Main Split Auth Stage (Layout from Screenshot in AcadHub Theme) -->
+<main class="auth-stage">
 
-<div class="container">
-<div class="login">
+  <!-- Left Form Column -->
+  <section class="form-pane">
+    <div class="pane-heading">
+      <h1>Login</h1>
+      <p>Doesn't have an account yet? <a href="index.html#portals">Contact Admin</a></p>
+    </div>
 
-<div class="heading">
-<h1 id="welcomeTitle">Welcome Student!</h1>
-<p>Sign in to access your AcadHub portal</p>
-</div>
+    <!-- Role Switcher Tabs (Admin, Faculty, Student) -->
+    <div class="role-tabs" role="tablist" aria-label="Select Role">
+      <button type="button" class="role-tab-btn active" data-role="STUDENT">
+        <span>🎓</span> Student
+      </button>
+      <button type="button" class="role-tab-btn" data-role="FACULTY">
+        <span>📘</span> Faculty
+      </button>
+      <button type="button" class="role-tab-btn" data-role="ADMIN">
+        <span>🛡️</span> Admin
+      </button>
+    </div>
 
-<!-- ROLE SELECTION -->
+    <!-- Main Authentication Form -->
+    <form id="loginForm" onsubmit="window.login&&window.login();return false" novalidate>
+      <select id="role" hidden>
+        <option value="STUDENT" selected>Student</option>
+        <option value="FACULTY">Faculty</option>
+        <option value="ADMIN">Admin</option>
+      </select>
 
-<div class="roles">
+      <!-- Username / Roll No -->
+      <div class="form-group">
+        <label class="form-label" for="username">Username or Roll Number</label>
+        <div class="input-box">
+          <input id="username" type="text" placeholder="you@example.com or roll no" autocomplete="username" required>
+        </div>
+      </div>
 
-<button type="button" class="role" data-role="ADMIN">
-<span>🛡️</span>Admin
-</button>
+      <!-- Password Field with Forgot Password Link -->
+      <div class="form-group">
+        <div class="form-label-row">
+          <label class="form-label" for="password">Password</label>
+          <a href="javascript:void(0)" onclick="if(window.UI&&window.UI.toast){window.UI.toast('info','Please contact the Dean of Academic Affairs (doaa30) to reset credentials.')}" class="forgot-link">Forgot Password?</a>
+        </div>
+        <div class="input-box">
+          <input id="password" type="password" placeholder="Enter 6 character or more" autocomplete="current-password" required>
+          <button type="button" class="password-toggle-btn" id="pwToggle" aria-label="Toggle password visibility">
+            <span id="pwIcon">👁️</span>
+          </button>
+        </div>
+      </div>
 
-<button type="button" class="role" data-role="FACULTY">
-<span>📘</span>Faculty
-</button>
+      <!-- Remember Me -->
+      <div class="remember-row">
+        <input type="checkbox" id="rememberMe" checked>
+        <label for="rememberMe">Remember me</label>
+      </div>
 
-<button type="button" class="role active" data-role="STUDENT">
-<span>🎓</span>Student
-</button>
+      <!-- Error Box -->
+      <p id="loginError" class="form-error" role="alert"></p>
 
-</div>
+      <!-- Main Login Button -->
+      <button id="loginBtn" class="btn-login-theme" type="submit">
+        <span>LOGIN</span> →
+      </button>
 
-<!-- LOGIN FORM -->
+      <!-- Divider -->
+      <div class="divider">
+        <span>or quick preset</span>
+      </div>
 
-<form id="loginForm"
-onsubmit="if(window.login){window.login()} return false;"
-novalidate>
+      <!-- Quick Preset Switcher Buttons -->
+      <div class="social-grid">
+        <button type="button" class="btn-preset" onclick="window.switchAndFillRole('STUDENT')">
+          <span style="font-size:15px;">🎓</span> Student Demo
+        </button>
+        <button type="button" class="btn-preset" onclick="window.switchAndFillRole('FACULTY')">
+          <span style="font-size:15px;">📘</span> Faculty Demo
+        </button>
+      </div>
+    </form>
+  </section>
 
-<select id="role" name="role" hidden>
-<option value="ADMIN">Admin</option>
-<option value="FACULTY">Faculty</option>
-<option value="STUDENT" selected>Student</option>
-</select>
+  <!-- Right Column: Vector Artwork matching Screenshot in AcadHub Ocean Teal Theme -->
+  <section class="illustration-pane" aria-hidden="true">
+    <svg class="illustration-svg" viewBox="0 0 600 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+      
+      <!-- Radial Mesh Glow Behind Monitor -->
+      <circle cx="370" cy="220" r="160" fill="#14B8A6" opacity="0.12"/>
+      <ellipse cx="440" cy="380" rx="90" ry="25" fill="#38BDF8" opacity="0.08"/>
 
-<!-- USERNAME -->
+      <!-- Modern Desk Legs in Deep Slate with Glow -->
+      <!-- Left Legs -->
+      <polygon points="265,260 273,260 220,405 210,405" fill="#14303C"/>
+      <polygon points="295,260 303,260 345,405 335,405" fill="#0E2029"/>
+      <!-- Right Legs -->
+      <polygon points="495,260 503,260 545,405 535,405" fill="#14303C"/>
+      <polygon points="465,260 473,260 425,405 415,405" fill="#0E2029"/>
+      <!-- Crossbars -->
+      <rect x="250" y="325" width="245" height="4" fill="#14303C" opacity="0.8"/>
 
-<div class="field">
+      <!-- Desktop Table Surface -->
+      <rect x="215" y="250" width="320" height="10" rx="3" fill="#0E2029" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
+      <rect x="215" y="250" width="320" height="2.5" fill="#14B8A6"/>
 
-<label for="username">Username</label>
+      <!-- Desktop Monitor Base & Stand -->
+      <ellipse cx="360" cy="246" rx="32" ry="5" fill="#14303C"/>
+      <path d="M356,246 L354,228 L366,228 L364,246 Z" fill="#1E3A47"/>
+      
+      <!-- Computer Monitor Outer Body (Modern Glass Border) -->
+      <rect x="282" y="146" width="156" height="102" rx="9" fill="#0B1A22" stroke="#2DD4BF" stroke-width="2"/>
+      <!-- Monitor Screen (Dark Ocean Glow) -->
+      <rect x="288" y="152" width="144" height="90" rx="6" fill="#07131A"/>
+      
+      <!-- Screen Content (AcadHub Student Profile Card) -->
+      <circle cx="360" cy="182" r="14" fill="url(#avatarTealGrad)"/>
+      <defs>
+        <linearGradient id="avatarTealGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#14B8A6"/>
+          <stop offset="100%" stop-color="#38BDF8"/>
+        </linearGradient>
+        <linearGradient id="screenBtnGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#14B8A6"/>
+          <stop offset="100%" stop-color="#0EA5E9"/>
+        </linearGradient>
+      </defs>
+      <!-- Inside Avatar Graphic -->
+      <circle cx="360" cy="179" r="5" fill="#031417"/>
+      <path d="M352,193 C352,187 356,186 360,186 C364,186 368,187 368,193" fill="#031417"/>
+      <!-- Profile Detail Lines on Screen -->
+      <rect x="330" y="202" width="60" height="3" rx="1.5" fill="#14303C"/>
+      <rect x="340" y="209" width="40" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+      <rect x="346" y="217" width="28" height="5" rx="2.5" fill="url(#screenBtnGrad)"/>
 
-<input
-id="username"
-name="username"
-type="text"
-placeholder="kriti16"
-autocomplete="off"
-required>
+      <!-- Floating Badges Above Monitor (Screenshot Style with Theme Accents) -->
+      <!-- 1. Lock Security Badge (Orange/Gold) -->
+      <g class="badge-1">
+        <circle cx="316" cy="132" r="13" fill="#F59E0B" filter="drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45))"/>
+        <rect x="311" y="129" width="10" height="8" rx="1.5" fill="#031417"/>
+        <path d="M313,129 L313,126 C313,124.5 314.5,123.5 316,123.5 C317.5,123.5 319,124.5 319,126 L319,129" fill="none" stroke="#031417" stroke-width="1.6"/>
+      </g>
 
-</div>
+      <!-- 2. Message Envelope Badge (Pink/Coral) -->
+      <g class="badge-2">
+        <circle cx="350" cy="112" r="14" fill="#F43F5E" filter="drop-shadow(0 4px 10px rgba(244, 63, 94, 0.45))"/>
+        <rect x="343" y="106" width="14" height="10" rx="1.5" fill="#FFFFFF"/>
+        <path d="M343,107 L350,112 L357,107" fill="none" stroke="#F43F5E" stroke-width="1.3"/>
+      </g>
 
-<!-- PASSWORD -->
+      <!-- 3. Checkmark Evaluation Badge (Emerald/Green) -->
+      <g class="badge-3">
+        <circle cx="384" cy="104" r="13" fill="#10B981" filter="drop-shadow(0 4px 10px rgba(16, 185, 129, 0.45))"/>
+        <path d="M379,104 L382.5,108 L389,100" fill="none" stroke="#031417" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
 
-<div class="field">
+      <!-- 4. User Profile Badge (Cyan/Sky) -->
+      <g class="badge-4">
+        <circle cx="414" cy="128" r="13" fill="#38BDF8" filter="drop-shadow(0 4px 10px rgba(56, 189, 248, 0.45))"/>
+        <circle cx="414" cy="125" r="3.5" fill="#031417"/>
+        <path d="M408,135 C408,131.5 410.5,130.5 414,130.5 C417.5,130.5 420,131.5 420,135" fill="#031417"/>
+      </g>
 
-<label for="password">Password</label>
+      <!-- Coffee Mug on Desk (Ruby Coral) -->
+      <rect x="456" y="238" width="14" height="12" rx="2.5" fill="#EF4444"/>
+      <path d="M470,241 C474,241 474,247 470,247" fill="none" stroke="#EF4444" stroke-width="2"/>
 
-<div class="password">
+      <!-- 3 Vertical File Binders on Desk (Amber, Teal, Cyan) -->
+      <rect x="480" y="206" width="10" height="44" rx="2" fill="#F59E0B"/>
+      <circle cx="485" cy="228" r="1.8" fill="#B45309"/>
+      <rect x="492" y="206" width="10" height="44" rx="2" fill="#14B8A6"/>
+      <circle cx="497" cy="228" r="1.8" fill="#042F2E"/>
+      <rect x="504" y="206" width="10" height="44" rx="2" fill="#38BDF8"/>
+      <circle cx="509" cy="228" r="1.8" fill="#0369A1"/>
 
-<input
-id="password"
-name="password"
-type="password"
-placeholder="Enter your password"
-autocomplete="new-password"
-required>
+      <!-- Modern Ergonomic Chair -->
+      <!-- Backrest -->
+      <path d="M210,238 L204,295 L242,295 L246,238 Z" fill="#14303C" stroke="rgba(20, 184, 166, 0.3)" stroke-width="1"/>
+      <!-- Seat -->
+      <path d="M198,295 L276,295 L268,312 L198,312 Z" fill="#0E2029" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
+      <!-- Chair Legs -->
+      <line x1="206" y1="312" x2="190" y2="378" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="256" y1="312" x2="238" y2="378" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round"/>
 
-<button type="button" class="eye" id="eye"
-aria-label="Show password">👁</button>
+      <!-- Character (Student at AcadHub Workstation) -->
+      <!-- Long Flowing Dark Indigo Hair -->
+      <path d="M256,155 C236,150 216,170 220,205 C224,230 242,254 252,248 C256,220 248,190 264,170 Z" fill="#0A1822"/>
+      
+      <!-- Head / Face (Profile looking right) -->
+      <circle cx="266" cy="176" r="13" fill="#FED7AA"/>
+      <!-- Front Hair Bangs -->
+      <path d="M258,162 Q274,162 274,176 Q268,172 258,172 Z" fill="#0A1822"/>
 
-</div>
-</div>
+      <!-- Torso / Top (AcadHub Violet Blouse) -->
+      <path d="M250,192 L280,192 L290,245 L240,245 Z" fill="#A855F7"/>
 
-<p id="loginError" class="error" role="alert"></p>
+      <!-- Arms typing towards computer keyboard -->
+      <path d="M275,200 L310,240 L335,248" fill="none" stroke="#A855F7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Hand -->
+      <circle cx="337" cy="249" r="4.5" fill="#FED7AA"/>
 
-<button type="submit" id="loginBtn" class="submit">
-Initialize Session →
-</button>
+      <!-- Lower Body (Deep Indigo Pants) -->
+      <path d="M245,245 L306,245 L306,270 L245,270 Z" fill="#1E293B"/>
+      <path d="M306,252 L306,340 L282,340 L282,252 Z" fill="#0F172A"/>
 
-</form>
+      <!-- Shoes -->
+      <path d="M278,340 L308,340 L312,352 L274,352 Z" rx="3" fill="#031417"/>
 
-<p class="note">
-Secure Academic Portal · AcadHub 2026
-</p>
+      <!-- Floor Accessories -->
+      <!-- Blue Briefcase / Laptop Bag -->
+      <rect x="390" y="340" width="46" height="32" rx="4" fill="#0284C7"/>
+      <path d="M406,340 L406,332 L420,332 L420,340" fill="none" stroke="#38BDF8" stroke-width="2.8"/>
+      <line x1="390" y1="352" x2="436" y2="352" stroke="#0369A1" stroke-width="2"/>
+      <rect x="410" y="349" width="6" height="6" rx="1" fill="#FFFFFF"/>
 
-</div>
-</div>
+      <!-- Tropical Potted Plant -->
+      <!-- Modern Slate Planter -->
+      <polygon points="466,346 504,346 498,380 472,380" fill="#14303C" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1"/>
+      <!-- Lush Leaves in Theme Colors (Pink, Teal, Violet) -->
+      <path d="M480,346 Q435,320 445,300 Q468,322 483,346 Z" fill="#F43F5E"/>
+      <path d="M485,346 Q476,275 498,270 Q504,310 488,346 Z" fill="#14B8A6"/>
+      <path d="M490,346 Q525,295 520,315 Q506,335 492,346 Z" fill="#A855F7"/>
 
-<!-- EXISTING JAVASCRIPT FILES -->
+    </svg>
+  </section>
 
-<script src="ui.js"></script>
-<script src="app.js"></script>
+</main>
+
+<script src="ui.js?v=20261106.8"></script>
+<script src="app.js?v=20261106.8"></script>
 
 <script>
+// Show/Hide Password Toggle
+const pwInput = document.getElementById('password');
+const pwToggle = document.getElementById('pwToggle');
+const pwIcon = document.getElementById('pwIcon');
 
-// ROLE INFORMATION
-
-const roleDetails = {
-
-STUDENT:{
-welcome:"Welcome Student!",
-username:"kriti16"
-},
-
-FACULTY:{
-welcome:"Welcome Faculty!",
-username:"rumneek24"
-},
-
-ADMIN:{
-welcome:"Welcome Admin!",
-username:"doaa30"
+if (pwToggle && pwInput) {
+  pwToggle.addEventListener('click', () => {
+    const isPw = pwInput.type === 'password';
+    pwInput.type = isPw ? 'text' : 'password';
+    pwIcon.textContent = isPw ? '🙈' : '👁️';
+  });
 }
 
+// Preset Demo Credentials
+const DEMO_PRESETS = {
+  STUDENT: { u: 'kriti16', p: 'kri16' },
+  FACULTY: { u: 'rumneek24', p: 'rum24' },
+  ADMIN:   { u: 'doaa30', p: 'adm@123' }
 };
 
-// ELEMENTS
+// Switch Role Function
+window.switchAndFillRole = function(role) {
+  const roleSelect = document.getElementById('role');
+  const uInput = document.getElementById('username');
+  const pInput = document.getElementById('password');
+  const errBox = document.getElementById('loginError');
 
-const roleSelect = document.getElementById('role');
-const username = document.getElementById('username');
-const password = document.getElementById('password');
-const welcomeTitle = document.getElementById('welcomeTitle');
-const loginError = document.getElementById('loginError');
+  if (roleSelect) roleSelect.value = role;
+  if (errBox) errBox.textContent = '';
 
-// ROLE SELECTION FUNCTION
+  document.querySelectorAll('.role-tab-btn').forEach(btn => {
+    if (btn.dataset.role === role) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
 
-function selectRole(role){
+  if (DEMO_PRESETS[role]) {
+    if (uInput) uInput.value = DEMO_PRESETS[role].u;
+    if (pInput) pInput.value = DEMO_PRESETS[role].p;
+  }
+};
 
-const details = roleDetails[role];
-
-if(!details) return;
-
-// Update selected role
-roleSelect.value = role;
-
-// Update heading
-welcomeTitle.textContent = details.welcome;
-
-// Show username as light placeholder
-username.value = "";
-username.placeholder = details.username;
-
-// Clear password
-password.value = "";
-password.type = "password";
-
-// Clear previous errors
-loginError.textContent = "";
-
-// Update selected button
-document.querySelectorAll('.role').forEach(button=>{
-
-button.classList.toggle(
-'active',
-button.dataset.role === role
-);
-
+// Wire up Role Tab clicks
+document.querySelectorAll('.role-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    window.switchAndFillRole(btn.dataset.role);
+  });
 });
 
-}
-
-// ROLE BUTTON EVENTS
-
-document.querySelectorAll('.role').forEach(button=>{
-
-button.addEventListener('click',()=>{
-
-selectRole(button.dataset.role);
-
+// Auto-fill Student default credentials on initial load
+window.addEventListener('DOMContentLoaded', () => {
+  const uInput = document.getElementById('username');
+  const pInput = document.getElementById('password');
+  if (uInput && !uInput.value) uInput.value = DEMO_PRESETS.STUDENT.u;
+  if (pInput && !pInput.value) pInput.value = DEMO_PRESETS.STUDENT.p;
 });
-
-});
-
-// DEFAULT ROLE
-
-selectRole('STUDENT');
-
-// SHOW / HIDE PASSWORD
-
-document.getElementById('eye').addEventListener('click',()=>{
-
-const hidden = password.type === 'password';
-
-password.type = hidden ? 'text' : 'password';
-
-document.getElementById('eye').textContent =
-hidden ? '🙈' : '👁';
-
-});
-
 </script>
 
 </body>
