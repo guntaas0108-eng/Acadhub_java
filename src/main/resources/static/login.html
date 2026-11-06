@@ -412,7 +412,7 @@ body::before {
 
 /* Dynamic Role Header Banner above illustration */
 .illust-role-header {
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   text-align: center;
   z-index: 5;
 }
@@ -429,15 +429,6 @@ body::before {
   border: 1px solid rgba(20, 184, 166, 0.38);
   color: #5EEAD4;
   box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
-  transition: all .3s ease;
-}
-.illust-role-desc {
-  font-size: 12.5px;
-  color: #8CA8B1;
-  margin-top: 6px;
-  font-weight: 500;
-  max-width: 440px;
-  line-height: 1.45;
   transition: all .3s ease;
 }
 
@@ -604,9 +595,6 @@ body::before {
       <div class="illust-role-badge" id="illustRoleBadge">
         <span>🎓</span> Student Learning Desk
       </div>
-      <p class="illust-role-desc" id="illustRoleDesc">
-        Access enrolled course study materials, submit lab assignments, track 79% marks & 75% attendance.
-      </p>
     </div>
 
     <!-- 3 Dynamic Vector Scenes Container -->
@@ -1001,21 +989,18 @@ const DEMO_PRESETS = {
     u: 'kriti16',
     p: 'kri16',
     title: '🎓 Student Learning Desk',
-    desc: 'Access enrolled course study materials, submit lab assignments, track 79% marks & 75% attendance.',
     sceneId: 'sceneStudent'
   },
   FACULTY: {
     u: 'rumneek24',
     p: 'rum24',
     title: '📘 Faculty Academic Portal',
-    desc: 'Conduct lectures, evaluate student assignments with A+ feedback, and mark daily course attendance.',
     sceneId: 'sceneFaculty'
   },
   ADMIN: {
     u: 'doaa30',
     p: 'adm@123',
     title: '🛡️ Admin University Console',
-    desc: 'Govern campus RBAC accounts, monitor live course enrollment graphs, and oversee 360° accountability.',
     sceneId: 'sceneAdmin'
   }
 };
@@ -1028,7 +1013,6 @@ window.switchAndFillRole = function(role) {
   const errBox = document.getElementById('loginError');
 
   const badgeEl = document.getElementById('illustRoleBadge');
-  const descEl = document.getElementById('illustRoleDesc');
 
   if (roleSelect) roleSelect.value = role;
   if (errBox) errBox.textContent = '';
@@ -1049,9 +1033,8 @@ window.switchAndFillRole = function(role) {
   if (uInput) uInput.value = preset.u;
   if (pInput) pInput.value = preset.p;
 
-  // 3. Update Dynamic Illustration Title & Subtitle
+  // 3. Update Dynamic Illustration Badge
   if (badgeEl) badgeEl.textContent = preset.title;
-  if (descEl) descEl.textContent = preset.desc;
 
   // 4. Smooth Cross-Fade Switch of Illustrations
   document.querySelectorAll('.illust-scene').forEach(svg => {
